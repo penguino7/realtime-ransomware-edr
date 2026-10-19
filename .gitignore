@@ -25,6 +25,7 @@ Release/
 # Tài liệu nội bộ & thư mục nháp
 Documents/
 scratch/
+ProcessProject.md
 
 # Dữ liệu huấn luyện (Giữ cấu trúc bằng .gitkeep)
 Data/Raw/*
