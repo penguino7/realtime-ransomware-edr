@@ -1,0 +1,49 @@
+# Visual Studio & Windows Driver Kit (WDK) Build Outputs
+.vs/
+*.obj
+*.pdb
+*.sys
+*.cer
+*.cat
+*.log
+*.tlog
+*.lastcodeanalysissucceeded
+x64/
+x86/
+Debug/
+Release/
+ARM64/
+
+# Python Cache & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.env
+
+# Large datasets, raw logs & CSVs
+raw_irps.csv
+Ransomware_Data.csv
+abc.csv
+abcd.csv
+simulated_ransomware_dataset.csv
+*.pml
+*.evtx
+
+# Research Papers, Notes & Extracted Texts
+*.pdf
+*_extracted_text.txt
+scratch/
+ROADMAP_DE_TAI_RANSOMWARE.md
+Ransomware_knowledge.md
+ShieldFS_ban_dich_chi_tiet.md
+
+# Images & Screenshots
+*.jpg
+*.jpeg
+*.png
+
+# Temporary OS files
+Thumbs.db
+Desktop.ini
