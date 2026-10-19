@@ -1,49 +1,49 @@
-# Visual Studio & Windows Driver Kit (WDK) Build Outputs
+# Environment & IDE
+.env
+venv/
+env/
 .vs/
+.vscode/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+
+# C / WDK Driver Build Outputs
+x64/
+x86/
+ARM64/
+Debug/
+Release/
 *.obj
 *.pdb
 *.sys
 *.cer
 *.cat
 *.log
-*.tlog
-*.lastcodeanalysissucceeded
-x64/
-x86/
-Debug/
-Release/
-ARM64/
 
-# Python Cache & Virtual Environments
-__pycache__/
-*.py[cod]
-*$py.class
-venv/
-env/
-.env
+# Tài liệu nội bộ & thư mục nháp
+Documents/
+scratch/
 
-# Large datasets, raw logs & CSVs
-raw_irps.csv
-Ransomware_Data.csv
-abc.csv
-abcd.csv
-simulated_ransomware_dataset.csv
+# Dữ liệu huấn luyện (Giữ cấu trúc bằng .gitkeep)
+Data/Raw/*
+!Data/Raw/.gitkeep
+Data/Interim/*
+!Data/Interim/.gitkeep
+Data/Processed/*
+!Data/Processed/.gitkeep
 *.pml
 *.evtx
 
-# Research Papers, Notes & Extracted Texts
-*.pdf
-*_extracted_text.txt
-scratch/
-ROADMAP_DE_TAI_RANSOMWARE.md
-Ransomware_knowledge.md
-ShieldFS_ban_dich_chi_tiet.md
+# Trọng số mô hình ML (Giữ cấu trúc bằng .gitkeep)
+Models/*
+!Models/.gitkeep
+*.pkl
+*.joblib
+*.onnx
+*.pt
 
-# Images & Screenshots
-*.jpg
-*.jpeg
-*.png
-
-# Temporary OS files
+# OS Metadata
 Thumbs.db
 Desktop.ini
