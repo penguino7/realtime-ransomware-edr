@@ -22,7 +22,8 @@ Release/
 *.cat
 *.log
 
-# Tài liệu nội bộ & thư mục nháp
+# Tài liệu nội bộ & thư mục 
+ModuleStrucDetails/
 Documents/
 scratch/
 ProcessProject.md
