@@ -22,7 +22,8 @@ Release/
 *.cat
 *.log
 
-# Tài liệu nội bộ & thư mục 
+# Tài liệu nội bộ & thư mục
+Backup/
 ModuleStrucDetails/
 Documents/
 scratch/
