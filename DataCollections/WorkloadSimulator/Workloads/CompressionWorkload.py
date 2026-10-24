@@ -66,24 +66,34 @@ class CompressionWorkload(BaseWorkload):
                     return p
         return None
 
-    def _compress_with_7zip(self, files: List[Path], output_archive: Path) -> bool:
-        """Kích hoạt tiến trình 7z.exe nén danh sách file thành archive .7z."""
+    def _compress_with_7zip(
+        self,
+        files: List[Path],
+        output_archive: Path,
+        password: Optional[str] = None
+    ) -> bool:
+        """Kích hoạt tiến trình 7z.exe nén danh sách file thành archive .7z (hỗ trợ mật khẩu AES-256)."""
         list_file = output_archive.parent / "7z_filelist.tmp"
         try:
             with open(list_file, "w", encoding="utf-8") as f:
                 for file_path in files:
                     f.write(f"{file_path}\n")
 
-            # Lệnh: 7z.exe a -t7z -mx=5 <output_archive> @<list_file> -y
+            # Cú pháp: 7z.exe a -t7z -mx=5 [-p<pass>] <output_archive> @<list_file> -y
             cmd = [
                 str(self.seven_zip_bin),
                 "a",
                 "-t7z",
                 "-mx=5",
+            ]
+            if password:
+                cmd.append(f"-p{password}")
+
+            cmd.extend([
                 str(output_archive),
                 f"@{list_file}",
                 "-y"
-            ]
+            ])
             process = subprocess.run(
                 cmd,
                 stdout=subprocess.PIPE,
@@ -99,21 +109,34 @@ class CompressionWorkload(BaseWorkload):
                 except Exception:
                     pass
 
-    def _extract_with_7zip(self, archive_path: Path, extract_dir: Path) -> bool:
+    def _extract_with_7zip(
+        self,
+        archive_path: Path,
+        extract_dir: Path,
+        password: Optional[str] = None
+    ) -> bool:
         """Kích hoạt tiến trình 7z.exe giải nén file .7z."""
         cmd = [
             str(self.seven_zip_bin),
             "x",
             str(archive_path),
             f"-o{extract_dir}",
-            "-y"
         ]
+        if password:
+            cmd.append(f"-p{password}")
+        cmd.append("-y")
+
         process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
         return process.returncode == 0
 
-    def _compress_with_winrar(self, files: List[Path], output_archive: Path) -> bool:
+    def _compress_with_winrar(
+        self,
+        files: List[Path],
+        output_archive: Path,
+        password: Optional[str] = None
+    ) -> bool:
         """
-        Kích hoạt tiến trình WinRAR.exe (hoặc Rar.exe) nén danh sách file thành archive .rar.
+        Kích hoạt tiến trình WinRAR.exe (hoặc Rar.exe) nén danh sách file thành archive .rar (hỗ trợ mật khẩu).
         """
         list_file = output_archive.parent / "winrar_filelist.tmp"
         try:
@@ -121,16 +144,21 @@ class CompressionWorkload(BaseWorkload):
                 for file_path in files:
                     f.write(f"{file_path}\n")
 
-            # Cú pháp WinRAR CLI: WinRAR.exe a -ibck -inul -y <archive.rar> @<filelist.tmp>
+            # Cú pháp WinRAR CLI: WinRAR.exe a -ibck -inul -y [-p<pass>] <archive.rar> @<filelist.tmp>
             cmd = [
                 str(self.winrar_bin),
                 "a",
                 "-ibck",
                 "-inul",
                 "-y",
+            ]
+            if password:
+                cmd.append(f"-p{password}")
+
+            cmd.extend([
                 str(output_archive),
                 f"@{list_file}"
-            ]
+            ])
             process = subprocess.run(
                 cmd,
                 stdout=subprocess.PIPE,
@@ -146,7 +174,12 @@ class CompressionWorkload(BaseWorkload):
                 except Exception:
                     pass
 
-    def _extract_with_winrar(self, archive_path: Path, extract_dir: Path) -> bool:
+    def _extract_with_winrar(
+        self,
+        archive_path: Path,
+        extract_dir: Path,
+        password: Optional[str] = None
+    ) -> bool:
         """Kích hoạt tiến trình WinRAR.exe giải nén file .rar."""
         # WinRAR yêu cầu đường dẫn thư mục giải nén phải kết thúc bằng dấu gạch chéo '\'
         target_dest = str(extract_dir)
@@ -159,15 +192,20 @@ class CompressionWorkload(BaseWorkload):
             "-ibck",
             "-inul",
             "-y",
+        ]
+        if password:
+            cmd.append(f"-p{password}")
+        cmd.extend([
             str(archive_path),
             target_dest
-        ]
+        ])
         process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
         return process.returncode == 0
 
     def execute(self) -> Dict[str, Any]:
         """
         Thực thi kịch bản nén và giải nén bằng 7-Zip hoặc WinRAR.
+        Tự động bốc thăm 50% nén thông thường, 50% nén có đặt mật khẩu (Entropy cao).
         """
         if not self.available_engines:
             print("[!] Không tìm thấy công cụ 7-Zip hoặc WinRAR trên hệ thống.")
@@ -183,15 +221,20 @@ class CompressionWorkload(BaseWorkload):
         dest_dir = self.target_dirs[0]
         timestamp = int(time.time())
 
+        # Bốc thăm 50% nén có mật khẩu (tạo Entropy ~7.9 - 8.0) và 50% nén thường
+        is_encrypted = random.choice([True, False])
+        password = "SecurePass2026!" if is_encrypted else None
+        enc_label = "MẬT KHẨU (Entropy cao ~8.0)" if is_encrypted else "thông thường"
+
         # Chọn công cụ nén và thực hiện nén
         if engine == "7zip":
             archive = dest_dir / f"workload_7zip_{timestamp}.7z"
-            print(f"[*] Nén {len(selected_files)} files bằng 7-Zip...")
-            ok = self._compress_with_7zip(selected_files, archive)
+            print(f"[*] Nén {len(selected_files)} files bằng 7-Zip [{enc_label}]...")
+            ok = self._compress_with_7zip(selected_files, archive, password=password)
         else:
             archive = dest_dir / f"workload_winrar_{timestamp}.rar"
-            print(f"[*] Nén {len(selected_files)} files bằng WinRAR...")
-            ok = self._compress_with_winrar(selected_files, archive)
+            print(f"[*] Nén {len(selected_files)} files bằng WinRAR [{enc_label}]...")
+            ok = self._compress_with_winrar(selected_files, archive, password=password)
 
         if not ok or not archive.exists():
             return {"workload": self.name, "status": "failed", "message": "Nén thất bại"}
@@ -203,9 +246,9 @@ class CompressionWorkload(BaseWorkload):
         print(f"[*] Giải nén thử nghiệm ra {extract_dir.name}...")
 
         if engine == "7zip":
-            self._extract_with_7zip(archive, extract_dir)
+            self._extract_with_7zip(archive, extract_dir, password=password)
         else:
-            self._extract_with_winrar(archive, extract_dir)
+            self._extract_with_winrar(archive, extract_dir, password=password)
 
         # Dọn dẹp tệp tin nén và thư mục giải nén tạm
         self.random_delay(0.2, 0.4)
@@ -214,10 +257,11 @@ class CompressionWorkload(BaseWorkload):
         if extract_dir.exists():
             shutil.rmtree(extract_dir, ignore_errors=True)
 
-        print(f"[+] Hoàn thành chu trình nén & giải nén ({engine}).")
+        print(f"[+] Hoàn thành chu trình nén & giải nén ({engine} - {enc_label}).")
         return {
             "workload": self.name,
             "status": "success",
             "engine": engine,
-            "files_compressed": len(selected_files)
+            "files_compressed": len(selected_files),
+            "encrypted": is_encrypted
         }
