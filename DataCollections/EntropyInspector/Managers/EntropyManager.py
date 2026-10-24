@@ -21,13 +21,22 @@ try:
     )
     from ..Calculators import ShannonEntropyCalculator
 except (ImportError, ValueError):
-    from DataCollections.EntropyInspector.Inspectors import (
-        BaseInspector,
-        EntropyEvent,
-        SnapshotInspector,
-        RealtimeWatcher,
-    )
-    from DataCollections.EntropyInspector.Calculators import ShannonEntropyCalculator
+    try:
+        from Inspectors import (
+            BaseInspector,
+            EntropyEvent,
+            SnapshotInspector,
+            RealtimeWatcher,
+        )
+        from Calculators import ShannonEntropyCalculator
+    except (ImportError, ValueError):
+        from DataCollections.EntropyInspector.Inspectors import (
+            BaseInspector,
+            EntropyEvent,
+            SnapshotInspector,
+            RealtimeWatcher,
+        )
+        from DataCollections.EntropyInspector.Calculators import ShannonEntropyCalculator
 
 
 class EntropyManager:
