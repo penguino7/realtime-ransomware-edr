@@ -4,6 +4,11 @@ from pathlib import Path
 from dataclasses import dataclass, field
 from typing import List, Set, Optional, Dict, Any
 
+try:
+    from .Config import Config
+except (ImportError, ValueError):
+    from Src.Core.Config import Config
+
 
 class IRPOperation(str, Enum):
     """
@@ -66,8 +71,8 @@ class IRPEvent:
 
     @property
     def is_high_entropy(self) -> bool:
-        """Kiểm tra tệp tin có đạt ngưỡng Entropy mã hóa (>= 7.0) hay không."""
-        return self.entropy >= 7.0
+        """Kiểm tra tệp tin có đạt ngưỡng Entropy mã hóa theo Config hay không."""
+        return self.entropy >= Config.HIGH_ENTROPY_THRESHOLD
 
     def to_dict(self) -> Dict[str, Any]:
         """Chuyển đổi thành từ điển phục vụ lưu trữ trung gian (Interim CSV)."""
