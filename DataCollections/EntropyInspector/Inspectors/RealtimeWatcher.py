@@ -135,7 +135,6 @@ class RealtimeWatcher(BaseInspector):
 
                 # Bỏ qua an toàn nếu tệp tạm đã bị xóa chớp nhoáng
                 if res.status == self.calculator.STATUS_NOT_FOUND:
-                    self.event_queue.task_done()
                     continue
 
                 timestamp = self.get_current_timestamp()
