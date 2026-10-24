@@ -124,7 +124,10 @@ class RealtimeWatcher(BaseInspector):
                 continue
 
             if item is None:
-                self.event_queue.task_done()
+                try:
+                    self.event_queue.task_done()
+                except ValueError:
+                    pass
                 break
 
             event_type, file_path, old_path = item
@@ -152,7 +155,10 @@ class RealtimeWatcher(BaseInspector):
             except Exception:
                 pass
             finally:
-                self.event_queue.task_done()
+                try:
+                    self.event_queue.task_done()
+                except ValueError:
+                    pass
 
     def start(self) -> None:
         """

@@ -78,6 +78,34 @@ def parse_arguments() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def _resolve_snapshot_path(file_arg: Optional[str], default_filename: str, raw_dir: Path) -> Path:
+    """Tự động phân giải đường dẫn file Snapshot (hỗ trợ cả đường dẫn tuyệt đối, tương đối hoặc chỉ tên file)."""
+    if not file_arg:
+        return raw_dir / default_filename
+
+    # 1. Kiểm tra trực tiếp đường dẫn truyền vào
+    p = Path(file_arg)
+    if p.exists():
+        return p
+
+    # 2. Thử tìm trong thư mục Data/Raw/
+    candidate_in_raw = raw_dir / p.name
+    if candidate_in_raw.exists():
+        return candidate_in_raw
+
+    # 3. Thử tự động thêm đuôi .csv nếu người dùng không gõ
+    if not p.suffix:
+        candidate_with_csv = raw_dir / f"{p.name}.csv"
+        if candidate_with_csv.exists():
+            return candidate_with_csv
+        candidate_local = Path(f"{p}.csv")
+        if candidate_local.exists():
+            return candidate_local
+
+    # Trả về đường dẫn gốc hoặc trong raw_dir để EntropyManager báo lỗi rõ ràng nếu không tìm thấy
+    return candidate_in_raw if not p.is_absolute() else p
+
+
 def main() -> None:
     """Hàm điều khiển chính của chương trình."""
     args = parse_arguments()
@@ -102,8 +130,8 @@ def main() -> None:
         manager.take_final_snapshot(filename=filename)
 
     elif args.mode == "compare":
-        baseline_path = Path(args.baseline_file) if args.baseline_file else manager.raw_data_dir / "baseline_entropy.csv"
-        final_path = Path(args.final_file) if args.final_file else manager.raw_data_dir / "final_entropy.csv"
+        baseline_path = _resolve_snapshot_path(args.baseline_file, "baseline_entropy.csv", manager.raw_data_dir)
+        final_path = _resolve_snapshot_path(args.final_file, "final_entropy.csv", manager.raw_data_dir)
         manager.compare_snapshots(baseline_csv=baseline_path, final_csv=final_path)
 
     elif args.mode == "realtime":

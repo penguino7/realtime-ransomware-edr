@@ -124,8 +124,12 @@ class EntropyManager:
         baseline_csv = Path(baseline_csv)
         final_csv = Path(final_csv)
 
-        if not baseline_csv.exists() or not final_csv.exists():
-            print("[!] Lỗi: Không tìm thấy tệp CSV Snapshot để so sánh.", file=sys.stderr)
+        if not baseline_csv.exists():
+            print(f"[!] Lỗi: Không tìm thấy file Baseline Snapshot tại: {baseline_csv}", file=sys.stderr)
+            return {}
+
+        if not final_csv.exists():
+            print(f"[!] Lỗi: Không tìm thấy file Final Snapshot tại: {final_csv}", file=sys.stderr)
             return {}
 
         baseline_map: Dict[str, float] = {}
