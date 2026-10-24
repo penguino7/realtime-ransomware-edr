@@ -3,6 +3,7 @@ from .Workloads import (
     CompressionWorkload,
     OfficeWorkload,
     FileOpsWorkload,
+    ImageWorkload,
 )
 from .Managers import WorkloadManager
 
@@ -11,6 +12,7 @@ __all__ = [
     "CompressionWorkload",
     "OfficeWorkload",
     "FileOpsWorkload",
+    "ImageWorkload",
     "WorkloadManager",
 ]
 

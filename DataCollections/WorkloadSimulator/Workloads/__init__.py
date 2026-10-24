@@ -8,11 +8,13 @@ from .BaseWorkload import BaseWorkload
 from .CompressionWorkload import CompressionWorkload
 from .OfficeWorkload import OfficeWorkload
 from .FileOpsWorkload import FileOpsWorkload
+from .ImageWorkload import ImageWorkload
 
 __all__ = [
     "BaseWorkload",
     "CompressionWorkload",
     "OfficeWorkload",
     "FileOpsWorkload",
+    "ImageWorkload",
 ]
 

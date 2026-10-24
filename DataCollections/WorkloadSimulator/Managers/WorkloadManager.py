@@ -15,6 +15,7 @@ try:
         CompressionWorkload,
         OfficeWorkload,
         FileOpsWorkload,
+        ImageWorkload,
     )
 except (ImportError, ValueError):
     from Workloads import (
@@ -22,6 +23,7 @@ except (ImportError, ValueError):
         CompressionWorkload,
         OfficeWorkload,
         FileOpsWorkload,
+        ImageWorkload,
     )
 
 
@@ -50,6 +52,7 @@ class WorkloadManager:
             ),
             "office": OfficeWorkload(target_dirs=self.target_dirs),
             "fileops": FileOpsWorkload(target_dirs=self.target_dirs),
+            "image": ImageWorkload(target_dirs=self.target_dirs),
         }
 
     def _default_directories(self) -> List[Path]:
@@ -134,14 +137,16 @@ class WorkloadManager:
         """
         Mô phỏng ngày làm việc tự nhiên của người dùng bằng cách chọn ngẫu nhiên
         các kịch bản xen kẽ nhau dựa trên trọng số xác suất thực tế:
-        - Soạn thảo Office/Text: 50%
-        - Thao tác tệp Copy/Rename/Delete: 35%
-        - Nén/Giải nén tệp tin: 15%
+        - Soạn thảo Office/Text: 40%
+        - Thao tác tệp Copy/Rename/Delete: 25%
+        - Xử lý ảnh hàng loạt (Hard Benign): 20%
+        - Nén/Giải nén tệp tin (thường & mật khẩu): 15%
         """
         if weights is None:
             weights = {
-                "office": 0.50,
-                "fileops": 0.35,
+                "office": 0.40,
+                "fileops": 0.25,
+                "image": 0.20,
                 "compression": 0.15,
             }
 
