@@ -30,7 +30,7 @@ scratch/
 ProcessProject.md
 
 # Dữ liệu huấn luyện (Giữ cấu trúc bằng .gitkeep)
-Data/Raw/*
+
 !Data/Raw/.gitkeep
 Data/Interim/*
 !Data/Interim/.gitkeep
