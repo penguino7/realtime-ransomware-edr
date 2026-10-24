@@ -3,15 +3,10 @@ Inspectors package for EntropyInspector.
 """
 
 from .BaseInspector import BaseInspector, EntropyEvent
+from .SnapshotInspector import SnapshotInspector
 
 __all__ = [
     "BaseInspector",
     "EntropyEvent",
+    "SnapshotInspector",
 ]
-from .BaseInspector import BaseInspector, EntropyEvent
-
-__all__ = [
-    "BaseInspector",
-    "EntropyEvent",
-]
-
