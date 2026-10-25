@@ -18,6 +18,7 @@ class FeatureExtractor:
     def __init__(
         self,
         epsilon: Optional[float] = None,
+        min_duration_floor: Optional[float] = None,
         high_entropy_threshold: Optional[float] = None,
         monitored_extensions: Optional[Set[str]] = None,
     ) -> None:
@@ -25,6 +26,7 @@ class FeatureExtractor:
         Khởi tạo FeatureExtractor với các tham số cấu hình lấy từ Config.
         """
         self.epsilon: float = epsilon or Config.EPSILON
+        self.min_duration_floor: float = min_duration_floor or Config.MIN_DURATION_FLOOR_SEC
         self.high_entropy_threshold: float = high_entropy_threshold or Config.HIGH_ENTROPY_THRESHOLD
         self.monitored_extensions: Set[str] = monitored_extensions or Config.MONITORED_EXTENSIONS
 
@@ -34,6 +36,7 @@ class FeatureExtractor:
         med_slice: WindowSlice,
         long_slice: WindowSlice,
         sample_id: str,
+        pid: int,
         process_name: str,
         tick_index: int,
         label: int = 0
@@ -46,8 +49,9 @@ class FeatureExtractor:
         long_feats = self._compute_long_features(long_slice)
 
         return FeatureVector(
-            # 1. Metadata định danh (3 cột)
+            # 1. Metadata định danh (4 cột)
             sample_id=sample_id,
+            pid=pid,
             process_name=process_name,
             tick_index=tick_index,
             # 2. Short Window Features (10 đặc trưng)
@@ -93,10 +97,11 @@ class FeatureExtractor:
         read_ops = short_slice.read_ops_count
         write_bytes = short_slice.total_write_bytes
 
-        # Tốc độ I/O (áp dụng hệ số làm mượt epsilon)
-        write_ops_per_sec = round(write_ops / (duration + self.epsilon), 4)
-        read_ops_per_sec = round(read_ops / (duration + self.epsilon), 4)
-        write_bytes_per_sec = round(write_bytes / (duration + self.epsilon), 4)
+        # Tốc độ I/O (áp dụng ngưỡng sàn thời gian tối thiểu chống bùng nổ số học ảo)
+        eff_duration = max(duration, self.min_duration_floor)
+        write_ops_per_sec = round(write_ops / eff_duration, 4)
+        read_ops_per_sec = round(read_ops / eff_duration, 4)
+        write_bytes_per_sec = round(write_bytes / eff_duration, 4)
 
         # Trích xuất Entropy của từng file riêng biệt trong cửa sổ ngắn
         file_entropies, file_diffs = self._get_per_file_entropy_stats(short_slice)
@@ -138,7 +143,8 @@ class FeatureExtractor:
         read_ops = med_slice.read_ops_count
 
         # Tốc độ ghi và tỷ lệ Đọc/Ghi
-        write_ops_per_sec = round(write_ops / (duration + self.epsilon), 4)
+        eff_duration = max(duration, self.min_duration_floor)
+        write_ops_per_sec = round(write_ops / eff_duration, 4)
         read_to_write_ratio = round(read_ops / (write_ops + self.epsilon), 4)
 
         # Trích xuất thống kê Entropy
