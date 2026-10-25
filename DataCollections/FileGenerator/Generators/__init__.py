@@ -7,6 +7,9 @@ from .TextGen import TextDocumentGenerator, StructuredDataGenerator
 from .OfficeGen import OfficeDocumentGenerator
 from .PdfGen import PDFDocumentGenerator
 from .ImageGen import ImageFileGenerator
+from .CodeGen import SourceCodeGenerator
+from .DatabaseConfigGen import DatabaseConfigFileGenerator
+from .ArchiveGen import ArchiveFileGenerator
 
 __all__ = [
     "BaseFileGenerator",
@@ -15,5 +18,8 @@ __all__ = [
     "OfficeDocumentGenerator",
     "PDFDocumentGenerator",
     "ImageFileGenerator",
+    "SourceCodeGenerator",
+    "DatabaseConfigFileGenerator",
+    "ArchiveFileGenerator",
 ]
 
