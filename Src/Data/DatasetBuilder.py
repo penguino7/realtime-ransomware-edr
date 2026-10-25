@@ -195,6 +195,13 @@ class DatasetBuilder:
                     size_bytes = int(row["size_bytes"]) if row.get("size_bytes") else 0
                     entropy = float(row["entropy"]) if row.get("entropy") else 0.0
                     baseline_h = float(row["baseline_entropy"]) if row.get("baseline_entropy") else 0.0
+
+                    # Thu nhận các trường siêu dữ liệu kiểm toán (Audit Metadata)
+                    raw_matched = str(row.get("entropy_matched", "False")).lower()
+                    entropy_matched = raw_matched in ("true", "1")
+                    raw_delta = row.get("match_delta_sec")
+                    match_delta_sec = float(raw_delta) if raw_delta and raw_delta.strip() else None
+                    entropy_source = row.get("entropy_source", "baseline_fallback")
                 except (ValueError, KeyError):
                     continue
 
@@ -207,7 +214,10 @@ class DatasetBuilder:
                     old_path=old_path,
                     size_bytes=size_bytes,
                     entropy=entropy,
-                    baseline_entropy=baseline_h
+                    baseline_entropy=baseline_h,
+                    entropy_matched=entropy_matched,
+                    match_delta_sec=match_delta_sec,
+                    entropy_source=entropy_source
                 )
 
                 # Bơm sự kiện vào WindowManager
