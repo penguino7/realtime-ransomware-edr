@@ -1,4 +1,5 @@
 
+import os
 import re
 from datetime import datetime
 from typing import Optional
@@ -64,6 +65,20 @@ class LogFormatters:
             except ValueError:
                 return 0
         return 0
+
+    @staticmethod
+    def normalize_windows_path(path: Optional[str]) -> str:
+        """
+        Chuẩn hóa đường dẫn tập tin theo quy chuẩn Windows:
+        - Xử lý None/rỗng.
+        - Bỏ dấu ngoặc kép và khoảng trắng thừa.
+        - Thống nhất dấu gạch chéo ngược (\\).
+        - Chuẩn hóa chữ thường (case-insensitive) và chuẩn đường dẫn Windows (os.path.normpath).
+        """
+        if not path:
+            return ""
+        clean_path = path.strip().strip('"').replace("/", "\\")
+        return os.path.normpath(clean_path).lower()
 
     @staticmethod
     def extract_rename_path(detail_str: str) -> Optional[str]:
