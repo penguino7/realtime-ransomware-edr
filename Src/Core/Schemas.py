@@ -143,11 +143,11 @@ class WindowSlice:
 @dataclass(slots=True)
 class FeatureVector:
     """
-    Vector đặc trưng hoàn chỉnh của một Tick ($N_{base} = 10 \\cdot k$ files).
-    Tương ứng chính xác với 1 dòng trong tệp dataset.csv (31 cột).
+    Vector đặc trưng hoàn chỉnh của một Tick
     """
-    # 1. Metadata định danh (3 cột)
+    # 1. Metadata định danh (4 cột)
     sample_id: str                      # Mã định danh phiên chạy (ví dụ: session_benign_01)
+    pid: int                            # Định danh duy nhất của tiến trình (Process ID)
     process_name: str                   # Tên tiến trình thực thi
     tick_index: int                     # Chỉ số Tick (1, 2, 3...)
 
@@ -189,12 +189,13 @@ class FeatureVector:
 
     def to_dict(self) -> Dict[str, Any]:
         """
-        Xuất toàn bộ 31 trường dữ liệu thành Dictionary chuẩn
+        Xuất toàn bộ 32 trường dữ liệu thành Dictionary chuẩn
         khớp chính xác 100% với header của dataset.csv.
         """
         return {
             # Metadata
             "sample_id": self.sample_id,
+            "pid": self.pid,
             "process_name": self.process_name,
             "tick_index": self.tick_index,
             # Short Window
