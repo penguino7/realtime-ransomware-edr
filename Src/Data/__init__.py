@@ -8,10 +8,12 @@ from .ParsersRawLog import (
     EntropyMatcher,
     IrpParser,
 )
+from .DatasetBuilder import DatasetBuilder
 
 __all__ = [
     "LogFormatters",
     "EntropyLoader",
     "EntropyMatcher",
     "IrpParser",
+    "DatasetBuilder",
 ]
