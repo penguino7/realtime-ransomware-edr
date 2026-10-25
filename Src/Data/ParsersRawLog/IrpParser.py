@@ -3,14 +3,16 @@
 import csv
 import os
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List, Optional, Set, Union
 
 try:
+    from ...Core.Config import Config
     from ...Core.Schemas import IRPEvent, IRPOperation
     from .LogFormatters import LogFormatters
     from .EntropyLoader import EntropyLoader
     from .EntropyMatcher import EntropyMatcher, EntropyMatchResult
 except (ImportError, ValueError):
+    from Src.Core.Config import Config
     from Src.Core.Schemas import IRPEvent, IRPOperation
     from Src.Data.ParsersRawLog.LogFormatters import LogFormatters
     from Src.Data.ParsersRawLog.EntropyLoader import EntropyLoader
@@ -34,11 +36,15 @@ class IrpParser:
         realtime_entropy_path: Union[str, Path],
         baseline_entropy_path: Union[str, Path],
         decoy_keyword: str = "DecoyDocs",
-        tolerance_sec: float = 0.3
+        tolerance_sec: float = 0.3,
+        excluded_processes: Optional[Set[str]] = None
     ) -> None:
 
         self.procmon_path = Path(procmon_path)
         self.decoy_keyword = decoy_keyword.lower()
+        self.excluded_processes: Set[str] = {
+            p.lower() for p in (excluded_processes if excluded_processes is not None else Config.EXCLUDED_PROCESSES)
+        }
 
         # Khởi tạo các thành phần chuyên biệt (Delegation Pattern)
         self.loader = EntropyLoader(
@@ -78,6 +84,10 @@ class IrpParser:
                 raw_path = row[4].strip()
                 raw_result = row[5].strip().upper()
                 raw_detail = row[6].strip()
+
+                # Cổng 0: Lọc bỏ tiến trình hệ thống và công cụ đo đạc kiểm thử
+                if proc_name.lower() in self.excluded_processes:
+                    continue
 
                 # Cổng 1: Lọc kết quả thực thi (Chỉ lấy SUCCESS hoặc BUFFER OVERFLOW)
                 if raw_result not in ("SUCCESS", "BUFFER OVERFLOW"):
