@@ -1,10 +1,15 @@
-
+"""
+Phân hệ: Data Preprocessing
+Tệp tin: EntropyLoader.py
+Mô tả: Nạp và chuẩn hóa dữ liệu Shannon Entropy từ Snapshot ban đầu và Nhật ký Realtime Watchdog vào RAM.
+Tác giả: ML Ransomware Detection Team
+"""
 
 import csv
 import os
 from pathlib import Path
 from collections import defaultdict
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Tuple, Union, Optional
 
 try:
     from .LogFormatters import LogFormatters
@@ -25,25 +30,23 @@ class EntropyLoader:
     ) -> None:
         """
         Khởi tạo EntropyLoader với đường dẫn 2 file log entropy.
-
         """
         self.baseline_path = Path(baseline_path)
         self.realtime_path = Path(realtime_path)
 
         self._baseline_map: Dict[str, float] = {}
-        self._realtime_map: Dict[str, List[Tuple[float, float, int]]] = defaultdict(list)
+        # Cấu trúc: norm_path -> [(ts_sec, entropy, file_size, event_type, old_path), ...]
+        self._realtime_map: Dict[str, List[Tuple[float, float, int, str, Optional[str]]]] = defaultdict(list)
         self._is_loaded = False
 
     @property
     def baseline_map(self) -> Dict[str, float]:
-        
         if not self._is_loaded:
             self.load_all()
         return self._baseline_map
 
     @property
-    def realtime_map(self) -> Dict[str, List[Tuple[float, float, int]]]:
-        
+    def realtime_map(self) -> Dict[str, List[Tuple[float, float, int, str, Optional[str]]]]:
         if not self._is_loaded:
             self.load_all()
         return self._realtime_map
@@ -67,15 +70,18 @@ class EntropyLoader:
             header = next(reader, None)
             for row in reader:
                 if len(row) >= 5 and row[2].strip():
-                    norm_path = os.path.normpath(row[2].strip()).lower()
+                    norm_path = LogFormatters.normalize_windows_path(row[2])
                     try:
                         self._baseline_map[norm_path] = float(row[4])
                     except ValueError:
                         continue
         return self._baseline_map
 
-    def load_realtime(self) -> Dict[str, List[Tuple[float, float, int]]]:
-        
+    def load_realtime(self) -> Dict[str, List[Tuple[float, float, int, str, Optional[str]]]]:
+        """
+        Đọc file realtime entropy, lưu đầy đủ event_type và old_path,
+        gom nhóm theo file và sắp xếp theo trục thời gian tăng dần.
+        """
         if not self.realtime_path.exists():
             raise FileNotFoundError(f"Không tìm thấy realtime entropy: {self.realtime_path}")
 
@@ -85,12 +91,16 @@ class EntropyLoader:
             header = next(reader, None)
             for row in reader:
                 if len(row) >= 6 and row[2].strip():
-                    norm_path = os.path.normpath(row[2].strip()).lower()
+                    norm_path = LogFormatters.normalize_windows_path(row[2])
+                    event_type = row[1].strip().upper() if len(row) > 1 else ""
+                    old_path = LogFormatters.normalize_windows_path(row[3]) if len(row) > 3 and row[3].strip() else None
                     ts_sec = LogFormatters.parse_realtime_timestamp(row[0])
                     try:
                         entropy = float(row[4])
                         file_size = int(row[5]) if row[5].strip() else 0
-                        self._realtime_map[norm_path].append((ts_sec, entropy, file_size))
+                        self._realtime_map[norm_path].append(
+                            (ts_sec, entropy, file_size, event_type, old_path)
+                        )
                     except ValueError:
                         continue
 
@@ -99,3 +109,4 @@ class EntropyLoader:
             self._realtime_map[path_key].sort(key=lambda item: item[0])
 
         return self._realtime_map
+
