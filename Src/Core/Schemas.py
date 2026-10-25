@@ -58,6 +58,9 @@ class IRPEvent:
     size_bytes: int = 0                 # Số lượng byte được đọc hoặc ghi
     entropy: float = 0.0                # Shannon Entropy tức thời của file (0.0 - 8.0)
     baseline_entropy: float = 0.0       # Shannon Entropy gốc ban đầu từ Baseline Snapshot
+    entropy_matched: bool = False       # True nếu ghép cặp thành công với watchdog realtime
+    match_delta_sec: Optional[float] = None # Sai lệch thời gian giữa IRP và Watchdog (giây)
+    entropy_source: str = "baseline_fallback" # Nguồn entropy: "realtime", "baseline_fallback", "deletion"
 
     @property
     def entropy_diff(self) -> float:
@@ -87,6 +90,9 @@ class IRPEvent:
             "entropy": self.entropy,
             "baseline_entropy": self.baseline_entropy,
             "entropy_diff": self.entropy_diff,
+            "entropy_matched": self.entropy_matched,
+            "match_delta_sec": self.match_delta_sec if self.match_delta_sec is not None else "",
+            "entropy_source": self.entropy_source,
         }
 
 
