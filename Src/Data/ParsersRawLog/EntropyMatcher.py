@@ -42,18 +42,20 @@ class EntropyMatcher:
         """
         Tìm giá trị Shannon Entropy tương ứng với thời điểm và thao tác IRP.
         """
+        # Kiểm tra xem file có baseline từ snapshot ban đầu hay không
         baseline_h = self.loader.baseline_map.get(norm_path)
         if baseline_h is None and old_norm_path:
-            baseline_h = self.loader.baseline_map.get(old_norm_path, 0.0)
-        if baseline_h is None:
-            baseline_h = 0.0
+            baseline_h = self.loader.baseline_map.get(old_norm_path)
+
+        has_baseline = baseline_h is not None and baseline_h > 0.0
+        baseline_val = baseline_h if has_baseline else 0.0
 
         # 1. Thao tác XÓA file -> Entropy sau khi xóa bằng 0.0
         if op == IRPOperation.DELETE:
-            delta_h = round(0.0 - baseline_h, 4)
+            delta_h = round(0.0 - baseline_val, 4) if has_baseline else 0.0
             return EntropyMatchResult(
                 current_entropy=0.0,
-                baseline_entropy=baseline_h,
+                baseline_entropy=baseline_val,
                 entropy_diff=delta_h,
                 matched=True,
                 match_delta_sec=0.0,
@@ -70,20 +72,23 @@ class EntropyMatcher:
             diff_sec = round(abs(best_event[0] - irp_ts), 6)
             if diff_sec <= self.tolerance_sec:
                 current_h = best_event[1]
-                delta_h = round(current_h - baseline_h, 4)
+                # QUAN TRỌNG: Chỉ tính delta_h nếu file có baseline từ trước.
+                # Nếu là file mới tạo (chưa có baseline), delta_h = 0.0 để tránh báo động giả (False Positive Spike)
+                delta_h = round(current_h - baseline_val, 4) if has_baseline else 0.0
+                source_tag = "realtime" if has_baseline else "realtime_new_file"
                 return EntropyMatchResult(
                     current_entropy=current_h,
-                    baseline_entropy=baseline_h,
+                    baseline_entropy=baseline_val,
                     entropy_diff=delta_h,
                     matched=True,
                     match_delta_sec=diff_sec,
-                    entropy_source="realtime"
+                    entropy_source=source_tag
                 )
 
         # 3. Fallback an toàn: Thao tác READ hoặc chưa kịp đo -> giữ nguyên baseline
         return EntropyMatchResult(
-            current_entropy=baseline_h,
-            baseline_entropy=baseline_h,
+            current_entropy=baseline_val,
+            baseline_entropy=baseline_val,
             entropy_diff=0.0,
             matched=False,
             match_delta_sec=None,
