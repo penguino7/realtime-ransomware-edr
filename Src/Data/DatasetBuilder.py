@@ -26,10 +26,11 @@ except (ImportError, ValueError):
 class DatasetBuilder:
 
 
-    # Danh sách 31 cột chuẩn xác của dataset.csv
+    # Danh sách 32 cột chuẩn xác của dataset.csv
     DATASET_HEADER = [
-        # Metadata định danh (3)
+        # Metadata định danh (4)
         "sample_id",
+        "pid",
         "process_name",
         "tick_index",
         # Short Window Features (10)
@@ -232,6 +233,7 @@ class DatasetBuilder:
                         med_slice=med_slice,
                         long_slice=long_slice,
                         sample_id=sample_id,
+                        pid=pid,
                         process_name=proc_name,
                         tick_index=tick_index,
                         label=label
@@ -270,6 +272,8 @@ class DatasetBuilder:
                     sample_id=sample_id,
                     label=label
                 )
+                # Sắp xếp các mẫu theo PID và Tick Index để từng tiến trình hiển thị tuần tự, chuẩn mực
+                vectors.sort(key=lambda v: (v.pid, v.tick_index))
                 for vec in vectors:
                     writer.writerow(vec.to_dict())
                 total_samples += len(vectors)
