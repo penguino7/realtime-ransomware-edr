@@ -48,6 +48,10 @@ class Config:
     # Dùng khi tính tốc độ (Ops/sec hoặc Bytes/sec) khi delta_time tiến tới 0 micro-giây
     EPSILON: float = 1e-6
 
+    # Ngưỡng sàn thời gian tối thiểu (Duration Floor) tính bằng giây (5 mili-giây)
+    # Ngăn chặn hiện tượng bùng nổ tốc độ phi thực tế (Numerical Explosion) khi duration tiến tới 0 micro-giây
+    MIN_DURATION_FLOOR_SEC: float = 0.005
+
     # =========================================================================
     # 3. ĐỊNH CHUẨN ĐO LƯỜNG SHANNON ENTROPY
     # =========================================================================
@@ -77,7 +81,8 @@ class Config:
     # Danh sách tiến trình hệ thống hoặc công cụ đo lường cần lọc bỏ khỏi tập train
     EXCLUDED_PROCESSES: Set[str] = {
         "procmon.exe", "procmon64.exe",
-        "searchprotocolhost.exe", "searchindexer.exe"
+        "searchprotocolhost.exe", "searchindexer.exe",
+        "explorer.exe", "msmpeng.exe"
     }
 
     # =========================================================================
