@@ -9,16 +9,15 @@ try:
     from ...Core.Schemas import IRPEvent, IRPOperation
     from .LogFormatters import LogFormatters
     from .EntropyLoader import EntropyLoader
-    from .EntropyMatcher import EntropyMatcher
+    from .EntropyMatcher import EntropyMatcher, EntropyMatchResult
 except (ImportError, ValueError):
     from Src.Core.Schemas import IRPEvent, IRPOperation
     from Src.Data.ParsersRawLog.LogFormatters import LogFormatters
     from Src.Data.ParsersRawLog.EntropyLoader import EntropyLoader
-    from Src.Data.ParsersRawLog.EntropyMatcher import EntropyMatcher
+    from Src.Data.ParsersRawLog.EntropyMatcher import EntropyMatcher, EntropyMatchResult
 
 
 class IrpParser:
-    
 
     # 5 thao tác IRP trọng yếu cần giám sát mã hóa
     TARGET_OPERATIONS = {
@@ -35,9 +34,9 @@ class IrpParser:
         realtime_entropy_path: Union[str, Path],
         baseline_entropy_path: Union[str, Path],
         decoy_keyword: str = "DecoyDocs",
-        tolerance_sec: float = 2.0
+        tolerance_sec: float = 0.3
     ) -> None:
-        
+
         self.procmon_path = Path(procmon_path)
         self.decoy_keyword = decoy_keyword.lower()
 
@@ -80,15 +79,11 @@ class IrpParser:
                 raw_result = row[5].strip().upper()
                 raw_detail = row[6].strip()
 
-                # Cổng 1: Lọc theo thư mục mồi Decoy
-                if self.decoy_keyword and self.decoy_keyword not in raw_path.lower():
-                    continue
-
-                # Cổng 2: Lọc kết quả thực thi thành công
+                # Cổng 1: Lọc kết quả thực thi (Chỉ lấy SUCCESS hoặc BUFFER OVERFLOW)
                 if raw_result not in ("SUCCESS", "BUFFER OVERFLOW"):
                     continue
 
-                # Cổng 3: Chuẩn hóa và lọc loại thao tác
+                # Cổng 2: Chuẩn hóa và lọc loại thao tác IRP
                 op = IRPOperation.from_str(raw_op)
                 if op not in self.TARGET_OPERATIONS:
                     continue
@@ -98,26 +93,41 @@ class IrpParser:
                 except ValueError:
                     continue
 
-                ts_sec = LogFormatters.parse_procmon_timestamp(raw_ts)
-                norm_path = os.path.normpath(raw_path).lower()
-                size_bytes = LogFormatters.extract_length(raw_detail)
-
-                old_path: Optional[str] = None
-                target_path = raw_path
-
                 # Xử lý trường hợp đổi tên file (SetRenameInformationFile)
+                # QUAN TRỌNG: Bóc tách destination TRƯỚC khi lọc DecoyDocs
+                old_path: Optional[str] = None
+                new_path: Optional[str] = None
                 if op == IRPOperation.RENAME:
                     new_path = LogFormatters.extract_rename_path(raw_detail)
                     if new_path:
                         old_path = raw_path
                         target_path = new_path
-                        norm_path = os.path.normpath(target_path).lower()
+                    else:
+                        target_path = raw_path
+                else:
+                    target_path = raw_path
 
-                # Ghép cặp Entropy
-                current_entropy, baseline_entropy = self.matcher.match(
+                # Cổng 3: Lọc theo thư mục mồi Decoy
+                # Cho phép giữ lại nếu HOẶC source_path HOẶC dest_path nằm trong thư mục mồi
+                if self.decoy_keyword:
+                    in_src = self.decoy_keyword in raw_path.lower()
+                    in_dst = new_path is not None and self.decoy_keyword in new_path.lower()
+                    if not in_src and not in_dst:
+                        continue
+
+                # Chuẩn hóa đường dẫn theo quy chuẩn Windows
+                norm_path = LogFormatters.normalize_windows_path(target_path)
+                old_norm_path = LogFormatters.normalize_windows_path(old_path) if old_path else None
+
+                ts_sec = LogFormatters.parse_procmon_timestamp(raw_ts)
+                size_bytes = LogFormatters.extract_length(raw_detail)
+
+                # Ghép cặp Entropy với Audit Metadata
+                match_res: EntropyMatchResult = self.matcher.match(
                     norm_path=norm_path,
                     irp_ts=ts_sec,
-                    op=op
+                    op=op,
+                    old_norm_path=old_norm_path
                 )
 
                 event = IRPEvent(
@@ -128,8 +138,11 @@ class IrpParser:
                     file_path=target_path,
                     old_path=old_path,
                     size_bytes=size_bytes,
-                    entropy=current_entropy,
-                    baseline_entropy=baseline_entropy
+                    entropy=match_res.current_entropy,
+                    baseline_entropy=match_res.baseline_entropy,
+                    entropy_matched=match_res.matched,
+                    match_delta_sec=match_res.match_delta_sec,
+                    entropy_source=match_res.entropy_source
                 )
 
                 parsed_events.append(event)
@@ -158,7 +171,10 @@ class IrpParser:
             "size_bytes",
             "entropy",
             "baseline_entropy",
-            "entropy_diff"
+            "entropy_diff",
+            "entropy_matched",
+            "match_delta_sec",
+            "entropy_source"
         ]
 
         with open(output_file, "w", newline="", encoding="utf-8") as f:
@@ -168,4 +184,3 @@ class IrpParser:
                 writer.writerow(event.to_dict())
 
         return output_file
-
