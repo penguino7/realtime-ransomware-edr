@@ -1,9 +1,3 @@
-"""
-Phân hệ: Data Preprocessing
-Tệp tin: EntropyLoader.py
-Mô tả: Nạp và chuẩn hóa dữ liệu Shannon Entropy từ Snapshot ban đầu và Nhật ký Realtime Watchdog vào RAM.
-Tác giả: ML Ransomware Detection Team
-"""
 
 import csv
 import os
