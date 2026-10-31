@@ -1,16 +1,29 @@
+
+
 """
 Lớp cơ sở trừu tượng (Abstract Base Class) định nghĩa cấu trúc chuẩn cho mọi Workload giả lập:
-- Quản lý danh sách thư mục mục tiêu chiến lược trên Windows Sandbox (8 thư mục người dùng + C:\\, D:\\).
+- Quản lý danh sách thư mục mục tiêu chiến lược tập trung qua Config.get_monitored_directories().
 - Cung cấp tiện ích quét tệp tin đệ quy đa tầng (Recursive rglob) hỗ trợ cây thư mục phân cấp.
 - Cung cấp cơ chế tạo khoảng trễ tự nhiên (Natural Delay) ngẫu nhiên giữa các thao tác I/O.
 - Bắt buộc mọi kịch bản con phải triển khai phương thức thực thi execute().
 """
 
+import sys
 import time
 import random
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import List, Dict, Optional, Any
+
+# Đảm bảo Project Root có trong sys.path để nạp Src.Core.Config
+_project_root = Path(__file__).resolve().parents[3]
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
+
+try:
+    from Src.Core.Config import Config
+except (ImportError, ValueError):
+    from Core.Config import Config
 
 
 class BaseWorkload(ABC):
@@ -21,41 +34,7 @@ class BaseWorkload(ABC):
         self.target_dirs: List[Path] = target_dirs or self._default_directories()
 
     def _default_directories(self) -> List[Path]:
-        home = Path.home()
-        standard_user_folders = [
-            "Desktop",
-            "Documents",
-            "Downloads",
-            "Pictures",
-            "Contacts",
-            "Favorites",
-            "Music",
-            "Videos",
-        ]
-
-        directories: List[Path] = []
-        for folder_name in standard_user_folders:
-            folder_path = home / folder_name / "DecoyDocs"
-            directories.append(folder_path)
-
-        # Thêm thư mục gốc trên các phân vùng ổ đĩa (nếu môi trường cho phép ghi)
-        for drive in ["C:\\", "D:\\"]:
-            drive_path = Path(drive)
-            if drive_path.exists():
-                decoy_drive_folder = drive_path / "DecoyDocs"
-                try:
-                    test_dir = decoy_drive_folder / ".test_write"
-                    test_dir.mkdir(parents=True, exist_ok=True)
-                    test_dir.rmdir()
-                    directories.append(decoy_drive_folder)
-                except (PermissionError, OSError):
-                    pass
-
-        # Nếu không có thư mục nào truy cập được, mặc định fallback về thư mục làm việc hiện tại
-        if not directories:
-            directories.append(Path.cwd() / "DecoyDocs")
-
-        return directories
+        return Config.get_monitored_directories()
 
     def find_files(self, extensions: Optional[List[str]] = None, recursive: bool = True) -> List[Path]:
         """

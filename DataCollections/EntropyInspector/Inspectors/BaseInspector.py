@@ -1,17 +1,27 @@
 """
 Lớp cơ sở trừu tượng (Abstract Base Class) định nghĩa cấu trúc chuẩn cho bộ giám định Entropy:
-- Quản lý danh mục 8 thư mục người dùng chiến lược (Desktop, Documents, Downloads, Pictures,
-  Contacts, Favorites, Music, Videos) và phân vùng ổ đĩa C:\\, D:\\ đồng bộ với FileManager và WorkloadSimulator.
+- Ủy quyền xác định danh mục thư mục mục tiêu tập trung qua Config.get_monitored_directories().
 - Cung cấp cấu trúc dữ liệu bất biến EntropyEvent chuẩn hóa sự kiện đo lường thời gian thực (SNAPSHOT, MODIFIED, CREATED, RENAMED, DELETED).
 - Cung cấp tiện ích xuất dữ liệu ra file CSV chuẩn phục vụ ghép cặp với Procmon IRP.
 """
 
 import csv
+import sys
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional, Dict, Any
+
+# Đảm bảo Project Root có trong sys.path để nạp Src.Core.Config
+_project_root = Path(__file__).resolve().parents[3]
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
+
+try:
+    from Src.Core.Config import Config
+except (ImportError, ValueError):
+    from Core.Config import Config
 
 try:
     from ..Calculators import ShannonEntropyCalculator, EntropyResult
@@ -65,47 +75,7 @@ class BaseInspector(ABC):
         self.events: List[EntropyEvent] = []
 
     def _default_directories(self) -> List[Path]:
-        """
-        Xác định danh sách các thư mục mục tiêu chiến lược của người dùng trên Windows:
-        - 8 thư mục người dùng: Desktop, Documents, Downloads, Pictures, Contacts, Favorites, Music, Videos.
-        - Các phân vùng ổ đĩa: C:\\DecoyDocs, D:\\DecoyDocs (nếu môi trường cho phép ghi).
-        - Đồng bộ hoàn toàn với FileEnvironmentManager và WorkloadSimulator.
-        """
-        home = Path.home()
-        standard_user_folders = [
-            "Desktop",
-            "Documents",
-            "Downloads",
-            "Pictures",
-            "Contacts",
-            "Favorites",
-            "Music",
-            "Videos",
-        ]
-
-        directories: List[Path] = []
-        for folder_name in standard_user_folders:
-            folder_path = home / folder_name / "DecoyDocs"
-            directories.append(folder_path)
-
-        # Thêm thư mục gốc trên các phân vùng ổ đĩa (nếu môi trường cho phép ghi)
-        for drive in ["C:\\", "D:\\"]:
-            drive_path = Path(drive)
-            if drive_path.exists():
-                decoy_drive_folder = drive_path / "DecoyDocs"
-                try:
-                    test_dir = decoy_drive_folder / ".test_write"
-                    test_dir.mkdir(parents=True, exist_ok=True)
-                    test_dir.rmdir()
-                    directories.append(decoy_drive_folder)
-                except (PermissionError, OSError):
-                    pass
-
-        # Nếu không có thư mục nào truy cập được, mặc định fallback về thư mục làm việc hiện tại
-        if not directories:
-            directories.append(Path.cwd() / "DecoyDocs")
-
-        return directories
+        return Config.get_monitored_directories()
 
     @staticmethod
     def get_current_timestamp() -> str:

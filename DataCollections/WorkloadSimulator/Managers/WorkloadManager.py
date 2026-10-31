@@ -5,6 +5,16 @@ import random
 from pathlib import Path
 from typing import List, Dict, Optional, Any
 
+# Đảm bảo Project Root có trong sys.path để nạp Src.Core.Config
+_project_root = Path(__file__).resolve().parents[3]
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
+
+try:
+    from Src.Core.Config import Config
+except (ImportError, ValueError):
+    from Core.Config import Config
+
 # Thiết lập encoding UTF-8 cho console Windows tránh UnicodeEncodeError (cp1252)
 if sys.stdout and hasattr(sys.stdout, "reconfigure"):
     try:
@@ -77,43 +87,7 @@ class WorkloadManager:
         }
 
     def _default_directories(self) -> List[Path]:
-        """
-        Xác định 8 thư mục mục tiêu chuẩn của người dùng trên Windows cùng phân vùng ổ đĩa:
-        Đồng bộ với FileEnvironmentManager và BaseWorkload.
-        """
-        home = Path.home()
-        standard_user_folders = [
-            "Desktop",
-            "Documents",
-            "Downloads",
-            "Pictures",
-            "Contacts",
-            "Favorites",
-            "Music",
-            "Videos",
-        ]
-
-        directories: List[Path] = []
-        for folder_name in standard_user_folders:
-            folder_path = home / folder_name / "DecoyDocs"
-            directories.append(folder_path)
-
-        for drive in ["C:\\", "D:\\"]:
-            drive_path = Path(drive)
-            if drive_path.exists():
-                decoy_drive_folder = drive_path / "DecoyDocs"
-                try:
-                    test_dir = decoy_drive_folder / ".test_write"
-                    test_dir.mkdir(parents=True, exist_ok=True)
-                    test_dir.rmdir()
-                    directories.append(decoy_drive_folder)
-                except (PermissionError, OSError):
-                    pass
-
-        if not directories:
-            directories.append(Path.cwd() / "DecoyDocs")
-
-        return directories
+        return Config.get_monitored_directories()
 
     def _delay(self, min_sec: float, max_sec: float) -> None:
         """Nghỉ ngẫu nhiên giữa các lần thực thi."""
