@@ -54,7 +54,7 @@ class WorkloadManager:
         self.custom_tool_path = custom_tool_path
         self.history: List[Dict[str, Any]] = []
 
-        # Khởi tạo đầy đủ 5 workload thành phần
+        # Khởi tạo các workload thành phần và các chế độ thao tác tệp độc lập
         self.workloads: Dict[str, BaseWorkload] = {
             "compression": CompressionWorkload(
                 target_dirs=self.target_dirs,
@@ -62,7 +62,17 @@ class WorkloadManager:
             ),
             "office": OfficeWorkload(target_dirs=self.target_dirs),
             "development": DevelopmentWorkload(target_dirs=self.target_dirs),
-            "fileops": FileOpsWorkload(target_dirs=self.target_dirs),
+            "fileops": FileOpsWorkload(target_dirs=self.target_dirs, mode="mixed"),
+            # 4 Chế độ thao tác tệp tin độc lập quy mô lớn (30 - 50 files) kích hoạt Ticks
+            "copy": FileOpsWorkload(target_dirs=self.target_dirs, mode="copy"),
+            "rename": FileOpsWorkload(target_dirs=self.target_dirs, mode="rename"),
+            "delete": FileOpsWorkload(target_dirs=self.target_dirs, mode="delete"),
+            "read": FileOpsWorkload(target_dirs=self.target_dirs, mode="read"),
+            # Đặt thêm alias fileops_* để tương thích tối đa các cách gọi
+            "fileops_copy": FileOpsWorkload(target_dirs=self.target_dirs, mode="copy"),
+            "fileops_rename": FileOpsWorkload(target_dirs=self.target_dirs, mode="rename"),
+            "fileops_delete": FileOpsWorkload(target_dirs=self.target_dirs, mode="delete"),
+            "fileops_read": FileOpsWorkload(target_dirs=self.target_dirs, mode="read"),
             "image": ImageWorkload(target_dirs=self.target_dirs),
         }
 
@@ -148,15 +158,24 @@ class WorkloadManager:
         min_delay: float = 1.0,
         max_delay: float = 3.0
     ) -> List[Dict[str, Any]]:
-        """
-        Thực thi tuần tự từng kịch bản, mỗi kịch bản N chu kỳ.
-        """
+       
+        sequential_tasks = [
+            "office",
+            "development",
+            "copy",
+            "rename",
+            "delete",
+            "read",
+            "image",
+            "compression",
+        ]
+
         print(f"\n{'=' * 60}")
-        print(f"[*] Bắt đầu chạy tuần tự tất cả 5 kịch bản...")
+        print(f"[*] Bắt đầu chạy tuần tự {len(sequential_tasks)} kịch bản chuyên biệt...")
         print(f"{'=' * 60}")
 
         results: List[Dict[str, Any]] = []
-        for task_key in self.workloads:
+        for task_key in sequential_tasks:
             task_results = self.run_workload(
                 task_name=task_key,
                 iterations=iterations_per_task,
@@ -193,8 +212,8 @@ class WorkloadManager:
                 "compression": 0.10,
             }
 
-        tasks = list(self.workloads.keys())
-        prob_weights = [weights.get(task, 1.0 / len(tasks)) for task in tasks]
+        tasks = list(weights.keys())
+        prob_weights = [weights[task] for task in tasks]
 
         print(f"\n{'=' * 60}")
         print(f"[*] Bắt đầu kịch bản xen kẽ ngẫu nhiên (Mixed Mode: {total_actions} hành vi)...")
