@@ -1,4 +1,10 @@
-
+"""
+Lớp cơ sở trừu tượng (Abstract Base Class) định nghĩa cấu trúc chuẩn cho bộ giám định Entropy:
+- Quản lý danh mục 8 thư mục người dùng chiến lược (Desktop, Documents, Downloads, Pictures,
+  Contacts, Favorites, Music, Videos) và phân vùng ổ đĩa C:\\, D:\\ đồng bộ với FileManager và WorkloadSimulator.
+- Cung cấp cấu trúc dữ liệu bất biến EntropyEvent chuẩn hóa sự kiện đo lường thời gian thực (SNAPSHOT, MODIFIED, CREATED, RENAMED, DELETED).
+- Cung cấp tiện ích xuất dữ liệu ra file CSV chuẩn phục vụ ghép cặp với Procmon IRP.
+"""
 
 import csv
 from abc import ABC, abstractmethod
@@ -22,12 +28,12 @@ class EntropyEvent:
     Cấu trúc dữ liệu bất biến chuẩn hóa một sự kiện đo lường Entropy.
     """
     timestamp: str              # Mốc thời gian phát sinh sự kiện (HH:MM:SS.ffffff)
-    event_type: str             # SNAPSHOT, MODIFIED, CREATED, RENAMED
+    event_type: str             # SNAPSHOT, MODIFIED, CREATED, RENAMED, DELETED
     file_path: str              # Đường dẫn tệp tin hiện tại
     old_path: Optional[str] = None  # Đường dẫn cũ (chỉ có khi tệp bị đổi tên/di chuyển)
     entropy: float = 0.0        # Giá trị Shannon Entropy đo được (0.0000 - 8.0000)
     file_size: int = 0          # Kích thước tệp tin (bytes)
-    status: str = "STATUS_SUCCESS"  # Trạng thái đo (STATUS_SUCCESS, STATUS_LOCKED, v.v.)
+    status: str = "STATUS_SUCCESS"  # Trạng thái đo (STATUS_SUCCESS, STATUS_LOCKED, STATUS_DELETED, v.v.)
     read_time_ms: float = 0.0   # Thời gian đọc và tính toán (mili-giây)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -45,26 +51,61 @@ class EntropyEvent:
 
 
 class BaseInspector(ABC):
-      
+    """
+    Lớp cơ sở trừu tượng cho tất cả các bộ giám định Entropy (Snapshot & Realtime Watchdog).
+    """
 
     def __init__(
         self,
         target_dirs: Optional[List[Path]] = None,
         calculator: Optional[ShannonEntropyCalculator] = None,
     ) -> None:
-
         self.target_dirs: List[Path] = target_dirs or self._default_directories()
         self.calculator: ShannonEntropyCalculator = calculator or ShannonEntropyCalculator()
         self.events: List[EntropyEvent] = []
 
     def _default_directories(self) -> List[Path]:
-        """Xác định các thư mục mồi mặc định trên Windows Sandbox."""
+        """
+        Xác định danh sách các thư mục mục tiêu chiến lược của người dùng trên Windows:
+        - 8 thư mục người dùng: Desktop, Documents, Downloads, Pictures, Contacts, Favorites, Music, Videos.
+        - Các phân vùng ổ đĩa: C:\\DecoyDocs, D:\\DecoyDocs (nếu môi trường cho phép ghi).
+        - Đồng bộ hoàn toàn với FileEnvironmentManager và WorkloadSimulator.
+        """
         home = Path.home()
-        return [
-            home / "Desktop" / "DecoyDocs",
-            home / "Documents" / "DecoyDocs",
-            home / "Downloads" / "DecoyDocs",
+        standard_user_folders = [
+            "Desktop",
+            "Documents",
+            "Downloads",
+            "Pictures",
+            "Contacts",
+            "Favorites",
+            "Music",
+            "Videos",
         ]
+
+        directories: List[Path] = []
+        for folder_name in standard_user_folders:
+            folder_path = home / folder_name / "DecoyDocs"
+            directories.append(folder_path)
+
+        # Thêm thư mục gốc trên các phân vùng ổ đĩa (nếu môi trường cho phép ghi)
+        for drive in ["C:\\", "D:\\"]:
+            drive_path = Path(drive)
+            if drive_path.exists():
+                decoy_drive_folder = drive_path / "DecoyDocs"
+                try:
+                    test_dir = decoy_drive_folder / ".test_write"
+                    test_dir.mkdir(parents=True, exist_ok=True)
+                    test_dir.rmdir()
+                    directories.append(decoy_drive_folder)
+                except (PermissionError, OSError):
+                    pass
+
+        # Nếu không có thư mục nào truy cập được, mặc định fallback về thư mục làm việc hiện tại
+        if not directories:
+            directories.append(Path.cwd() / "DecoyDocs")
+
+        return directories
 
     @staticmethod
     def get_current_timestamp() -> str:
