@@ -36,15 +36,28 @@ class IrpParser:
         realtime_entropy_path: Union[str, Path],
         baseline_entropy_path: Union[str, Path],
         decoy_keyword: str = "DecoyDocs",
-        tolerance_sec: float = 0.3,
+        tolerance_sec: Optional[float] = None,
         excluded_processes: Optional[Set[str]] = None
     ) -> None:
+        """
+        Khởi tạo bộ phân tích IRP log kết hợp đối soát Entropy.
 
+        :param procmon_path: Đường dẫn tệp CSV xuất từ Process Monitor.
+        :param realtime_entropy_path: Đường dẫn tệp CSV entropy thời gian thực (RealtimeWatcher).
+        :param baseline_entropy_path: Đường dẫn tệp CSV entropy nền tảng (Baseline).
+        :param decoy_keyword: Từ khóa nhận diện thư mục mồi nhử (mặc định 'DecoyDocs').
+        :param tolerance_sec: Cửa sổ dung sai thời gian (giây). Nếu None, tự động lấy Config.TIMESTAMP_TOLERANCE_MS / 1000.0.
+        :param excluded_processes: Tập hợp tên tiến trình cần loại bỏ (bộ đo đạc, hệ thống).
+        """
         self.procmon_path = Path(procmon_path)
         self.decoy_keyword = decoy_keyword.lower()
         self.excluded_processes: Set[str] = {
             p.lower() for p in (excluded_processes if excluded_processes is not None else Config.EXCLUDED_PROCESSES)
         }
+        if tolerance_sec is None:
+            self.tolerance_sec: float = Config.TIMESTAMP_TOLERANCE_MS / 1000.0
+        else:
+            self.tolerance_sec: float = float(tolerance_sec)
 
         # Khởi tạo các thành phần chuyên biệt (Delegation Pattern)
         self.loader = EntropyLoader(
@@ -53,7 +66,7 @@ class IrpParser:
         )
         self.matcher = EntropyMatcher(
             loader=self.loader,
-            tolerance_sec=tolerance_sec
+            tolerance_sec=self.tolerance_sec
         )
 
     def parse(self, limit: Optional[int] = None) -> List[IRPEvent]:
