@@ -1,6 +1,6 @@
 
 from pathlib import Path
-from typing import Set, Dict, Any
+from typing import Set, Dict, Any, List
 
 
 class Config:
@@ -74,8 +74,16 @@ class Config:
 
     # Tập hợp các phần mở rộng tệp tin mồi (Decoy Files) được hệ thống giám sát
     MONITORED_EXTENSIONS: Set[str] = {
-        ".docx", ".xlsx", ".pdf", ".txt", ".csv",
-        ".json", ".jpg", ".png", ".rar", ".7z", ".zip"
+        # 1. Văn phòng & Dữ liệu có cấu trúc
+        ".docx", ".xlsx", ".pdf", ".txt", ".csv", ".json",
+        # 2. Mã nguồn & Kịch bản lập trình (Entropy thấp: 4.5 - 5.5)
+        ".py", ".sql", ".html", ".xml", ".cpp",
+        # 3. Cơ sở dữ liệu & Cấu hình máy chủ
+        ".db", ".sqlite", ".ini", ".yaml", ".log",
+        # 4. Đồ họa hình ảnh
+        ".jpg", ".png",
+        # 5. Lưu trữ tệp nén (Entropy cao: 7.0 - 7.5)
+        ".rar", ".7z", ".zip", ".tar.gz",
     }
 
     # Danh sách tiến trình hệ thống hoặc công cụ đo lường cần lọc bỏ khỏi tập train
@@ -147,6 +155,43 @@ class Config:
     # =========================================================================
     # 7. PHƯƠNG THỨC TIỆN ÍCH (HELPER METHODS)
     # =========================================================================
+    @classmethod
+    def get_monitored_directories(cls) -> List[Path]:
+       
+        home = Path.home()
+        standard_user_folders = [
+            "Desktop",
+            "Documents",
+            "Downloads",
+            "Pictures",
+            "Contacts",
+            "Favorites",
+            "Music",
+            "Videos",
+        ]
+
+        directories: List[Path] = []
+        for folder_name in standard_user_folders:
+            folder_path = home / folder_name / "DecoyDocs"
+            directories.append(folder_path)
+
+        for drive in ["C:\\", "D:\\"]:
+            drive_path = Path(drive)
+            if drive_path.exists():
+                decoy_drive_folder = drive_path / "DecoyDocs"
+                try:
+                    test_dir = decoy_drive_folder / ".test_write"
+                    test_dir.mkdir(parents=True, exist_ok=True)
+                    test_dir.rmdir()
+                    directories.append(decoy_drive_folder)
+                except (PermissionError, OSError):
+                    pass
+
+        if not directories:
+            directories.append(Path.cwd() / "DecoyDocs")
+
+        return directories
+
     @classmethod
     def ensure_directories(cls) -> None:
         """
