@@ -1,11 +1,20 @@
+"""
+Module thực hiện ghép cặp thời gian thực giữa thao tác IRP của tiến trình và Shannon Entropy:
+- Ghép cặp (Join) dựa trên khóa kép (FilePath, Nearest-Timestamp).
+- Tự động đồng bộ ngưỡng dung sai (tolerance) chuẩn mực từ Config.TIMESTAMP_TOLERANCE_MS (0.2s).
+- Tích hợp nhận diện sự kiện xóa thực tế (realtime_deletion) từ RealtimeWatcher.
+- Áp dụng logic phòng ngừa cảnh báo giả (False Positive Spike): delta_h = 0.0 đối với file mới tạo chưa có baseline.
+"""
 
 from dataclasses import dataclass
 from typing import Optional
 
 try:
+    from ...Core.Config import Config
     from ...Core.Schemas import IRPOperation
     from .EntropyLoader import EntropyLoader
 except (ImportError, ValueError):
+    from Src.Core.Config import Config
     from Src.Core.Schemas import IRPOperation
     from Src.Data.ParsersRawLog.EntropyLoader import EntropyLoader
 
@@ -13,14 +22,15 @@ except (ImportError, ValueError):
 @dataclass(slots=True)
 class EntropyMatchResult:
     """
-    Kết quả ghép cặp chi tiết giữa sự kiện IRP và Shannon Entropy
+    Kết quả ghép cặp chi tiết giữa sự kiện IRP và Shannon Entropy.
     """
     current_entropy: float              # Shannon Entropy thời điểm IRP (0.0 - 8.0)
     baseline_entropy: float             # Shannon Entropy gốc ban đầu từ baseline snapshot
     entropy_diff: float                 # Biến thiên Delta H = H_current - H_baseline
     matched: bool                       # True nếu bắt được event realtime trong ngưỡng tolerance
     match_delta_sec: Optional[float]    # Chênh lệch thời gian giữa IRP và Watchdog (giây)
-    entropy_source: str                 # Nguồn gốc: "realtime", "baseline_fallback", "deletion"
+    entropy_source: str                 # Nguồn gốc: "realtime", "realtime_new_file", "realtime_deletion", "deletion_fallback", "baseline_fallback"
+
 
 class EntropyMatcher:
     """
@@ -28,9 +38,19 @@ class EntropyMatcher:
     với giá trị Shannon Entropy tương ứng từ EntropyLoader.
     """
 
-    def __init__(self, loader: EntropyLoader, tolerance_sec: float = 0.3) -> None:
+    def __init__(self, loader: EntropyLoader, tolerance_sec: Optional[float] = None) -> None:
+        """
+        Khởi tạo EntropyMatcher.
+
+        :param loader: Đối tượng EntropyLoader đã nạp dữ liệu baseline và realtime.
+        :param tolerance_sec: Ngưỡng dung sai thời gian tối đa (giây).
+                              Nếu None, tự động lấy từ Config.TIMESTAMP_TOLERANCE_MS / 1000.0 (mặc định 0.2s).
+        """
         self.loader = loader
-        self.tolerance_sec = tolerance_sec
+        if tolerance_sec is not None:
+            self.tolerance_sec = tolerance_sec
+        else:
+            self.tolerance_sec = getattr(Config, "TIMESTAMP_TOLERANCE_MS", 200.0) / 1000.0
 
     def match(
         self,
@@ -50,25 +70,56 @@ class EntropyMatcher:
         has_baseline = baseline_h is not None and baseline_h > 0.0
         baseline_val = baseline_h if has_baseline else 0.0
 
-        # 1. Thao tác XÓA file -> Entropy sau khi xóa bằng 0.0
+        # -------------------------------------------------------------
+        # 1. Thao tác XÓA file (IRPOperation.DELETE)
+        # -------------------------------------------------------------
         if op == IRPOperation.DELETE:
             delta_h = round(0.0 - baseline_val, 4) if has_baseline else 0.0
+
+            # Tìm xem có sự kiện DELETED thực tế từ RealtimeWatcher không
+            events = self.loader.realtime_map.get(norm_path)
+            if not events and old_norm_path:
+                events = self.loader.realtime_map.get(old_norm_path)
+
+            if events:
+                # Lọc các sự kiện có event_type == "DELETED"
+                del_events = [e for e in events if len(e) >= 4 and e[3] == "DELETED"]
+                if del_events:
+                    best_del = min(del_events, key=lambda e: abs(e[0] - irp_ts))
+                    diff_sec = round(abs(best_del[0] - irp_ts), 6)
+                    if diff_sec <= self.tolerance_sec:
+                        return EntropyMatchResult(
+                            current_entropy=0.0,
+                            baseline_entropy=baseline_val,
+                            entropy_diff=delta_h,
+                            matched=True,
+                            match_delta_sec=diff_sec,
+                            entropy_source="realtime_deletion"
+                        )
+
+            # Fallback an toàn nếu file tạm bị xóa chớp nhoáng Watchdog chưa kịp ghi
             return EntropyMatchResult(
                 current_entropy=0.0,
                 baseline_entropy=baseline_val,
                 entropy_diff=delta_h,
                 matched=True,
                 match_delta_sec=0.0,
-                entropy_source="deletion"
+                entropy_source="deletion_fallback"
             )
 
-        # 2. Tìm sự kiện đo Watchdog gần nhất trong realtime map (tìm theo path mới hoặc path cũ)
+        # -------------------------------------------------------------
+        # 2. Thao tác GHI, TẠO MỚI, ĐỔI TÊN (WRITE, CREATE, RENAME)
+        # -------------------------------------------------------------
         events = self.loader.realtime_map.get(norm_path)
         if not events and old_norm_path:
             events = self.loader.realtime_map.get(old_norm_path)
 
         if events:
-            best_event = min(events, key=lambda e: abs(e[0] - irp_ts))
+            # Ưu tiên các sự kiện đo đạc nội dung thực (MODIFIED, CREATED, RENAMED), bỏ qua DELETED
+            content_events = [e for e in events if len(e) < 4 or e[3] != "DELETED"]
+            target_events = content_events if content_events else events
+
+            best_event = min(target_events, key=lambda e: abs(e[0] - irp_ts))
             diff_sec = round(abs(best_event[0] - irp_ts), 6)
             if diff_sec <= self.tolerance_sec:
                 current_h = best_event[1]
@@ -85,7 +136,9 @@ class EntropyMatcher:
                     entropy_source=source_tag
                 )
 
+        # -------------------------------------------------------------
         # 3. Fallback an toàn: Thao tác READ hoặc chưa kịp đo -> giữ nguyên baseline
+        # -------------------------------------------------------------
         return EntropyMatchResult(
             current_entropy=baseline_val,
             baseline_entropy=baseline_val,
@@ -94,4 +147,3 @@ class EntropyMatcher:
             match_delta_sec=None,
             entropy_source="baseline_fallback"
         )
-
