@@ -18,10 +18,14 @@ class OfficeWorkload(BaseWorkload):
     def __init__(
         self,
         target_dirs: Optional[List[Path]] = None,
+        min_files: int = 30,
+        max_files: int = 50,
         locale: str = "vi_VN"
     ) -> None:
         
         super().__init__(target_dirs=target_dirs, name="OfficeWorkload")
+        self.min_files = max(5, min_files)
+        self.max_files = max(self.min_files, max_files)
         try:
             self.faker = Faker(locale)
         except Exception:
@@ -86,9 +90,14 @@ class OfficeWorkload(BaseWorkload):
             print("[!] Không tìm thấy file tài liệu Word/Excel/Text nào trong DecoyDocs.")
             return {"workload": self.name, "status": "skipped", "message": "Không có file văn bản"}
 
-        # Chọn ngẫu nhiên từ 8 đến 15 file để chỉnh sửa
+        # Chọn ngẫu nhiên từ min_files đến max_files để chỉnh sửa (30 - 50 files)
         random.shuffle(files)
-        selected_files = files[:min(len(files), 15)]
+        target_count = (
+            random.randint(self.min_files, min(len(files), self.max_files))
+            if len(files) >= self.min_files
+            else len(files)
+        )
+        selected_files = files[:target_count]
 
         print(f"[*] [{self.name}] Bắt đầu mở và chỉnh sửa {len(selected_files)} tài liệu văn phòng...")
         modified_count = 0
