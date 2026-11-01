@@ -3,7 +3,7 @@
 import csv
 import os
 from pathlib import Path
-from typing import List, Optional, Set, Union
+from typing import List, Optional, Set, Union, Generator, Tuple
 
 try:
     from ...Core.Config import Config
@@ -48,16 +48,6 @@ class IrpParser:
         tolerance_sec: Optional[float] = None,
         excluded_processes: Optional[Set[str]] = None
     ) -> None:
-        """
-        Khởi tạo bộ phân tích IRP log kết hợp đối soát Entropy.
-
-        :param procmon_path: Đường dẫn tệp CSV xuất từ Process Monitor.
-        :param realtime_entropy_path: Đường dẫn tệp CSV entropy thời gian thực (RealtimeWatcher).
-        :param baseline_entropy_path: Đường dẫn tệp CSV entropy nền tảng (Baseline).
-        :param decoy_keyword: Từ khóa nhận diện thư mục mồi nhử (mặc định 'DecoyDocs').
-        :param tolerance_sec: Cửa sổ dung sai thời gian (giây). Nếu None, tự động lấy Config.TIMESTAMP_TOLERANCE_MS / 1000.0.
-        :param excluded_processes: Tập hợp tên tiến trình cần loại bỏ (bộ đo đạc, hệ thống).
-        """
         self.procmon_path = Path(procmon_path)
         self.decoy_keyword = decoy_keyword.lower()
         self.excluded_processes: Set[str] = {
@@ -78,108 +68,129 @@ class IrpParser:
             tolerance_sec=self.tolerance_sec
         )
 
+    def _read_procmon_rows(self) -> Generator[List[str], None, None]:
+        """Đọc tuần tự từng dòng dữ liệu từ tệp Procmon CSV, bỏ qua header."""
+        with open(self.procmon_path, "r", encoding="utf-8", errors="replace") as f:
+            reader = csv.reader(f)
+            next(reader, None)
+            for row in reader:
+                yield row
+
+    def _is_excluded_process(self, proc_name: str) -> bool:
+        """Kiểm tra tiến trình có thuộc danh sách loại trừ (hệ thống, đo đạc) không."""
+        return proc_name.lower() in self.excluded_processes
+
+    @staticmethod
+    def _is_success_result(raw_result: str) -> bool:
+        """Kiểm tra kết quả thực thi IRP có thành công hoặc buffer overflow không."""
+        return raw_result in ("SUCCESS", "BUFFER OVERFLOW")
+
+    @staticmethod
+    def _resolve_paths(
+        op: IRPOperation, raw_path: str, raw_detail: str
+    ) -> Tuple[str, Optional[str], Optional[str]]:
+        """
+        Bóc tách và xác định target_path, old_path, new_path.
+        Đặc biệt với SetRenameInformationFile, new_path nằm trong cột Detail.
+        """
+        old_path: Optional[str] = None
+        new_path: Optional[str] = None
+        if op == IRPOperation.RENAME:
+            new_path = LogFormatters.extract_rename_path(raw_detail)
+            if new_path:
+                old_path = raw_path
+                target_path = new_path
+            else:
+                target_path = raw_path
+        else:
+            target_path = raw_path
+        return target_path, old_path, new_path
+
+    def _is_decoy_path(self, raw_path: str, new_path: Optional[str]) -> bool:
+        """Kiểm tra thao tác có tác động tới thư mục mồi DecoyDocs hay không."""
+        if not self.decoy_keyword:
+            return True
+        in_src = self.decoy_keyword in raw_path.lower()
+        in_dst = new_path is not None and self.decoy_keyword in new_path.lower()
+        return in_src or in_dst
+
+    def _parse_row(self, row: List[str]) -> Optional[IRPEvent]:
+        """
+        Phân tích và lọc 1 dòng Procmon log, ghép cặp Entropy và tạo IRPEvent.
+        Trả về None nếu dòng không thỏa mãn các cổng kiểm tra.
+        """
+        if len(row) < 7:
+            return None
+
+        proc_name = row[self.COL_PROCESS].strip()
+        if self._is_excluded_process(proc_name):
+            return None
+
+        raw_result = row[self.COL_RESULT].strip().upper()
+        if not self._is_success_result(raw_result):
+            return None
+
+        raw_op = row[self.COL_OPERATION].strip()
+        op = IRPOperation.from_str(raw_op)
+        if op not in self.TARGET_OPERATIONS:
+            return None
+
+        try:
+            pid = int(row[self.COL_PID].strip())
+        except ValueError:
+            return None
+
+        raw_path = row[self.COL_PATH].strip()
+        raw_detail = row[self.COL_DETAIL].strip()
+
+        target_path, old_path, new_path = self._resolve_paths(op, raw_path, raw_detail)
+
+        if not self._is_decoy_path(raw_path, new_path):
+            return None
+
+        norm_path = LogFormatters.normalize_windows_path(target_path)
+        old_norm_path = LogFormatters.normalize_windows_path(old_path) if old_path else None
+
+        ts_sec = LogFormatters.parse_procmon_timestamp(row[self.COL_TIME])
+        size_bytes = LogFormatters.extract_length(raw_detail)
+
+        match_res: EntropyMatchResult = self.matcher.match(
+            norm_path=norm_path,
+            irp_ts=ts_sec,
+            op=op,
+            old_norm_path=old_norm_path
+        )
+
+        return IRPEvent(
+            timestamp=ts_sec,
+            pid=pid,
+            process_name=proc_name,
+            operation=op,
+            file_path=target_path,
+            old_path=old_path,
+            size_bytes=size_bytes,
+            entropy=match_res.current_entropy,
+            baseline_entropy=match_res.baseline_entropy,
+            entropy_matched=match_res.matched,
+            match_delta_sec=match_res.match_delta_sec,
+            entropy_source=match_res.entropy_source
+        )
+
     def parse(self, limit: Optional[int] = None) -> List[IRPEvent]:
         """
-        Duyệt qua Procmon log, áp dụng 3 cổng lọc và ghép cặp tạo danh sách IRPEvent.
+        Duyệt qua Procmon log, áp dụng các cổng lọc và ghép cặp tạo danh sách IRPEvent.
         """
         if not self.procmon_path.exists():
             raise FileNotFoundError(f"Không tìm thấy Procmon log: {self.procmon_path}")
 
-        # Nạp dữ liệu entropy vào RAM nếu chưa nạp
         self.loader.load_all()
-
         parsed_events: List[IRPEvent] = []
 
-        with open(self.procmon_path, "r", encoding="utf-8", errors="replace") as f:
-            reader = csv.reader(f)
-            header = next(reader, None)
-
-            count = 0
-            for row in reader:
-                if len(row) < 7:
-                    continue
-
-                raw_ts = row[self.COL_TIME]
-                proc_name = row[self.COL_PROCESS].strip()
-                raw_pid = row[self.COL_PID].strip()
-                raw_op = row[self.COL_OPERATION].strip()
-                raw_path = row[self.COL_PATH].strip()
-                raw_result = row[self.COL_RESULT].strip().upper()
-                raw_detail = row[self.COL_DETAIL].strip()
-
-                # Cổng 0: Lọc bỏ tiến trình hệ thống và công cụ đo đạc kiểm thử
-                if proc_name.lower() in self.excluded_processes:
-                    continue
-
-                # Cổng 1: Lọc kết quả thực thi (Chỉ lấy SUCCESS hoặc BUFFER OVERFLOW)
-                if raw_result not in ("SUCCESS", "BUFFER OVERFLOW"):
-                    continue
-
-                # Cổng 2: Chuẩn hóa và lọc loại thao tác IRP
-                op = IRPOperation.from_str(raw_op)
-                if op not in self.TARGET_OPERATIONS:
-                    continue
-
-                try:
-                    pid = int(raw_pid)
-                except ValueError:
-                    continue
-
-                # Xử lý trường hợp đổi tên file (SetRenameInformationFile)
-                # QUAN TRỌNG: Bóc tách destination TRƯỚC khi lọc DecoyDocs
-                old_path: Optional[str] = None
-                new_path: Optional[str] = None
-                if op == IRPOperation.RENAME:
-                    new_path = LogFormatters.extract_rename_path(raw_detail)
-                    if new_path:
-                        old_path = raw_path
-                        target_path = new_path
-                    else:
-                        target_path = raw_path
-                else:
-                    target_path = raw_path
-
-                # Cổng 3: Lọc theo thư mục mồi Decoy
-                # Cho phép giữ lại nếu HOẶC source_path HOẶC dest_path nằm trong thư mục mồi
-                if self.decoy_keyword:
-                    in_src = self.decoy_keyword in raw_path.lower()
-                    in_dst = new_path is not None and self.decoy_keyword in new_path.lower()
-                    if not in_src and not in_dst:
-                        continue
-
-                # Chuẩn hóa đường dẫn theo quy chuẩn Windows
-                norm_path = LogFormatters.normalize_windows_path(target_path)
-                old_norm_path = LogFormatters.normalize_windows_path(old_path) if old_path else None
-
-                ts_sec = LogFormatters.parse_procmon_timestamp(raw_ts)
-                size_bytes = LogFormatters.extract_length(raw_detail)
-
-                # Ghép cặp Entropy với Audit Metadata
-                match_res: EntropyMatchResult = self.matcher.match(
-                    norm_path=norm_path,
-                    irp_ts=ts_sec,
-                    op=op,
-                    old_norm_path=old_norm_path
-                )
-
-                event = IRPEvent(
-                    timestamp=ts_sec,
-                    pid=pid,
-                    process_name=proc_name,
-                    operation=op,
-                    file_path=target_path,
-                    old_path=old_path,
-                    size_bytes=size_bytes,
-                    entropy=match_res.current_entropy,
-                    baseline_entropy=match_res.baseline_entropy,
-                    entropy_matched=match_res.matched,
-                    match_delta_sec=match_res.match_delta_sec,
-                    entropy_source=match_res.entropy_source
-                )
-
+        for row in self._read_procmon_rows():
+            event = self._parse_row(row)
+            if event is not None:
                 parsed_events.append(event)
-                count += 1
-                if limit and count >= limit:
+                if limit and len(parsed_events) >= limit:
                     break
 
         return parsed_events
