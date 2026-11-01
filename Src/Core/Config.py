@@ -126,7 +126,7 @@ class Config:
     # =========================================================================
     @classmethod
     def get_monitored_directories(cls) -> List[Path]:
-        """
+        r"""
         Nguồn chuẩn duy nhất (SSoT) định nghĩa 8 thư mục người dùng + C:\DecoyDocs, D:\DecoyDocs.
         Dùng chung cho toàn bộ FileGenerator, WorkloadSimulator và EntropyInspector.
         """
