@@ -7,11 +7,13 @@ from pathlib import Path
 from typing import List, Dict, Optional, Union, Tuple, Any
 
 try:
+    from ..Core.Config import Config
     from ..Core.Schemas import IRPEvent, IRPOperation, FeatureVector
     from ..Features.WindowManager import WindowManager
     from ..Features.FeatureExtractor import FeatureExtractor
     from .ParsersRawLog.IrpParser import IrpParser
 except (ImportError, ValueError):
+    from Src.Core.Config import Config
     from Src.Core.Schemas import IRPEvent, IRPOperation, FeatureVector
     from Src.Features.WindowManager import WindowManager
     from Src.Features.FeatureExtractor import FeatureExtractor
@@ -64,16 +66,19 @@ class DatasetBuilder:
 
     def __init__(
         self,
-        raw_dir: Union[str, Path] = "Data/Raw",
-        interim_dir: Union[str, Path] = "Data/Interim",
-        output_csv_path: Union[str, Path] = "Data/Processed/dataset.csv",
+        raw_dir: Optional[Union[str, Path]] = None,
+        interim_dir: Optional[Union[str, Path]] = None,
+        output_csv_path: Optional[Union[str, Path]] = None,
         window_manager: Optional[WindowManager] = None,
-        feature_extractor: Optional[FeatureExtractor] = None
+        feature_extractor: Optional[FeatureExtractor] = None,
     ) -> None:
-        
-        self.raw_dir = Path(raw_dir)
-        self.interim_dir = Path(interim_dir)
-        self.output_csv_path = Path(output_csv_path)
+        self.raw_dir = Path(raw_dir) if raw_dir is not None else Config.RAW_DATA_DIR
+        self.interim_dir = Path(interim_dir) if interim_dir is not None else Config.INTERIM_DATA_DIR
+        self.output_csv_path = (
+            Path(output_csv_path)
+            if output_csv_path is not None
+            else (Config.PROCESSED_DATA_DIR / Config.DATASET_FILENAME)
+        )
 
         self.window_manager = window_manager or WindowManager()
         self.feature_extractor = feature_extractor or FeatureExtractor()
