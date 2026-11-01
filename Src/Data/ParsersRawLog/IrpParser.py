@@ -30,6 +30,17 @@ class IrpParser:
         IRPOperation.DELETE,
     }
 
+    # Từ khóa xác định thao tác mở file có ý đồ đọc/ghi nội dung thực sự (loại trừ CREATE flood do chỉ đọc metadata)
+    MEANINGFUL_CREATE_KEYWORDS = (
+        "generic read",
+        "generic write",
+        "read data",
+        "write data",
+        "append data",
+        "overwrite",
+        "supersede",
+    )
+
     # Chỉ số các cột chuẩn trong tệp CSV xuất từ Process Monitor
     COL_TIME = 0
     COL_PROCESS = 1
@@ -85,6 +96,15 @@ class IrpParser:
         """Kiểm tra kết quả thực thi IRP có thành công hoặc buffer overflow không."""
         return raw_result in ("SUCCESS", "BUFFER OVERFLOW")
 
+    @classmethod
+    def _is_meaningful_create(cls, raw_detail: str) -> bool:
+        """
+        Kiểm tra xem sự kiện CreateFile có thực sự truy cập hoặc thao tác dữ liệu hay không.
+        Bỏ qua các sự kiện mở file chỉ để đọc thuộc tính (Read Attributes, Read Control, stat, exists).
+        """
+        detail_lower = raw_detail.lower()
+        return any(kw in detail_lower for kw in cls.MEANINGFUL_CREATE_KEYWORDS)
+
     @staticmethod
     def _resolve_paths(
         op: IRPOperation, raw_path: str, raw_detail: str
@@ -135,13 +155,18 @@ class IrpParser:
         if op not in self.TARGET_OPERATIONS:
             return None
 
+        raw_detail = row[self.COL_DETAIL].strip()
+
+        # Cổng lọc CREATE flood: Bỏ qua các sự kiện mở file chỉ để thăm dò thuộc tính (Read Attributes, stat, exists)
+        if op == IRPOperation.CREATE and not self._is_meaningful_create(raw_detail):
+            return None
+
         try:
             pid = int(row[self.COL_PID].strip())
         except ValueError:
             return None
 
         raw_path = row[self.COL_PATH].strip()
-        raw_detail = row[self.COL_DETAIL].strip()
 
         target_path, old_path, new_path = self._resolve_paths(op, raw_path, raw_detail)
 
