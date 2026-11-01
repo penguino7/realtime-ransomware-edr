@@ -1,11 +1,13 @@
-
-
 import time
 import queue
+import logging
 import threading
 from datetime import datetime
 from pathlib import Path
-from typing import List, Dict, Optional, Any, Tuple
+from typing import List, Dict, Optional, Any, Tuple, Union
+from logging.handlers import RotatingFileHandler
+
+logger = logging.getLogger(__name__)
 
 try:
     from watchdog.observers import Observer
@@ -50,7 +52,6 @@ class _EntropyEventHandler(FileSystemEventHandler if WATCHDOG_AVAILABLE else obj
         self._lock = threading.Lock()
 
     def _should_process(self, file_path_str: str, event_type: str) -> bool:
-       
         p = Path(file_path_str)
         # Bỏ qua các tệp ẩn hệ thống (.git, .vscode, .)
         if p.name.startswith("."):
@@ -61,6 +62,7 @@ class _EntropyEventHandler(FileSystemEventHandler if WATCHDOG_AVAILABLE else obj
         with self._lock:
             last_time = self._last_event_times.get(key, 0.0)
             if now - last_time < self.debounce_sec:
+                logger.debug("Bỏ qua sự kiện %s cho '%s' do debounce (%.3fs)", event_type, file_path_str, now - last_time)
                 return False
             self._last_event_times[key] = now
 
@@ -102,7 +104,13 @@ class _EntropyEventHandler(FileSystemEventHandler if WATCHDOG_AVAILABLE else obj
 
 
 class RealtimeWatcher(BaseInspector):
-
+    """
+    Bộ thanh tra và lắng nghe sự kiện hệ thống tệp thời gian thực (Realtime Watchdog).
+    Mô hình Producer-Consumer đa luồng:
+    - 1 Producer (Watchdog Observer) đẩy sự kiện kèm timestamp gốc vào Queue.
+    - 3 Background Worker Threads tiêu thụ Queue và tính toán Shannon Entropy song song.
+    - Hỗ trợ ghi log chuyên biệt theo từng session (RotatingFileHandler) để chẩn đoán lỗi đo đạc.
+    """
 
     def __init__(
         self,
@@ -110,6 +118,8 @@ class RealtimeWatcher(BaseInspector):
         calculator: Optional[ShannonEntropyCalculator] = None,
         debounce_sec: float = 0.05,
         num_workers: int = 3,
+        log_file: Optional[Union[str, Path]] = None,
+        log_level: int = logging.INFO,
     ) -> None:
         super().__init__(target_dirs=target_dirs, calculator=calculator)
         self.debounce_sec = debounce_sec
@@ -120,6 +130,52 @@ class RealtimeWatcher(BaseInspector):
         self.is_running: bool = False
         self._stop_event = threading.Event()
         self._events_lock = threading.Lock()
+
+        # Quản lý file log riêng cho từng session
+        self.log_file: Optional[Path] = Path(log_file) if log_file else None
+        self.log_level: int = log_level
+        self._file_handler: Optional[RotatingFileHandler] = None
+
+        # Bộ đếm chẩn đoán chất lượng thu thập
+        self.error_count: int = 0
+        self.not_found_count: int = 0
+
+    def _setup_file_logger(self) -> None:
+        """Thiết lập RotatingFileHandler riêng cho session (5MB, 3 backups) chống tràn ổ đĩa."""
+        if not self.log_file:
+            return
+
+        self._teardown_file_logger()
+
+        self.log_file.parent.mkdir(parents=True, exist_ok=True)
+        formatter = logging.Formatter(
+            fmt="%(asctime)s [%(levelname)s] [%(threadName)s] %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
+        handler = RotatingFileHandler(
+            str(self.log_file),
+            maxBytes=5 * 1024 * 1024,
+            backupCount=3,
+            encoding="utf-8",
+        )
+        handler.setFormatter(formatter)
+        handler.setLevel(self.log_level)
+        logger.addHandler(handler)
+        if logger.level > self.log_level or logger.level == 0:
+            logger.setLevel(self.log_level)
+        self._file_handler = handler
+
+    def _teardown_file_logger(self) -> None:
+        """Đóng và giải phóng file handler tránh lock tệp trên Windows."""
+        if self._file_handler:
+            try:
+                self._file_handler.flush()
+                self._file_handler.close()
+                logger.removeHandler(self._file_handler)
+            except Exception:
+                pass
+            finally:
+                self._file_handler = None
 
     def _worker_loop(self) -> None:
         """
@@ -157,6 +213,7 @@ class RealtimeWatcher(BaseInspector):
                     )
                     with self._events_lock:
                         self.events.append(ev)
+                    logger.debug("Ghi nhận sự kiện xóa tệp: %s", file_path)
                     continue
 
                 # 2. Xử lý các sự kiện MODIFIED, CREATED, RENAMED (Đo 64KB đầu buffer)
@@ -164,6 +221,8 @@ class RealtimeWatcher(BaseInspector):
 
                 # Bỏ qua an toàn nếu tệp tạm đã bị xóa chớp nhoáng (ví dụ .tmp)
                 if res.status == self.calculator.STATUS_NOT_FOUND:
+                    self.not_found_count += 1
+                    logger.debug("Tệp tạm đã bị xóa trước khi đo (STATUS_NOT_FOUND): %s", file_path)
                     continue
 
                 ev = EntropyEvent(
@@ -178,8 +237,13 @@ class RealtimeWatcher(BaseInspector):
                 )
                 with self._events_lock:
                     self.events.append(ev)
-            except Exception:
-                pass
+                logger.debug("Đo entropy [%s] %s: H=%.4f (status=%s)", event_type, file_path, res.entropy, res.status)
+            except FileNotFoundError:
+                self.not_found_count += 1
+                logger.debug("File đã biến mất trước khi kịp đo: %s", file_path)
+            except Exception as e:
+                self.error_count += 1
+                logger.warning("Lỗi đo entropy tệp %s: %s", file_path, e, exc_info=True)
             finally:
                 try:
                     self.event_queue.task_done()
@@ -201,6 +265,9 @@ class RealtimeWatcher(BaseInspector):
 
         self.is_running = True
         self._stop_event.clear()
+        self.error_count = 0
+        self.not_found_count = 0
+        self._setup_file_logger()
 
         # 1. Khởi động Worker Pool đa luồng (3 workers song song)
         self.worker_threads.clear()
@@ -208,7 +275,7 @@ class RealtimeWatcher(BaseInspector):
             t = threading.Thread(
                 target=self._worker_loop,
                 name=f"RealtimeWatcherWorker-{i+1}",
-                daemon=True
+                daemon=True,
             )
             t.start()
             self.worker_threads.append(t)
@@ -217,7 +284,7 @@ class RealtimeWatcher(BaseInspector):
         self.observer = Observer()
         handler = _EntropyEventHandler(
             event_queue=self.event_queue,
-            debounce_sec=self.debounce_sec
+            debounce_sec=self.debounce_sec,
         )
 
         active_dirs = 0
@@ -228,11 +295,16 @@ class RealtimeWatcher(BaseInspector):
 
         if active_dirs > 0:
             self.observer.start()
+            logger.info(
+                "Đã khởi động RealtimeWatcher trên %d thư mục mồi (Workers: %d, Debounce: %.2fs)",
+                active_dirs, self.num_workers, self.debounce_sec,
+            )
             print(
                 f"[*] [RealtimeWatcher] Đã khởi động lắng nghe thời gian thực trên {active_dirs} thư mục mồi "
                 f"(Worker Pool: {self.num_workers} threads, Debounce: {self.debounce_sec}s)..."
             )
         else:
+            logger.warning("Không có thư mục mục tiêu nào tồn tại trên đĩa.")
             print("[!] [RealtimeWatcher] Cảnh báo: Không có thư mục mục tiêu nào tồn tại trên đĩa.")
 
     def stop(self) -> List[EntropyEvent]:
@@ -241,6 +313,7 @@ class RealtimeWatcher(BaseInspector):
         và trả về danh sách toàn bộ EntropyEvent đã sắp xếp theo thứ tự thời gian.
         """
         if not self.is_running:
+            self._teardown_file_logger()
             return self.events
 
         self.is_running = False
@@ -250,15 +323,15 @@ class RealtimeWatcher(BaseInspector):
             try:
                 self.observer.stop()
                 self.observer.join(timeout=2.0)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning("Lỗi dừng Observer: %s", e, exc_info=True)
             self.observer = None
 
         # 2. Đợi Worker Pool xử lý HẾT SẠCH hàng đợi (bảo toàn 100% sự kiện cuối phiên)
         try:
             self.event_queue.join()
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("Lỗi đợi hàng đợi: %s", e, exc_info=True)
 
         # 3. Ra cờ dừng và gửi Poison Pill cho tất cả worker threads
         self._stop_event.set()
@@ -269,20 +342,30 @@ class RealtimeWatcher(BaseInspector):
         for t in self.worker_threads:
             try:
                 t.join(timeout=5.0)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning("Lỗi kết thúc luồng worker %s: %s", t.name, e, exc_info=True)
         self.worker_threads.clear()
 
         # 5. Sắp xếp lại danh sách sự kiện theo thứ tự thời gian tuyệt đối
         with self._events_lock:
             self.events.sort(key=lambda x: x.timestamp)
 
+        # 6. Ghi 1 dòng tổng kết duy nhất vào log file
+        summary_msg = (
+            f"Phiên giám sát kết thúc: Tổng thu thập {len(self.events)} sự kiện | "
+            f"{self.error_count} lỗi đo đạc | {self.not_found_count} tệp không tồn tại/xóa nhanh."
+        )
+        logger.info(summary_msg)
         print(f"[+] [RealtimeWatcher] Đã dừng. Thu thập thành công {len(self.events)} sự kiện Entropy.")
+
+        # 7. Đóng file handler và dọn dẹp
+        self._teardown_file_logger()
+
         return self.events
 
     def get_summary(
         self,
-        events: Optional[List[EntropyEvent]] = None
+        events: Optional[List[EntropyEvent]] = None,
     ) -> Dict[str, Any]:
         """
         Tổng hợp thống kê các sự kiện động đã bắt được trong phiên.
@@ -296,6 +379,8 @@ class RealtimeWatcher(BaseInspector):
                 "by_event_type": {},
                 "mean_entropy": 0.0,
                 "high_entropy_count": 0,
+                "error_count": self.error_count,
+                "not_found_count": self.not_found_count,
             }
 
         by_type: Dict[str, int] = {}
@@ -312,4 +397,6 @@ class RealtimeWatcher(BaseInspector):
             "mean_entropy": round(mean_entropy, 4),
             "high_entropy_count": high_entropy_count,
             "high_entropy_ratio": round(high_entropy_count / total, 4) if total > 0 else 0.0,
+            "error_count": self.error_count,
+            "not_found_count": self.not_found_count,
         }
