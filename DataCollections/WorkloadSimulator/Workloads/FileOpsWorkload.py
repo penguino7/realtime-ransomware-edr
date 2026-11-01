@@ -47,8 +47,8 @@ class FileOpsWorkload(BaseWorkload):
         self,
         target_dirs: Optional[List[Path]] = None,
         mode: str = "mixed",
-        min_files: int = 30,
-        max_files: int = 50,
+        min_files: int = 50,
+        max_files: int = 100,
         locale: str = "vi_VN"
     ) -> None:
         super().__init__(target_dirs=target_dirs, name="FileOpsWorkload")
