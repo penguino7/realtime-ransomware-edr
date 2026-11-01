@@ -100,7 +100,11 @@ class DatasetBuilder:
             if sdir.is_dir() and not sdir.name.startswith("."):
                 procmon = sdir / "procmon.csv"
                 realtime = sdir / "realtime_entropy.csv"
-                baseline = sdir / "before_entropy.csv"
+                baseline = (
+                    sdir / "baseline_entropy.csv"
+                    if (sdir / "baseline_entropy.csv").exists()
+                    else sdir / "before_entropy.csv"
+                )
 
                 if procmon.exists() and realtime.exists() and baseline.exists():
                     label = 1 if "malware" in sdir.name.lower() or "ransom" in sdir.name.lower() else 0
