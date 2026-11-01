@@ -5,11 +5,6 @@ import random
 from pathlib import Path
 from typing import List, Dict, Optional, Any
 
-# Đảm bảo Project Root có trong sys.path để nạp Src.Core.Config
-_project_root = Path(__file__).resolve().parents[3]
-if str(_project_root) not in sys.path:
-    sys.path.insert(0, str(_project_root))
-
 try:
     from Src.Core.Config import Config
 except (ImportError, ValueError):

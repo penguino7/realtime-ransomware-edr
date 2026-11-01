@@ -19,10 +19,12 @@ if sys.platform.startswith("win"):
     except Exception:
         pass
 
-# Thêm đường dẫn hiện tại vào sys.path để hỗ trợ chạy trực tiếp từ bất kỳ đâu
+# Thêm đường dẫn hiện tại và project root vào sys.path để hỗ trợ chạy trực tiếp từ bất kỳ đâu
 CURRENT_DIR = Path(__file__).resolve().parent
-if str(CURRENT_DIR) not in sys.path:
-    sys.path.insert(0, str(CURRENT_DIR))
+PROJECT_ROOT = CURRENT_DIR.parents[1]
+for p in [str(CURRENT_DIR), str(PROJECT_ROOT)]:
+    if p not in sys.path:
+        sys.path.insert(0, p)
 
 # Nạp FileEnvironmentManager linh hoạt
 try:

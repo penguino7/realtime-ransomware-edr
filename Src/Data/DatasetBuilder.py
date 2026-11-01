@@ -6,11 +6,6 @@ import sys
 from pathlib import Path
 from typing import List, Dict, Optional, Union, Tuple, Any
 
-# Đảm bảo đường dẫn gốc của project luôn có trong sys.path
-project_root = Path(__file__).resolve().parents[2]
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
-
 try:
     from ..Core.Schemas import IRPEvent, IRPOperation, FeatureVector
     from ..Features.WindowManager import WindowManager
