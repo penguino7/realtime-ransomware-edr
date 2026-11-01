@@ -58,6 +58,12 @@ def parse_arguments() -> argparse.Namespace:
         help="Đường dẫn thư mục mục tiêu tùy chọn (mặc định: Desktop, Documents, Downloads DecoyDocs)."
     )
     parser.add_argument(
+        "--session-dir",
+        type=str,
+        default=None,
+        help="Đường dẫn thư mục session lưu trữ toàn bộ dữ liệu và log (ví dụ: Data/Raw/Benign_Copy_01). Mặc định: tự suy luận từ --output hoặc Data/Raw/."
+    )
+    parser.add_argument(
         "--output",
         type=str,
         default=None,
@@ -111,14 +117,31 @@ def main() -> None:
     args = parse_arguments()
 
     custom_dirs: Optional[List[Path]] = [Path(args.dir)] if args.dir else None
-    manager = EntropyManager(target_dirs=custom_dirs)
+
+    # Tự động phân giải thư mục session:
+    # 1. Ưu tiên --session-dir nếu được truyền rõ ràng
+    # 2. Nếu --output có chứa thư mục cha (ví dụ Data/Raw/Benign_01/realtime_entropy.csv), dùng thư mục cha đó
+    # 3. Mặc định dùng Data/Raw
+    session_dir: Optional[Path] = None
+    if args.session_dir:
+        session_dir = Path(args.session_dir)
+    elif args.output:
+        p = Path(args.output)
+        if len(p.parts) > 1:
+            session_dir = p.parent
+
+    manager = EntropyManager(
+        target_dirs=custom_dirs,
+        raw_data_dir=session_dir
+    )
 
     print("\n" + "=" * 65)
     print("      ENTROPY INSPECTOR - BỘ GIÁM ĐỊNH SHANNON ENTROPY")
     print("=" * 65)
     print(f"• Chế độ hoạt động : {args.mode.upper()}")
     print(f"• Thư mục mục tiêu : {[str(d) for d in manager.target_dirs]}")
-    print(f"• Thư mục Raw Data : {manager.raw_data_dir}")
+    print(f"• Thư mục Session  : {manager.raw_data_dir}")
+    print(f"• Tệp Log Session  : {manager.realtime_watcher.log_file}")
     print("=" * 65 + "\n")
 
     if args.mode == "snapshot-before":

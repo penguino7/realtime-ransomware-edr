@@ -11,7 +11,7 @@ Lớp điều phối (Orchestrator) toàn bộ phân hệ EntropyInspector:
 import csv
 import sys
 from pathlib import Path
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Optional, Any, Union
 
 try:
     from Src.Core.Config import Config
@@ -97,6 +97,13 @@ class EntropyManager:
             return Config.RAW_DATA_DIR
         return Path(__file__).resolve().parents[3] / "Data" / "Raw"
 
+    def _resolve_output_path(self, filename: Union[str, Path]) -> Path:
+        """Phân giải đường dẫn đầu ra an toàn, tránh lặp lại thư mục cha."""
+        p = Path(filename)
+        if p.is_absolute() or len(p.parts) > 1:
+            return p
+        return self.raw_data_dir / p.name
+
     def take_baseline_snapshot(self, filename: str = "baseline_entropy.csv") -> Path:
         """
         Chụp ảnh Entropy gốc của toàn bộ tệp tin mồi trước khi bắt đầu thử nghiệm.
@@ -105,7 +112,7 @@ class EntropyManager:
         print(f"\n[*] Đang quét Snapshot gốc (Baseline) trên {len(self.target_dirs)} thư mục mồi...")
         events = self.snapshot_inspector.scan(recursive=True)
 
-        output_path = Path(filename) if Path(filename).is_absolute() else self.raw_data_dir / filename
+        output_path = self._resolve_output_path(filename)
         output_path.parent.mkdir(parents=True, exist_ok=True)
         self.snapshot_inspector.export_to_csv(output_path, events=events)
 
@@ -122,7 +129,7 @@ class EntropyManager:
         print(f"\n[*] Đang quét Snapshot sau thử nghiệm (Final) trên {len(self.target_dirs)} thư mục mồi...")
         events = self.snapshot_inspector.scan(recursive=True)
 
-        output_path = Path(filename) if Path(filename).is_absolute() else self.raw_data_dir / filename
+        output_path = self._resolve_output_path(filename)
         output_path.parent.mkdir(parents=True, exist_ok=True)
         self.snapshot_inspector.export_to_csv(output_path, events=events)
 
@@ -217,7 +224,7 @@ class EntropyManager:
         Lưu kết quả trực tiếp vào Data/Raw/<filename>.
         """
         events = self.realtime_watcher.stop()
-        output_path = Path(filename) if Path(filename).is_absolute() else self.raw_data_dir / filename
+        output_path = self._resolve_output_path(filename)
         output_path.parent.mkdir(parents=True, exist_ok=True)
         self.realtime_watcher.export_to_csv(output_path, events=events)
 
