@@ -15,12 +15,15 @@ class FeatureExtractor:
     Bộ trích xuất đặc trưng toán học của hệ thống Realtime Ransomware EDR.
     """
 
+    MAX_READ_TO_WRITE_RATIO: float = 100.0
+
     def __init__(
         self,
         epsilon: Optional[float] = None,
         min_duration_floor: Optional[float] = None,
         high_entropy_threshold: Optional[float] = None,
         monitored_extensions: Optional[Set[str]] = None,
+        max_read_to_write_ratio: Optional[float] = None,
     ) -> None:
         """
         Khởi tạo FeatureExtractor với các tham số cấu hình lấy từ Config.
@@ -29,6 +32,11 @@ class FeatureExtractor:
         self.min_duration_floor: float = min_duration_floor or Config.MIN_DURATION_FLOOR_SEC
         self.high_entropy_threshold: float = high_entropy_threshold or Config.HIGH_ENTROPY_THRESHOLD
         self.monitored_extensions: Set[str] = monitored_extensions or Config.MONITORED_EXTENSIONS
+        self.max_read_to_write_ratio: float = (
+            max_read_to_write_ratio
+            if max_read_to_write_ratio is not None
+            else getattr(Config, "MAX_READ_TO_WRITE_RATIO", self.MAX_READ_TO_WRITE_RATIO)
+        )
 
     def extract_features(
         self,
@@ -142,10 +150,14 @@ class FeatureExtractor:
         write_ops = med_slice.write_ops_count
         read_ops = med_slice.read_ops_count
 
-        # Tốc độ ghi và tỷ lệ Đọc/Ghi
+        # Tốc độ ghi và tỷ lệ Đọc/Ghi (chặn trần max_read_to_write_ratio để tránh số rác triệu đơn vị khi chia cho epsilon)
         eff_duration = max(duration, self.min_duration_floor)
         write_ops_per_sec = round(write_ops / eff_duration, 4)
-        read_to_write_ratio = round(read_ops / (write_ops + self.epsilon), 4)
+        if write_ops == 0:
+            read_to_write_ratio = self.max_read_to_write_ratio if read_ops > 0 else 0.0
+        else:
+            raw_ratio = read_ops / write_ops
+            read_to_write_ratio = round(min(raw_ratio, self.max_read_to_write_ratio), 4)
 
         # Trích xuất thống kê Entropy
         file_entropies, _ = self._get_per_file_entropy_stats(med_slice)
