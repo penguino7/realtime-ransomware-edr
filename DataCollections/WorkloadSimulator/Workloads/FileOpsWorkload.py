@@ -23,6 +23,26 @@ class FileOpsWorkload(BaseWorkload):
 
     AVAILABLE_MODES = ["copy", "rename", "delete", "read", "mixed"]
 
+    # Hằng số điều khiển độ trễ I/O tự nhiên (giây) và kích thước khối đọc
+    DELAY_MIN_SEC = 0.05
+    DELAY_MAX_SEC = 0.15
+    READ_DELAY_MIN_SEC = 0.03
+    READ_DELAY_MAX_SEC = 0.10
+    READ_CHUNK_SIZE = 64 * 1024  # 64KB (khớp với kích thước buffer phân tích Shannon Entropy)
+
+    RENAME_PREFIXES = [
+        "draft", "final", "reviewed", "backup",
+        "old", "updated", "archived", "v2", "approved"
+    ]
+
+    # Bảng ánh xạ chế độ thực thi tới phương thức xử lý (Dispatch Table Pattern)
+    _HANDLERS = {
+        "copy": "_handle_copy_mode",
+        "rename": "_handle_rename_mode",
+        "delete": "_handle_delete_mode",
+        "read": "_handle_read_mode",
+    }
+
     def __init__(
         self,
         target_dirs: Optional[List[Path]] = None,
@@ -60,23 +80,18 @@ class FileOpsWorkload(BaseWorkload):
             except Exception as e:
                 print(f"  [!] Lỗi sao chép {src_file.name}: {e}", file=sys.stderr)
 
-            # Tạm nghỉ ngắn tự nhiên (0.05s - 0.15s) mô phỏng tốc độ I/O đĩa
-            self.random_delay(0.05, 0.15)
+            # Tạm nghỉ ngắn tự nhiên mô phỏng tốc độ I/O đĩa
+            self.random_delay(self.DELAY_MIN_SEC, self.DELAY_MAX_SEC)
 
         return copied_paths
 
     def _execute_rename(self, files: List[Path]) -> int:
         renamed_count = 0
-        prefixes = [
-            "draft", "final", "reviewed", "backup",
-            "old", "updated", "archived", "v2", "approved"
-        ]
-
         print(f"[*] [{self.name}:RENAME] Bắt đầu đổi tên {len(files)} tệp tin (giữ nguyên đuôi mở rộng)...")
 
         for idx, file_path in enumerate(files, 1):
             try:
-                chosen_prefix = random.choice(prefixes)
+                chosen_prefix = random.choice(self.RENAME_PREFIXES)
                 clean_word = "".join(c for c in self.faker.word() if c.isalnum())
                 # Giữ nguyên phần đuôi mở rộng .docx, .xlsx, .py, .pdf...
                 new_filename = f"{chosen_prefix}_{clean_word}_{file_path.name}"
@@ -89,7 +104,7 @@ class FileOpsWorkload(BaseWorkload):
             except Exception as e:
                 print(f"  [!] Lỗi đổi tên {file_path.name}: {e}", file=sys.stderr)
 
-            self.random_delay(0.05, 0.15)
+            self.random_delay(self.DELAY_MIN_SEC, self.DELAY_MAX_SEC)
 
         return renamed_count
 
@@ -112,7 +127,7 @@ class FileOpsWorkload(BaseWorkload):
             except Exception as e:
                 print(f"  [!] Lỗi xóa file {file_path.name}: {e}", file=sys.stderr)
 
-            self.random_delay(0.05, 0.15)
+            self.random_delay(self.DELAY_MIN_SEC, self.DELAY_MAX_SEC)
 
         return deleted_count
 
@@ -125,23 +140,20 @@ class FileOpsWorkload(BaseWorkload):
             try:
                 if file_path.exists() and file_path.is_file():
                     with open(file_path, "rb") as f:
-                        # Đọc khối dữ liệu 64KB đầu tiên hoặc toàn bộ file nếu nhỏ hơn 64KB
-                        chunk = f.read(65536)
+                        chunk = f.read(self.READ_CHUNK_SIZE)
                         total_bytes += len(chunk)
                         read_count += 1
                         print(f"  [{idx:02d}/READ] Đọc {len(chunk):,} bytes từ: {file_path.name}")
             except Exception as e:
                 print(f"  [!] Lỗi đọc file {file_path.name}: {e}", file=sys.stderr)
 
-            self.random_delay(0.03, 0.10)
+            self.random_delay(self.READ_DELAY_MIN_SEC, self.READ_DELAY_MAX_SEC)
 
         print(f"[+] [{self.name}:READ] Hoàn thành đọc {read_count} files (Tổng: {total_bytes:,} bytes).")
         return read_count
 
-    def execute(self, mode: Optional[str] = None) -> Dict[str, Any]:
-        """
-        Thực thi kịch bản quản lý file quy mô lớn theo chế độ chỉ định hoặc ngẫu nhiên.
-        """
+    def _resolve_mode(self, mode: Optional[str]) -> str:
+        """Chuẩn hóa và lựa chọn chế độ thực thi."""
         active_mode = (mode or self.mode).lower().strip()
         if active_mode not in self.AVAILABLE_MODES:
             print(f"[!] Chế độ '{active_mode}' không hợp lệ. Chọn 1 trong: {self.AVAILABLE_MODES}")
@@ -149,14 +161,71 @@ class FileOpsWorkload(BaseWorkload):
 
         if active_mode == "mixed":
             active_mode = random.choice(["copy", "rename", "delete", "read"])
+        return active_mode
+
+    def _get_destination_dir(self) -> Path:
+        """Xác định thư mục đích cho thao tác sao chép (ưu tiên Documents hoặc Backup_Data)."""
+        for d in self.target_dirs:
+            if "documents" in d.name.lower():
+                backup_sub = d / "Backup_Data"
+                return backup_sub if backup_sub.exists() else d
+        dest = self.target_dirs[1] if len(self.target_dirs) > 1 else self.target_dirs[0]
+        backup_sub = dest / "Backup_Data"
+        return backup_sub if backup_sub.exists() else dest
+
+    def _handle_copy_mode(self, files: List[Path], target_count: int) -> Dict[str, Any]:
+        """Xử lý kịch bản sao chép tệp tin hàng loạt."""
+        files_to_copy = files[:target_count]
+        dest_dir = self._get_destination_dir()
+        copied_files = self._execute_copy(files_to_copy, dest_dir)
+        print(f"[+] [{self.name}:COPY] Hoàn thành sao chép {len(copied_files)}/{target_count} tệp tin.")
+        return {"files_copied": len(copied_files)}
+
+    def _handle_rename_mode(self, files: List[Path], target_count: int) -> Dict[str, Any]:
+        """Xử lý kịch bản đổi tên tệp tin hàng loạt (giữ nguyên extension)."""
+        files_to_rename = files[:target_count]
+        renamed_count = self._execute_rename(files_to_rename)
+        print(f"[+] [{self.name}:RENAME] Hoàn thành đổi tên {renamed_count}/{target_count} tệp tin (Giữ nguyên đuôi).")
+        return {"files_renamed": renamed_count}
+
+    def _handle_delete_mode(self, files: List[Path], target_count: int) -> Dict[str, Any]:
+        """Xử lý kịch bản xóa tệp tin (ưu tiên file tạm copy_* trước, sau đó file mồi)."""
+        copy_files = [f for f in files if f.name.lower().startswith("copy_")]
+        other_files = [f for f in files if not f.name.lower().startswith("copy_")]
+
+        files_to_delete = copy_files[:target_count]
+        if len(files_to_delete) < target_count:
+            needed = target_count - len(files_to_delete)
+            files_to_delete.extend(other_files[:needed])
+
+        deleted_count = self._execute_delete(files_to_delete)
+        print(f"[+] [{self.name}:DELETE] Hoàn thành xóa {deleted_count}/{len(files_to_delete)} tệp tin.")
+        return {"files_deleted": deleted_count}
+
+    def _handle_read_mode(self, files: List[Path], target_count: int) -> Dict[str, Any]:
+        """Xử lý kịch bản đọc tuần tự tệp tin."""
+        files_to_read = files[:target_count]
+        read_count = self._execute_read(files_to_read)
+        print(f"[+] [{self.name}:READ] Hoàn thành đọc {read_count}/{target_count} tệp tin.")
+        return {"files_read": read_count}
+
+    def execute(self, mode: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Thực thi kịch bản quản lý file quy mô lớn qua Dispatch Table Pattern.
+        """
+        active_mode = self._resolve_mode(mode)
 
         available_files = self.find_files()
         if not available_files:
             print("[!] Không tìm thấy file mồi nào trong các thư mục giám sát.")
             return {"workload": self.name, "mode": active_mode, "status": "skipped", "message": "Không có file"}
 
-        # Xác định số lượng file mục tiêu (tối thiểu 30, tối đa 50 file để đạt từ 3 - 5 Ticks)
-        target_count = random.randint(self.min_files, min(len(available_files), self.max_files))
+        # Phòng vệ: Nếu số file khả dụng ít hơn min_files thì lấy toàn bộ
+        if len(available_files) < self.min_files:
+            target_count = len(available_files)
+        else:
+            target_count = random.randint(self.min_files, min(len(available_files), self.max_files))
+
         random.shuffle(available_files)
 
         result_payload: Dict[str, Any] = {
@@ -166,56 +235,10 @@ class FileOpsWorkload(BaseWorkload):
             "target_count": target_count,
         }
 
-        # -------------------------------------------------------------
-        # 1. Chế độ COPY (30 - 50 files)
-        # -------------------------------------------------------------
-        if active_mode == "copy":
-            files_to_copy = available_files[:target_count]
-            # Chọn thư mục đích khác thư mục hiện tại
-            dest_dir = self.target_dirs[1] if len(self.target_dirs) > 1 else self.target_dirs[0]
-            # Thêm thư mục con Backup_Data nếu có
-            backup_sub = dest_dir / "Backup_Data"
-            if backup_sub.exists():
-                dest_dir = backup_sub
-
-            copied_files = self._execute_copy(files_to_copy, dest_dir)
-            result_payload["files_copied"] = len(copied_files)
-            print(f"[+] [{self.name}:COPY] Hoàn thành sao chép {len(copied_files)}/{target_count} tệp tin.")
-
-        # -------------------------------------------------------------
-        # 2. Chế độ RENAME (30 - 50 files)
-        # -------------------------------------------------------------
-        elif active_mode == "rename":
-            files_to_rename = available_files[:target_count]
-            renamed_count = self._execute_rename(files_to_rename)
-            result_payload["files_renamed"] = renamed_count
-            print(f"[+] [{self.name}:RENAME] Hoàn thành đổi tên {renamed_count}/{target_count} tệp tin (Giữ nguyên đuôi).")
-
-        # -------------------------------------------------------------
-        # 3. Chế độ DELETE (30 - 50 files)
-        # -------------------------------------------------------------
-        elif active_mode == "delete":
-            # Ưu tiên tìm các file bản sao trước (bắt đầu bằng copy_)
-            copy_files = [f for f in available_files if f.name.lower().startswith("copy_")]
-            other_files = [f for f in available_files if not f.name.lower().startswith("copy_")]
-
-            # Gom đủ số lượng target_count
-            files_to_delete = copy_files[:target_count]
-            if len(files_to_delete) < target_count:
-                needed = target_count - len(files_to_delete)
-                files_to_delete.extend(other_files[:needed])
-
-            deleted_count = self._execute_delete(files_to_delete)
-            result_payload["files_deleted"] = deleted_count
-            print(f"[+] [{self.name}:DELETE] Hoàn thành xóa {deleted_count}/{len(files_to_delete)} tệp tin.")
-
-        # -------------------------------------------------------------
-        # 4. Chế độ READ (30 - 50 files)
-        # -------------------------------------------------------------
-        elif active_mode == "read":
-            files_to_read = available_files[:target_count]
-            read_count = self._execute_read(files_to_read)
-            result_payload["files_read"] = read_count
-            print(f"[+] [{self.name}:READ] Hoàn thành đọc {read_count}/{target_count} tệp tin.")
+        handler_name = self._HANDLERS.get(active_mode)
+        if handler_name:
+            handler = getattr(self, handler_name)
+            mode_metrics = handler(available_files, target_count)
+            result_payload.update(mode_metrics)
 
         return result_payload
