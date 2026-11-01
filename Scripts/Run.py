@@ -57,7 +57,11 @@ def run_dataset(args: list) -> None:
     parser = argparse.ArgumentParser(description="DatasetBuilder - Xây dựng dataset.csv từ log Interim.")
     parser.add_argument("--reparse", action="store_true", help="Làm sạch và phân tích lại toàn bộ log thô Data/Raw/.")
     parsed = parser.parse_args(args)
-    builder = DatasetBuilder()
+    builder = DatasetBuilder(
+        raw_dir=PROJECT_ROOT / "Data" / "Raw",
+        interim_dir=PROJECT_ROOT / "Data" / "Interim",
+        output_csv_path=PROJECT_ROOT / "Data" / "Processed" / "dataset.csv"
+    )
     output_path = builder.build(reparse_raw=parsed.reparse)
     print(f"[+] Dataset hoàn thành tại: {output_path}")
 
@@ -72,11 +76,11 @@ SUBCOMMANDS = {
 
 def main() -> None:
     if len(sys.argv) < 2 or sys.argv[1] in ("-h", "--help"):
-        print("Cách dùng: python Scripts/Run.py <lệnh> [tham số...]")
+        print("Cách dùng: python Scripts/run.py <lệnh> [tham số...]")
         print("\nCác lệnh khả dụng:")
         print("  filegen   Sinh hoặc dọn dẹp file mồi DecoyDocs (--count, --cleanup, --dir)")
         print("  workload  Giả lập hành vi người dùng (--mode, --count, --delay-min, --delay-max)")
-        print("  entropy   Giám định Entropy (--realtime, --snapshot-before, --snapshot-after, --compare)")
+        print("  entropy   Giám định Entropy (--mode [realtime|snapshot-before|snapshot-after|compare], --session-dir, --output)")
         print("  dataset   Xây dựng dataset.csv (--reparse)")
         sys.exit(0)
 
