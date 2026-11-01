@@ -34,59 +34,39 @@ class Config:
     # =========================================================================
     # 2. CƠ CHẾ TICK & 3 TẦNG CỬA SỔ TRƯỢT (SLIDING WINDOWS & TICKS)
     # =========================================================================
-    # Số lượng tệp tin riêng biệt cơ sở để kích hoạt 1 Tick (N_base = 10 * k)
-    # Đảm bảo bán kính thiệt hại tối đa (Blast Radius) khi phát hiện luôn <= 10 files
-    N_BASE: int = 10
-
-    # Kích thước cửa sổ Ngắn (Short Window): 10 file gần nhất
-    SHORT_WINDOW_SIZE: int = 10
-
-    # Kích thước tối đa của cửa sổ Vừa (Medium Window): 50 file gần nhất
-    MEDIUM_WINDOW_SIZE: int = 50
-
-    # Hệ số làm mượt mẫu số (Smoothing factor) chống lỗi ZeroDivisionError
-    # Dùng khi tính tốc độ (Ops/sec hoặc Bytes/sec) khi delta_time tiến tới 0 micro-giây
-    EPSILON: float = 1e-6
-
-    # Ngưỡng sàn thời gian tối thiểu (Duration Floor) tính bằng giây (5 mili-giây)
-    # Ngăn chặn hiện tượng bùng nổ tốc độ phi thực tế (Numerical Explosion) khi duration tiến tới 0 micro-giây
-    MIN_DURATION_FLOOR_SEC: float = 0.005
+    N_BASE: int = 10                       # Giới hạn bán kính thiệt hại (Blast Radius) khi phát hiện và ngăn chặn <= 10 tệp tin
+    SHORT_WINDOW_SIZE: int = 10            # Đồng bộ với N_BASE để bắt ngay hành vi cục bộ trong 10 file gần nhất
+    MEDIUM_WINDOW_SIZE: int = 50           # Quan sát xu hướng trung hạn và tỷ lệ duyệt thư mục mà không làm phình RAM
+    EPSILON: float = 1e-6                  # Hệ số làm mượt mẫu số chống ZeroDivisionError khi delta_time = 0
+    MIN_DURATION_FLOOR_SEC: float = 0.005  # Ngưỡng sàn 5ms chống bùng nổ tốc độ phi thực tế khi I/O hoàn thành chớp nhoáng
 
     # =========================================================================
     # 3. ĐỊNH CHUẨN ĐO LƯỜNG SHANNON ENTROPY
     # =========================================================================
-    # Kích thước khối byte đầu tiên được đọc để tính toán Entropy (64 KB)
-    ENTROPY_SAMPLE_SIZE: int = 65536
-
-    # Ngưỡng đánh dấu khối dữ liệu có độ hỗn loạn cao (nguy cơ mã hóa)
-    # Theo chuẩn thực nghiệm các bài báo UNVEIL (USENIX 2016) và ShieldFS (CCS 2016)
-    HIGH_ENTROPY_THRESHOLD: float = 7.0
-
-    # Ngưỡng xác định file gốc ban đầu là tài liệu văn bản / chưa nén
-    # Dùng để phát hiện bước nhảy biến thiên Delta H chuyển dịch trạng thái (Transition)
-    BASELINE_LOW_ENTROPY_THRESHOLD: float = 6.5
+    ENTROPY_SAMPLE_SIZE: int = 65536               # Đọc 64KB đầu buffer: đủ phản ánh phân bố byte mã hóa mà không gây nghẽn đĩa
+    HIGH_ENTROPY_THRESHOLD: float = 7.0            # Ngưỡng thực nghiệm USENIX 2016 (UNVEIL) phân định khối mã hóa với văn bản thông thường
+    BASELINE_LOW_ENTROPY_THRESHOLD: float = 6.5    # Phân loại file gốc là văn bản thuần để bắt bước nhảy trạng thái Delta H
 
     # =========================================================================
     # 4. THAM SỐ LÀM SẠCH VÀ GHÉP CẶP DỮ LIỆU (IRP PARSER)
     # =========================================================================
-    # Độ lệch thời gian tối đa cho phép giữa log Procmon và log Realtime Entropy (mili-giây)
-    TIMESTAMP_TOLERANCE_MS: float = 200.0
+    TIMESTAMP_TOLERANCE_MS: float = 200.0  # Watchdog đo sau Procmon ~10-150ms do độ trễ I/O nên cần dung sai này
 
-    # Tập hợp các phần mở rộng tệp tin mồi (Decoy Files) được hệ thống giám sát
+    # 22 phần mở rộng tệp tin mồi (Decoy Files) đại diện cho các nhóm tài sản số
     MONITORED_EXTENSIONS: Set[str] = {
-        # 1. Văn phòng & Dữ liệu có cấu trúc
+        # Văn phòng & dữ liệu cấu trúc
         ".docx", ".xlsx", ".pdf", ".txt", ".csv", ".json",
-        # 2. Mã nguồn & Kịch bản lập trình (Entropy thấp: 4.5 - 5.5)
+        # Mã nguồn & kịch bản lập trình (Entropy tự nhiên thấp: 4.5 - 5.5)
         ".py", ".sql", ".html", ".xml", ".cpp",
-        # 3. Cơ sở dữ liệu & Cấu hình máy chủ
+        # Cơ sở dữ liệu & cấu hình hệ thống
         ".db", ".sqlite", ".ini", ".yaml", ".log",
-        # 4. Đồ họa hình ảnh
+        # Đồ họa hình ảnh
         ".jpg", ".png",
-        # 5. Lưu trữ tệp nén (Entropy cao: 7.0 - 7.5)
+        # Tệp nén lưu trữ (Entropy tự nhiên cao: 7.0 - 7.5)
         ".rar", ".7z", ".zip", ".tar.gz",
     }
 
-    # Danh sách tiến trình hệ thống hoặc công cụ đo lường cần lọc bỏ khỏi tập train
+    # Lọc bỏ Procmon và Windows Search để tránh ô nhiễm tập dữ liệu huấn luyện
     EXCLUDED_PROCESSES: Set[str] = {
         "procmon.exe", "procmon64.exe",
         "searchprotocolhost.exe", "searchindexer.exe",
@@ -96,20 +76,12 @@ class Config:
     # =========================================================================
     # 5. SIÊU THAM SỐ HUẤN LUYỆN HỌC MÁY (MACHINE LEARNING)
     # =========================================================================
-    # Hạt giống ngẫu nhiên đảm bảo tính tái lập (Reproducibility)
-    RANDOM_STATE: int = 42
+    RANDOM_STATE: int = 42                 # Hạt giống cố định để bảo đảm tính tái lập (Reproducibility)
+    TEST_SIZE: float = 0.20                # 20% dữ liệu dùng cho tập kiểm thử độc lập
+    VAL_SIZE: float = 0.20                 # 20% dữ liệu dùng cho tập kiểm chứng nội bộ (Validation)
+    MALWARE_CONFIDENCE_THRESHOLD: float = 0.95  # Yêu cầu độ tin cậy >= 95% mới kích hoạt tiêu diệt tiến trình (chống FPR)
 
-    # Tỷ lệ phân chia tập kiểm thử (Test set ratio)
-    TEST_SIZE: float = 0.20
-
-    # Tỷ lệ phân chia tập kiểm tra chéo nội bộ (Validation set ratio)
-    VAL_SIZE: float = 0.20
-
-    # Ngưỡng xác suất tin cậy của mô hình (Confidence Threshold >= 95%)
-    # Khi P(Ransomware) >= ngưỡng này, Responder mới được phép tiêu diệt tiến trình
-    MALWARE_CONFIDENCE_THRESHOLD: float = 0.95
-
-    # Danh sách tên 27 đặc trưng vật lý chuẩn mực của mô hình
+    # Danh sách 27 đặc trưng vật lý đa tầng đã chuẩn hóa
     FEATURE_NAMES: list = [
         # --- Short Window (10 features) ---
         "short_duration_sec",
@@ -146,18 +118,18 @@ class Config:
     # =========================================================================
     # 6. KẾT NỐI NHÂN KERNEL RING 0 (MINIFILTER IPC)
     # =========================================================================
-    # Tên cổng kết nối Filter Communication Port của Minifilter Driver
-    PORT_NAME: str = "\\RansomCollectorPort"
-
-    # Số lượng bản ghi IRP nhị phân tối đa đọc từ kernel trong một lượt nhận tin
-    MAX_IRP_RECORDS_PER_READ: int = 1024
+    PORT_NAME: str = "\\RansomCollectorPort"      # Filter Communication Port dùng chung với Minifilter Driver Ring 0
+    MAX_IRP_RECORDS_PER_READ: int = 1024        # Kích thước bộ đệm nhận tin ctypes IPC tránh nghẽn hàng đợi kernel
 
     # =========================================================================
     # 7. PHƯƠNG THỨC TIỆN ÍCH (HELPER METHODS)
     # =========================================================================
     @classmethod
     def get_monitored_directories(cls) -> List[Path]:
-       
+        """
+        Nguồn chuẩn duy nhất (SSoT) định nghĩa 8 thư mục người dùng + C:\DecoyDocs, D:\DecoyDocs.
+        Dùng chung cho toàn bộ FileGenerator, WorkloadSimulator và EntropyInspector.
+        """
         home = Path.home()
         standard_user_folders = [
             "Desktop",
