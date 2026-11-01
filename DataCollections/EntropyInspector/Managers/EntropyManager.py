@@ -4,6 +4,7 @@ EntropyManager.py
 Lớp điều phối (Orchestrator) toàn bộ phân hệ EntropyInspector:
 - Quản lý vòng đời của SnapshotInspector (quét tĩnh) và RealtimeWatcher (giám sát động).
 - Tự động hóa tổ chức kết xuất các tệp tin CSV chuẩn về đúng thư mục Data/Raw/.
+- Tự động khởi tạo và liên kết file log session (realtime_watcher.log) cạnh các file CSV.
 - Cung cấp tiện ích so sánh chênh lệch Entropy Trước vs. Sau (Baseline vs. Final).
 """
 
@@ -11,6 +12,14 @@ import csv
 import sys
 from pathlib import Path
 from typing import List, Dict, Optional, Any
+
+try:
+    from Src.Core.Config import Config
+except (ImportError, ValueError):
+    try:
+        from Core.Config import Config
+    except (ImportError, ValueError):
+        Config = None
 
 try:
     from ..Inspectors import (
@@ -49,9 +58,11 @@ class EntropyManager:
         target_dirs: Optional[List[Path]] = None,
         raw_data_dir: Optional[Path] = None,
         calculator: Optional[ShannonEntropyCalculator] = None,
+        log_file: Optional[Path] = None,
     ) -> None:
         """
         Khởi tạo EntropyManager và nạp sẵn 2 bộ thanh tra (Snapshot & Realtime).
+        Tự động cấu hình file log riêng cho từng session (realtime_watcher.log).
         """
         self.target_dirs: List[Path] = target_dirs or self._default_directories()
         self.raw_data_dir: Path = raw_data_dir or self._default_raw_dir()
@@ -62,13 +73,17 @@ class EntropyManager:
             target_dirs=self.target_dirs,
             calculator=self.calculator
         )
+        effective_log_file = log_file or (self.raw_data_dir / "realtime_watcher.log")
         self.realtime_watcher = RealtimeWatcher(
             target_dirs=self.target_dirs,
-            calculator=self.calculator
+            calculator=self.calculator,
+            log_file=effective_log_file,
         )
 
     def _default_directories(self) -> List[Path]:
-        """Xác định các thư mục mồi mặc định trên Windows Sandbox."""
+        """Nguồn chuẩn duy nhất (SSoT) định nghĩa các thư mục mồi."""
+        if Config:
+            return Config.get_monitored_directories()
         home = Path.home()
         return [
             home / "Desktop" / "DecoyDocs",
@@ -77,8 +92,9 @@ class EntropyManager:
         ]
 
     def _default_raw_dir(self) -> Path:
-        """Xác định đường dẫn chuẩn tới thư mục Data/Raw của dự án."""
-        # Trỏ ngược 3 cấp thư mục từ EntropyInspector/Managers -> Root -> Data/Raw
+        """Xác định đường dẫn chuẩn tới thư mục Data/Raw của dự án (SSoT)."""
+        if Config:
+            return Config.RAW_DATA_DIR
         return Path(__file__).resolve().parents[3] / "Data" / "Raw"
 
     def take_baseline_snapshot(self, filename: str = "baseline_entropy.csv") -> Path:
@@ -89,7 +105,8 @@ class EntropyManager:
         print(f"\n[*] Đang quét Snapshot gốc (Baseline) trên {len(self.target_dirs)} thư mục mồi...")
         events = self.snapshot_inspector.scan(recursive=True)
 
-        output_path = self.raw_data_dir / filename
+        output_path = Path(filename) if Path(filename).is_absolute() else self.raw_data_dir / filename
+        output_path.parent.mkdir(parents=True, exist_ok=True)
         self.snapshot_inspector.export_to_csv(output_path, events=events)
 
         summary = self.snapshot_inspector.get_summary(events)
@@ -105,7 +122,8 @@ class EntropyManager:
         print(f"\n[*] Đang quét Snapshot sau thử nghiệm (Final) trên {len(self.target_dirs)} thư mục mồi...")
         events = self.snapshot_inspector.scan(recursive=True)
 
-        output_path = self.raw_data_dir / filename
+        output_path = Path(filename) if Path(filename).is_absolute() else self.raw_data_dir / filename
+        output_path.parent.mkdir(parents=True, exist_ok=True)
         self.snapshot_inspector.export_to_csv(output_path, events=events)
 
         summary = self.snapshot_inspector.get_summary(events)
@@ -149,6 +167,9 @@ class EntropyManager:
         created_files = set(final_map.keys()) - set(baseline_map.keys())
         deleted_files = set(baseline_map.keys()) - set(final_map.keys())
 
+        low_thresh = Config.BASELINE_LOW_ENTROPY_THRESHOLD if Config else 6.5
+        high_thresh = Config.HIGH_ENTROPY_THRESHOLD if Config else 7.0
+
         modified_high_entropy = 0
         deltas: List[float] = []
 
@@ -158,7 +179,7 @@ class EntropyManager:
             diff = f_ent - b_ent
             deltas.append(diff)
             # Phát hiện tệp bị tăng vọt Entropy từ thấp lên ngưỡng mã hóa
-            if b_ent < 6.5 and f_ent >= 7.0:
+            if b_ent < low_thresh and f_ent >= high_thresh:
                 modified_high_entropy += 1
 
         avg_delta = sum(deltas) / len(deltas) if deltas else 0.0
@@ -196,7 +217,8 @@ class EntropyManager:
         Lưu kết quả trực tiếp vào Data/Raw/<filename>.
         """
         events = self.realtime_watcher.stop()
-        output_path = self.raw_data_dir / filename
+        output_path = Path(filename) if Path(filename).is_absolute() else self.raw_data_dir / filename
+        output_path.parent.mkdir(parents=True, exist_ok=True)
         self.realtime_watcher.export_to_csv(output_path, events=events)
 
         summary = self.realtime_watcher.get_summary(events)
@@ -219,4 +241,3 @@ class EntropyManager:
             else:
                 print(f"• {formatted_key:<26}: {val}")
         print(f"{'=' * 60}\n")
-
