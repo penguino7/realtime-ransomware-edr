@@ -30,6 +30,15 @@ class IrpParser:
         IRPOperation.DELETE,
     }
 
+    # Chỉ số các cột chuẩn trong tệp CSV xuất từ Process Monitor
+    COL_TIME = 0
+    COL_PROCESS = 1
+    COL_PID = 2
+    COL_OPERATION = 3
+    COL_PATH = 4
+    COL_RESULT = 5
+    COL_DETAIL = 6
+
     def __init__(
         self,
         procmon_path: Union[str, Path],
@@ -90,13 +99,13 @@ class IrpParser:
                 if len(row) < 7:
                     continue
 
-                raw_ts = row[0]
-                proc_name = row[1].strip()
-                raw_pid = row[2].strip()
-                raw_op = row[3].strip()
-                raw_path = row[4].strip()
-                raw_result = row[5].strip().upper()
-                raw_detail = row[6].strip()
+                raw_ts = row[self.COL_TIME]
+                proc_name = row[self.COL_PROCESS].strip()
+                raw_pid = row[self.COL_PID].strip()
+                raw_op = row[self.COL_OPERATION].strip()
+                raw_path = row[self.COL_PATH].strip()
+                raw_result = row[self.COL_RESULT].strip().upper()
+                raw_detail = row[self.COL_DETAIL].strip()
 
                 # Cổng 0: Lọc bỏ tiến trình hệ thống và công cụ đo đạc kiểm thử
                 if proc_name.lower() in self.excluded_processes:
