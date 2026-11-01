@@ -164,6 +164,64 @@ class DatasetBuilder:
         sessions.sort(key=lambda s: s[1])
         return sessions
 
+    @staticmethod
+    def _parse_interim_row(row: Dict[str, str]) -> Optional[IRPEvent]:
+        """Chuyển đổi một dòng Dict từ file interim CSV thành đối tượng IRPEvent."""
+        try:
+            ts = float(row["timestamp"])
+            pid = int(row["pid"])
+            proc_name = row["process_name"]
+            op = IRPOperation.from_str(row["operation"])
+            target_path = row["file_path"]
+            old_path = row["old_path"] if row.get("old_path") else None
+            size_bytes = int(row["size_bytes"]) if row.get("size_bytes") else 0
+            entropy = float(row["entropy"]) if row.get("entropy") else 0.0
+            baseline_h = float(row["baseline_entropy"]) if row.get("baseline_entropy") else 0.0
+
+            raw_matched = str(row.get("entropy_matched", "False")).lower()
+            entropy_matched = raw_matched in ("true", "1")
+            raw_delta = row.get("match_delta_sec")
+            match_delta_sec = float(raw_delta) if raw_delta and raw_delta.strip() else None
+            entropy_source = row.get("entropy_source", "baseline_fallback")
+        except (ValueError, KeyError):
+            return None
+
+        return IRPEvent(
+            timestamp=ts,
+            pid=pid,
+            process_name=proc_name,
+            operation=op,
+            file_path=target_path,
+            old_path=old_path,
+            size_bytes=size_bytes,
+            entropy=entropy,
+            baseline_entropy=baseline_h,
+            entropy_matched=entropy_matched,
+            match_delta_sec=match_delta_sec,
+            entropy_source=entropy_source
+        )
+
+    def _extract_tick_vector(
+        self,
+        slices_tuple: Tuple[Any, Any, Any, int],
+        sample_id: str,
+        pid: int,
+        proc_name: str,
+        label: int
+    ) -> FeatureVector:
+        """Trích xuất vector 27 đặc trưng vật lý từ bộ 3 cửa sổ trượt tại mốc Tick."""
+        short_slice, med_slice, long_slice, tick_index = slices_tuple
+        return self.feature_extractor.extract_features(
+            short_slice=short_slice,
+            med_slice=med_slice,
+            long_slice=long_slice,
+            sample_id=sample_id,
+            pid=pid,
+            process_name=proc_name,
+            tick_index=tick_index,
+            label=label
+        )
+
     def process_interim_session(
         self,
         interim_path: Union[str, Path],
@@ -186,59 +244,20 @@ class DatasetBuilder:
         with open(file_path, "r", encoding="utf-8", errors="replace") as f:
             reader = csv.DictReader(f)
             for row in reader:
-                try:
-                    ts = float(row["timestamp"])
-                    pid = int(row["pid"])
-                    proc_name = row["process_name"]
-                    op = IRPOperation.from_str(row["operation"])
-                    target_path = row["file_path"]
-                    old_path = row["old_path"] if row.get("old_path") else None
-                    size_bytes = int(row["size_bytes"]) if row.get("size_bytes") else 0
-                    entropy = float(row["entropy"]) if row.get("entropy") else 0.0
-                    baseline_h = float(row["baseline_entropy"]) if row.get("baseline_entropy") else 0.0
-
-                    # Thu nhận các trường siêu dữ liệu kiểm toán (Audit Metadata)
-                    raw_matched = str(row.get("entropy_matched", "False")).lower()
-                    entropy_matched = raw_matched in ("true", "1")
-                    raw_delta = row.get("match_delta_sec")
-                    match_delta_sec = float(raw_delta) if raw_delta and raw_delta.strip() else None
-                    entropy_source = row.get("entropy_source", "baseline_fallback")
-                except (ValueError, KeyError):
+                event = self._parse_interim_row(row)
+                if event is None:
                     continue
 
-                event = IRPEvent(
-                    timestamp=ts,
-                    pid=pid,
-                    process_name=proc_name,
-                    operation=op,
-                    file_path=target_path,
-                    old_path=old_path,
-                    size_bytes=size_bytes,
-                    entropy=entropy,
-                    baseline_entropy=baseline_h,
-                    entropy_matched=entropy_matched,
-                    match_delta_sec=match_delta_sec,
-                    entropy_source=entropy_source
-                )
-
-                # Bơm sự kiện vào WindowManager
                 slices_tuple = self.window_manager.add_event(event)
-
-                # Nếu đạt ngưỡng Tick (chạm mốc 10 * k files)
                 if slices_tuple is not None:
-                    short_slice, med_slice, long_slice, tick_index = slices_tuple
-
-                    feature_vector = self.feature_extractor.extract_features(
-                        short_slice=short_slice,
-                        med_slice=med_slice,
-                        long_slice=long_slice,
+                    vec = self._extract_tick_vector(
+                        slices_tuple=slices_tuple,
                         sample_id=sample_id,
-                        pid=pid,
-                        process_name=proc_name,
-                        tick_index=tick_index,
+                        pid=event.pid,
+                        proc_name=event.process_name,
                         label=label
                     )
-                    vectors.append(feature_vector)
+                    vectors.append(vec)
 
         return vectors
 
