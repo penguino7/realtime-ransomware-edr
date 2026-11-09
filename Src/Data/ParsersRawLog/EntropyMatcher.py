@@ -1,4 +1,5 @@
 
+from pathlib import Path
 from dataclasses import dataclass
 from typing import Optional, Tuple, List
 
@@ -6,10 +7,12 @@ try:
     from ...Core.Config import Config
     from ...Core.Schemas import IRPOperation
     from .EntropyLoader import EntropyLoader
+    from .LogFormatters import LogFormatters
 except (ImportError, ValueError):
     from Src.Core.Config import Config
     from Src.Core.Schemas import IRPOperation
     from Src.Data.ParsersRawLog.EntropyLoader import EntropyLoader
+    from Src.Data.ParsersRawLog.LogFormatters import LogFormatters
 
 
 @dataclass(slots=True)
@@ -46,19 +49,73 @@ class EntropyMatcher:
             self.tolerance_sec = getattr(Config, "TIMESTAMP_TOLERANCE_MS", 200.0) / 1000.0
 
     def _get_baseline(self, norm_path: str, old_norm_path: Optional[str]) -> Tuple[float, bool]:
-        """Tra cứu giá trị Entropy nền tảng từ snapshot ban đầu."""
+        """
+        Tra cứu giá trị Entropy nền tảng từ snapshot ban đầu.
+        Hỗ trợ:
+        1. Đường dẫn trực tiếp norm_path
+        2. Đường dẫn cũ old_norm_path (từ sự kiện RENAME)
+        3. Bảng bí danh alias_map (nếu file đã đổi tên)
+        4. Tên gốc Path(norm_path).stem (cho trường hợp ransomware gắn thêm đuôi như .lockbit, .locked)
+        """
+        # 1. Tra cứu trực tiếp
         baseline_h = self.loader.baseline_map.get(norm_path)
-        if baseline_h is None and old_norm_path:
+        if baseline_h is not None and baseline_h > 0.0:
+            return baseline_h, True
+
+        # 2. Tra cứu qua old_norm_path
+        if old_norm_path:
             baseline_h = self.loader.baseline_map.get(old_norm_path)
-        has_baseline = baseline_h is not None and baseline_h > 0.0
-        return (baseline_h if has_baseline else 0.0), has_baseline
+            if baseline_h is not None and baseline_h > 0.0:
+                return baseline_h, True
+
+        # 3. Tra cứu qua bảng bí danh alias_map
+        alias = self.loader.alias_map.get(norm_path)
+        if alias:
+            baseline_h = self.loader.baseline_map.get(alias)
+            if baseline_h is not None and baseline_h > 0.0:
+                return baseline_h, True
+
+        # 4. Tra cứu qua tên gốc khi file bị nối thêm phần mở rộng mã hóa (ví dụ: a.docx.lockbit -> a.docx)
+        p = Path(norm_path)
+        if "." in p.stem:
+            stem_candidate = LogFormatters.normalize_windows_path(str(p.parent / p.stem))
+            baseline_h = self.loader.baseline_map.get(stem_candidate)
+            if baseline_h is not None and baseline_h > 0.0:
+                return baseline_h, True
+
+        return 0.0, False
 
     def _get_realtime_events(self, norm_path: str, old_norm_path: Optional[str]) -> Optional[List]:
-        """Truy xuất danh sách sự kiện realtime theo đường dẫn hiện tại hoặc đường dẫn cũ."""
+        """
+        Truy xuất danh sách sự kiện realtime theo đường dẫn hiện tại, đường dẫn cũ
+        hoặc thông qua bảng bí danh đổi tên alias_map.
+        """
+        # 1. Tra cứu trực tiếp theo norm_path
         events = self.loader.realtime_map.get(norm_path)
-        if not events and old_norm_path:
+        if events:
+            return events
+
+        # 2. Tra cứu theo old_norm_path
+        if old_norm_path:
             events = self.loader.realtime_map.get(old_norm_path)
-        return events
+            if events:
+                return events
+
+        # 3. Tra cứu qua bí danh alias_map (liên kết giữa A.docx <-> A.docx.lockbit)
+        alias = self.loader.alias_map.get(norm_path)
+        if alias:
+            events = self.loader.realtime_map.get(alias)
+            if events:
+                return events
+
+        if old_norm_path:
+            alias_old = self.loader.alias_map.get(old_norm_path)
+            if alias_old:
+                events = self.loader.realtime_map.get(alias_old)
+                if events:
+                    return events
+
+        return None
 
     def _match_delete(
         self,
@@ -114,9 +171,12 @@ class EntropyMatcher:
         content_events = [e for e in events if len(e) < 4 or e[3] != "DELETED"]
         target_events = content_events if content_events else events
 
+        # Cho phép dung sai mở rộng (tối đa 2.0s) cho thao tác sửa đổi nội dung
+        # nhằm thích ứng với độ trễ giải phóng khóa độc quyền (Exclusive Lock) của Ransomware
+        effective_tolerance = max(self.tolerance_sec, 2.0)
         best_event = min(target_events, key=lambda e: abs(e[0] - irp_ts))
         diff_sec = round(abs(best_event[0] - irp_ts), 6)
-        if diff_sec <= self.tolerance_sec:
+        if diff_sec <= effective_tolerance:
             current_h = best_event[1]
             delta_h = round(current_h - baseline_val, 4) if has_baseline else 0.0
             source_tag = "realtime" if has_baseline else "realtime_new_file"
