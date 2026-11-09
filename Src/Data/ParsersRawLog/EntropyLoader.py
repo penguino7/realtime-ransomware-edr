@@ -31,6 +31,8 @@ class EntropyLoader:
         self._baseline_map: Dict[str, float] = {}
         # Cấu trúc: norm_path -> [(ts_sec, entropy, file_size, event_type, old_path), ...]
         self._realtime_map: Dict[str, List[Tuple[float, float, int, str, Optional[str]]]] = defaultdict(list)
+        # Bảng ánh xạ bí danh 2 chiều giữa đường dẫn gốc và đường dẫn sau đổi tên
+        self._alias_map: Dict[str, str] = {}
         self._is_loaded = False
 
     @property
@@ -44,6 +46,24 @@ class EntropyLoader:
         if not self._is_loaded:
             self.load_all()
         return self._realtime_map
+
+    @property
+    def alias_map(self) -> Dict[str, str]:
+        if not self._is_loaded:
+            self.load_all()
+        return self._alias_map
+
+    def register_alias(self, path1: str, path2: str) -> None:
+        """
+        Đăng ký thủ công liên kết bí danh 2 chiều giữa hai đường dẫn file.
+        """
+        if not path1 or not path2:
+            return
+        norm1 = LogFormatters.normalize_windows_path(path1)
+        norm2 = LogFormatters.normalize_windows_path(path2)
+        if norm1 != norm2:
+            self._alias_map[norm1] = norm2
+            self._alias_map[norm2] = norm1
 
     def load_all(self) -> None:
         """Nạp đồng thời cả baseline và realtime entropy vào bộ nhớ đệm."""
@@ -80,6 +100,7 @@ class EntropyLoader:
             raise FileNotFoundError(f"Không tìm thấy realtime entropy: {self.realtime_path}")
 
         self._realtime_map.clear()
+        self._alias_map.clear()
         with open(self.realtime_path, "r", encoding="utf-8", errors="replace") as f:
             reader = csv.reader(f)
             header = next(reader, None)
@@ -88,6 +109,10 @@ class EntropyLoader:
                     norm_path = LogFormatters.normalize_windows_path(row[2])
                     event_type = row[1].strip().upper() if len(row) > 1 else ""
                     old_path = LogFormatters.normalize_windows_path(row[3]) if len(row) > 3 and row[3].strip() else None
+                    if old_path and old_path != norm_path:
+                        self._alias_map[old_path] = norm_path
+                        self._alias_map[norm_path] = old_path
+
                     ts_sec = LogFormatters.parse_realtime_timestamp(row[0])
                     try:
                         entropy = float(row[4])
