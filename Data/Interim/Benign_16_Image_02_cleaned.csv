@@ -1,6 +1,6 @@
 timestamp,pid,process_name,operation,file_path,old_path,size_bytes,entropy,baseline_entropy,entropy_diff,entropy_matched,match_delta_sec,entropy_source
 79256.06272,984,python.exe,CREATE,C:\DecoyDocs\.test_write,,0,0.0,0.0,0.0,False,,baseline_fallback
-79256.063037,984,python.exe,DELETE,C:\DecoyDocs\.test_write,,0,0.0,0.0,0.0,True,0.0,deletion_fallback
+79256.063037,984,python.exe,DELETE,C:\DecoyDocs\.test_write,,0,0.0,0.0,0.0,False,0.0,deletion_fallback
 79256.329339,984,python.exe,CREATE,C:\Users\nhat\Music\DecoyDocs\Project_Source\000_Backup_Admin_khi_468.jpg,,0,6.7968,6.4741,0.3227,True,0.05472,realtime
 79256.329439,984,python.exe,READ,C:\Users\nhat\Music\DecoyDocs\Project_Source\000_Backup_Admin_khi_468.jpg,,8192,6.7968,6.4741,0.3227,True,0.05462,realtime
 79256.337687,984,python.exe,READ,C:\Users\nhat\Music\DecoyDocs\Project_Source\000_Backup_Admin_khi_468.jpg,,8501,6.7968,6.4741,0.3227,True,0.046372,realtime

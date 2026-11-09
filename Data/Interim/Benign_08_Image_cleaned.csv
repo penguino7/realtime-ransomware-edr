@@ -1,6 +1,6 @@
 timestamp,pid,process_name,operation,file_path,old_path,size_bytes,entropy,baseline_entropy,entropy_diff,entropy_matched,match_delta_sec,entropy_source
 76531.518225,4860,python.exe,CREATE,C:\DecoyDocs\.test_write,,0,0.0,0.0,0.0,False,,baseline_fallback
-76531.519283,4860,python.exe,DELETE,C:\DecoyDocs\.test_write,,0,0.0,0.0,0.0,True,0.0,deletion_fallback
+76531.519283,4860,python.exe,DELETE,C:\DecoyDocs\.test_write,,0,0.0,0.0,0.0,False,0.0,deletion_fallback
 76531.776949,4860,python.exe,CREATE,C:\Users\nhat\Music\DecoyDocs\aaa_Payroll_2026_nhưng_172.png,,0,0.0,7.6284,-7.6284,True,0.06503,realtime
 76531.777048,4860,python.exe,READ,C:\Users\nhat\Music\DecoyDocs\aaa_Payroll_2026_nhưng_172.png,,6040,0.0,7.6284,-7.6284,True,0.064931,realtime
 76531.831708,4860,python.exe,CREATE,C:\Users\nhat\Music\DecoyDocs\aaa_Payroll_2026_nhưng_172.png,,0,0.0,7.6284,-7.6284,True,0.010271,realtime

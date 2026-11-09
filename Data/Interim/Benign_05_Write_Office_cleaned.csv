@@ -1,6 +1,6 @@
 timestamp,pid,process_name,operation,file_path,old_path,size_bytes,entropy,baseline_entropy,entropy_diff,entropy_matched,match_delta_sec,entropy_source
 73514.514277,5996,python.exe,CREATE,C:\DecoyDocs\.test_write,,0,0.0,0.0,0.0,False,,baseline_fallback
-73514.514716,5996,python.exe,DELETE,C:\DecoyDocs\.test_write,,0,0.0,0.0,0.0,True,0.0,deletion_fallback
+73514.514716,5996,python.exe,DELETE,C:\DecoyDocs\.test_write,,0,0.0,0.0,0.0,False,0.0,deletion_fallback
 73514.793199,5996,python.exe,CREATE,C:\Users\nhat\Documents\DecoyDocs\Project_Source\000_Contract_Master_cái_056.xlsx,,0,0.0,7.78,-7.78,True,0.019214,realtime
 73514.793376,5996,python.exe,READ,C:\Users\nhat\Documents\DecoyDocs\Project_Source\000_Contract_Master_cái_056.xlsx,,22,0.0,7.78,-7.78,True,0.019037,realtime
 73514.793649,5996,python.exe,READ,C:\Users\nhat\Documents\DecoyDocs\Project_Source\000_Contract_Master_cái_056.xlsx,,42,0.0,7.78,-7.78,True,0.018764,realtime

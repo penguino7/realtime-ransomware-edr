@@ -1,6 +1,6 @@
 timestamp,pid,process_name,operation,file_path,old_path,size_bytes,entropy,baseline_entropy,entropy_diff,entropy_matched,match_delta_sec,entropy_source
 72798.483992,7960,python.exe,CREATE,C:\DecoyDocs\.test_write,,0,0.0,0.0,0.0,False,,baseline_fallback
-72798.484299,7960,python.exe,DELETE,C:\DecoyDocs\.test_write,,0,0.0,0.0,0.0,True,0.0,deletion_fallback
+72798.484299,7960,python.exe,DELETE,C:\DecoyDocs\.test_write,,0,0.0,0.0,0.0,False,0.0,deletion_fallback
 72798.807372,7960,python.exe,CREATE,C:\Users\nhat\Downloads\DecoyDocs\HR_Contracts\decoy_Payroll_2026_của_390.ini,,0,5.2668,5.2668,0.0,False,,baseline_fallback
 72798.807473,7960,python.exe,CREATE,C:\Users\nhat\Documents\DecoyDocs\Backup_Data\copy_nhưng_decoy_Payroll_2026_của_390.ini,,0,5.2668,0.0,5.2668,True,0.001954,realtime_new_file
 72798.807926,7960,python.exe,READ,C:\Users\nhat\Downloads\DecoyDocs\HR_Contracts\decoy_Payroll_2026_của_390.ini,,796,5.2668,5.2668,0.0,False,,baseline_fallback

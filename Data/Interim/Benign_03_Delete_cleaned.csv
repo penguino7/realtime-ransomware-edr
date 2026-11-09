@@ -1,6 +1,6 @@
 timestamp,pid,process_name,operation,file_path,old_path,size_bytes,entropy,baseline_entropy,entropy_diff,entropy_matched,match_delta_sec,entropy_source
 73037.701405,2956,python.exe,CREATE,C:\DecoyDocs\.test_write,,0,0.0,0.0,0.0,False,,baseline_fallback
-73037.701847,2956,python.exe,DELETE,C:\DecoyDocs\.test_write,,0,0.0,0.0,0.0,True,0.0,deletion_fallback
+73037.701847,2956,python.exe,DELETE,C:\DecoyDocs\.test_write,,0,0.0,0.0,0.0,False,0.0,deletion_fallback
 73038.049145,2956,python.exe,DELETE,C:\DecoyDocs\Backup_Data\!00_Confidential_là_250.xlsx,,0,0.0,7.7755,-7.7755,True,0.005667,realtime_deletion
 73038.19865,2956,python.exe,DELETE,C:\Users\nhat\Favorites\DecoyDocs\Personal_Photos\!00_Accounting_từ_339.pdf,,0,0.0,5.678,-5.678,True,0.008139,realtime_deletion
 73038.272349,2956,python.exe,DELETE,C:\Users\nhat\Desktop\DecoyDocs\Financial_Reports\!00_Backup_Admin_một_272.docx,,0,0.0,7.9631,-7.9631,True,0.008184,realtime_deletion

@@ -83,6 +83,15 @@ class EntropyMatcher:
             if baseline_h is not None and baseline_h > 0.0:
                 return baseline_h, True
 
+        # 5. Tra cứu qua tìm-trùng-stem trong cùng thư mục cho kiểu thay đuôi (ví dụ: baocao.docx -> baocao.locked)
+        target_stem = p.stem.lower()
+        parent_str = LogFormatters.normalize_windows_path(str(p.parent))
+        for base_path, base_h in self.loader.baseline_map.items():
+            bp = Path(base_path)
+            if LogFormatters.normalize_windows_path(str(bp.parent)) == parent_str and bp.stem.lower() == target_stem:
+                if base_h > 0.0:
+                    return base_h, True
+
         return 0.0, False
 
     def _get_realtime_events(self, norm_path: str, old_norm_path: Optional[str]) -> Optional[List]:
@@ -149,7 +158,7 @@ class EntropyMatcher:
             current_entropy=0.0,
             baseline_entropy=baseline_val,
             entropy_diff=delta_h,
-            matched=True,
+            matched=False,
             match_delta_sec=0.0,
             entropy_source="deletion_fallback"
         )
@@ -171,12 +180,9 @@ class EntropyMatcher:
         content_events = [e for e in events if len(e) < 4 or e[3] != "DELETED"]
         target_events = content_events if content_events else events
 
-        # Cho phép dung sai mở rộng (tối đa 2.0s) cho thao tác sửa đổi nội dung
-        # nhằm thích ứng với độ trễ giải phóng khóa độc quyền (Exclusive Lock) của Ransomware
-        effective_tolerance = max(self.tolerance_sec, 2.0)
         best_event = min(target_events, key=lambda e: abs(e[0] - irp_ts))
         diff_sec = round(abs(best_event[0] - irp_ts), 6)
-        if diff_sec <= effective_tolerance:
+        if diff_sec <= self.tolerance_sec:
             current_h = best_event[1]
             delta_h = round(current_h - baseline_val, 4) if has_baseline else 0.0
             source_tag = "realtime" if has_baseline else "realtime_new_file"

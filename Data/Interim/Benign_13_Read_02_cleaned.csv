@@ -1,7 +1,7 @@
 timestamp,pid,process_name,operation,file_path,old_path,size_bytes,entropy,baseline_entropy,entropy_diff,entropy_matched,match_delta_sec,entropy_source
 78875.182423,1832,python.exe,CREATE,C:\DecoyDocs\.test_write,,0,0.0,0.0,0.0,False,,baseline_fallback
 78875.183023,8096,python.exe,CREATE,C:\DecoyDocs\.test_write,,0,0.0,0.0,0.0,False,,baseline_fallback
-78875.183301,1832,python.exe,DELETE,C:\DecoyDocs\.test_write,,0,0.0,0.0,0.0,True,0.0,deletion_fallback
+78875.183301,1832,python.exe,DELETE,C:\DecoyDocs\.test_write,,0,0.0,0.0,0.0,False,0.0,deletion_fallback
 78875.541322,1832,python.exe,CREATE,C:\Users\nhat\Contacts\DecoyDocs\Personal_Photos\$_Payroll_2026_vậy_575.sql,,0,5.567,5.567,0.0,False,,baseline_fallback
 78875.541395,1832,python.exe,READ,C:\Users\nhat\Contacts\DecoyDocs\Personal_Photos\$_Payroll_2026_vậy_575.sql,,2341,5.567,5.567,0.0,False,,baseline_fallback
 78875.588307,1832,python.exe,CREATE,C:\Users\nhat\Documents\DecoyDocs\Project_Source\decoy_Contract_Master_được_895.png,,0,7.51,7.51,0.0,False,,baseline_fallback

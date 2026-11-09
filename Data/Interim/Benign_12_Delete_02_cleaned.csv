@@ -1,7 +1,7 @@
 timestamp,pid,process_name,operation,file_path,old_path,size_bytes,entropy,baseline_entropy,entropy_diff,entropy_matched,match_delta_sec,entropy_source
 78762.344603,5796,python.exe,CREATE,C:\DecoyDocs\.test_write,,0,0.0,0.0,0.0,False,,baseline_fallback
 78762.345321,7952,python.exe,CREATE,C:\DecoyDocs\.test_write,,0,0.0,0.0,0.0,False,,baseline_fallback
-78762.345931,5796,python.exe,DELETE,C:\DecoyDocs\.test_write,,0,0.0,0.0,0.0,True,0.0,deletion_fallback
+78762.345931,5796,python.exe,DELETE,C:\DecoyDocs\.test_write,,0,0.0,0.0,0.0,False,0.0,deletion_fallback
 78762.706463,5796,python.exe,DELETE,C:\Users\nhat\Favorites\DecoyDocs\!00_Confidential_để_328.json,,0,0.0,5.0726,-5.0726,True,0.007007,realtime_deletion
 78762.802554,5796,python.exe,DELETE,C:\Users\nhat\Contacts\DecoyDocs\Personal_Photos\$_Backup_Admin_bên_820.zip,,0,0.0,6.4337,-6.4337,True,0.000244,realtime_deletion
 78762.944372,5796,python.exe,DELETE,C:\Users\nhat\Downloads\DecoyDocs\000_Accounting_số_933.yaml,,0,0.0,4.5045,-4.5045,True,3.1e-05,realtime_deletion

@@ -1,7 +1,7 @@
 timestamp,pid,process_name,operation,file_path,old_path,size_bytes,entropy,baseline_entropy,entropy_diff,entropy_matched,match_delta_sec,entropy_source
 76632.505555,7036,python.exe,CREATE,C:\DecoyDocs\.test_write,,0,0.0,0.0,0.0,False,,baseline_fallback
 76632.506147,5320,python.exe,CREATE,C:\DecoyDocs\.test_write,,0,0.0,0.0,0.0,False,,baseline_fallback
-76632.506245,7036,python.exe,DELETE,C:\DecoyDocs\.test_write,,0,0.0,0.0,0.0,True,0.0,deletion_fallback
+76632.506245,7036,python.exe,DELETE,C:\DecoyDocs\.test_write,,0,0.0,0.0,0.0,False,0.0,deletion_fallback
 76632.765702,7036,python.exe,CREATE,C:\Users\nhat\Videos\DecoyDocs\Personal_Photos\aaa_Accounting_này_404.docx,,0,0.0,7.9629,-7.9629,True,0.019528,realtime
 76632.765838,7036,python.exe,READ,C:\Users\nhat\Videos\DecoyDocs\Personal_Photos\aaa_Accounting_này_404.docx,,22,0.0,7.9629,-7.9629,True,0.019392,realtime
 76632.765924,7036,python.exe,READ,C:\Users\nhat\Videos\DecoyDocs\Personal_Photos\aaa_Accounting_này_404.docx,,42,0.0,7.9629,-7.9629,True,0.019306,realtime

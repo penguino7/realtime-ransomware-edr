@@ -1,7 +1,7 @@
 timestamp,pid,process_name,operation,file_path,old_path,size_bytes,entropy,baseline_entropy,entropy_diff,entropy_matched,match_delta_sec,entropy_source
 72921.251812,5116,python.exe,CREATE,C:\DecoyDocs\.test_write,,0,0.0,0.0,0.0,False,,baseline_fallback
 72921.252432,4740,python.exe,CREATE,C:\DecoyDocs\.test_write,,0,0.0,0.0,0.0,False,,baseline_fallback
-72921.253185,5116,python.exe,DELETE,C:\DecoyDocs\.test_write,,0,0.0,0.0,0.0,True,0.0,deletion_fallback
+72921.253185,5116,python.exe,DELETE,C:\DecoyDocs\.test_write,,0,0.0,0.0,0.0,False,0.0,deletion_fallback
 72921.56144,5116,python.exe,CREATE,C:\Users\nhat\Music\DecoyDocs\Config_Prod,,0,0.0,0.0,0.0,False,,baseline_fallback
 72921.564146,5116,python.exe,RENAME,C:\Users\nhat\Music\DecoyDocs\Config_Prod\updated_người_aaa_Financial_Report_bên_288.xml,C:\Users\nhat\Music\DecoyDocs\Config_Prod\aaa_Financial_Report_bên_288.xml,0,4.3067,4.3067,0.0,True,0.005773,realtime
 72921.567918,4740,python.exe,CREATE,C:\Users\nhat\Music\DecoyDocs\Config_Prod\updated_người_aaa_Financial_Report_bên_288.xml,,0,4.3067,4.3067,0.0,True,0.002001,realtime
