@@ -173,6 +173,10 @@ class IrpParser:
         if not self._is_decoy_path(raw_path, new_path):
             return None
 
+        # Đăng ký liên kết bí danh đổi tên vào loader để hỗ trợ ghép cặp chéo
+        if op == IRPOperation.RENAME and old_path and new_path:
+            self.loader.register_alias(old_path, new_path)
+
         norm_path = LogFormatters.normalize_windows_path(target_path)
         old_norm_path = LogFormatters.normalize_windows_path(old_path) if old_path else None
 
@@ -201,6 +205,23 @@ class IrpParser:
             entropy_source=match_res.entropy_source
         )
 
+    def _pre_scan_renames(self) -> None:
+        """
+        Quét trước toàn bộ sự kiện SetRenameInformationFile trong Procmon CSV
+        để nạp đầy đủ các cặp bí danh (A.docx <-> A.docx.lockbit) vào alias_map
+        trước khi bắt đầu phân tích các thao tác WriteFile diễn ra trước đó.
+        """
+        for row in self._read_procmon_rows():
+            if len(row) < 7:
+                continue
+            raw_op = row[self.COL_OPERATION].strip().upper()
+            if "RENAME" in raw_op or "SETRENAME" in raw_op:
+                raw_path = row[self.COL_PATH].strip()
+                raw_detail = row[self.COL_DETAIL].strip()
+                new_path = LogFormatters.extract_rename_path(raw_detail)
+                if new_path and self._is_decoy_path(raw_path, new_path):
+                    self.loader.register_alias(raw_path, new_path)
+
     def parse(self, limit: Optional[int] = None) -> List[IRPEvent]:
         """
         Duyệt qua Procmon log, áp dụng các cổng lọc và ghép cặp tạo danh sách IRPEvent.
@@ -209,6 +230,7 @@ class IrpParser:
             raise FileNotFoundError(f"Không tìm thấy Procmon log: {self.procmon_path}")
 
         self.loader.load_all()
+        self._pre_scan_renames()
         parsed_events: List[IRPEvent] = []
 
         for row in self._read_procmon_rows():
