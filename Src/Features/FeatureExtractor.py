@@ -159,14 +159,15 @@ class FeatureExtractor:
             raw_ratio = read_ops / write_ops
             read_to_write_ratio = round(min(raw_ratio, self.max_read_to_write_ratio), 4)
 
-        # Trích xuất thống kê Entropy
+        # Trích xuất thống kê Write-Entropy (ShieldFS: chỉ tính trên các file có thao tác ghi/sửa đổi)
         file_entropies, _ = self._get_per_file_entropy_stats(med_slice)
         mean_entropy = round(sum(file_entropies) / len(file_entropies), 4) if file_entropies else 0.0
         high_entropy_count = sum(1 for h in file_entropies if h >= self.high_entropy_threshold)
-        total_files = len(med_slice.distinct_files)
-        high_entropy_ratio = round(high_entropy_count / (total_files + self.epsilon), 4) if total_files else 0.0
+        total_written_files = len(file_entropies)
+        high_entropy_ratio = round(high_entropy_count / total_written_files, 4) if total_written_files > 0 else 0.0
 
         # Thao tác cấu trúc
+        total_files = len(med_slice.distinct_files)
         rename_count = med_slice.rename_count
         delete_count = med_slice.delete_count
 
@@ -243,18 +244,28 @@ class FeatureExtractor:
             "long_inplace_rewrite_ratio": inplace_rewrite_ratio,
         }
 
-    @staticmethod
-    def _get_per_file_entropy_stats(window_slice: WindowSlice) -> tuple[List[float], List[float]]:
+    @classmethod
+    def _get_per_file_entropy_stats(cls, window_slice: WindowSlice) -> tuple[List[float], List[float]]:
         """
         Trích xuất giá trị Entropy mới nhất và Delta H của từng file riêng biệt trong lát cắt.
-        Đảm bảo mỗi file chỉ đóng góp đúng 1 giá trị mới nhất vào thống kê trung bình.
+        Áp dụng nguyên lý Write-Entropy (ShieldFS):
+        - Chỉ xét các sự kiện thay đổi nội dung dữ liệu (WRITE, RENAME mang dữ liệu mới).
+        - Tuyệt đối loại trừ các sự kiện DELETE (H=0.0) và READ để không làm méo mó và pha loãng phân phối entropy.
+        - Đảm bảo mỗi file chỉ đóng góp đúng 1 giá trị mới nhất vào thống kê trung bình.
         """
         latest_entropy_map: Dict[str, float] = {}
         latest_diff_map: Dict[str, float] = {}
 
+        # Các thao tác ghi nhận sự thay đổi nội dung file thực tế
+        CONTENT_MODIFYING_OPS = {IRPOperation.WRITE, IRPOperation.RENAME}
+
         for ev in window_slice.events:
             if not ev.file_path:
                 continue
+            # Chỉ ghi nhận các sự kiện ghi/đổi tên nội dung
+            if ev.operation not in CONTENT_MODIFYING_OPS:
+                continue
+
             norm_path = ev.file_path.strip().lower()
             if norm_path in window_slice.distinct_files:
                 # Cập nhật trạng thái entropy mới nhất của file tại thời điểm này
