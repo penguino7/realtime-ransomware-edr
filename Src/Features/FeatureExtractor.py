@@ -62,11 +62,14 @@ class FeatureExtractor:
             pid=pid,
             process_name=process_name,
             tick_index=tick_index,
-            # 2. Short Window Features (10 đặc trưng)
+            # 2. Short Window Features (13 đặc trưng)
             short_duration_sec=short_feats["short_duration_sec"],
             short_write_ops_per_sec=short_feats["short_write_ops_per_sec"],
             short_read_ops_per_sec=short_feats["short_read_ops_per_sec"],
             short_write_bytes_per_sec=short_feats["short_write_bytes_per_sec"],
+            short_write_ops_per_file=short_feats["short_write_ops_per_file"],
+            short_write_bytes_per_file=short_feats["short_write_bytes_per_file"],
+            short_read_to_write_ratio=short_feats["short_read_to_write_ratio"],
             short_mean_entropy=short_feats["short_mean_entropy"],
             short_max_entropy=short_feats["short_max_entropy"],
             short_entropy_diff=short_feats["short_entropy_diff"],
@@ -98,18 +101,30 @@ class FeatureExtractor:
 
     def _compute_short_features(self, short_slice: WindowSlice) -> Dict[str, Any]:
         """
-        Tính toán 10 đặc trưng của Cửa Sổ Ngắn (10 file riêng biệt gần nhất).
+        Tính toán 13 đặc trưng của Cửa Sổ Ngắn (10 file riêng biệt gần nhất):
+        Bao gồm 10 đặc trưng gốc và 3 đặc trưng độc lập thời gian (Model B / Clock-Free).
         """
         duration = short_slice.duration_sec
         write_ops = short_slice.write_ops_count
         read_ops = short_slice.read_ops_count
         write_bytes = short_slice.total_write_bytes
+        total_files = len(short_slice.distinct_files)
 
-        # Tốc độ I/O (áp dụng ngưỡng sàn thời gian tối thiểu chống bùng nổ số học ảo)
+        # Tốc độ I/O theo thời gian (áp dụng ngưỡng sàn thời gian tối thiểu chống bùng nổ số học ảo)
         eff_duration = max(duration, self.min_duration_floor)
         write_ops_per_sec = round(write_ops / eff_duration, 4)
         read_ops_per_sec = round(read_ops / eff_duration, 4)
         write_bytes_per_sec = round(write_bytes / eff_duration, 4)
+
+        # 3 đặc trưng độc lập thời gian (Clock-Free / Per-File Metrics)
+        eff_files = max(total_files, 1)
+        short_write_ops_per_file = round(write_ops / eff_files, 4)
+        short_write_bytes_per_file = round(write_bytes / eff_files, 4)
+        if write_ops == 0:
+            short_read_to_write_ratio = self.max_read_to_write_ratio if read_ops > 0 else 0.0
+        else:
+            raw_ratio = read_ops / write_ops
+            short_read_to_write_ratio = round(min(raw_ratio, self.max_read_to_write_ratio), 4)
 
         # Trích xuất Entropy của từng file riêng biệt trong cửa sổ ngắn
         file_entropies, file_diffs = self._get_per_file_entropy_stats(short_slice)
@@ -126,7 +141,6 @@ class FeatureExtractor:
             Path(f).suffix.lower() for f in short_slice.distinct_files
             if Path(f).suffix
         }
-        total_files = len(short_slice.distinct_files)
         ext_diversity = round(len(unique_exts) / (total_files + self.epsilon), 4) if total_files else 0.0
 
         return {
@@ -134,6 +148,9 @@ class FeatureExtractor:
             "short_write_ops_per_sec": write_ops_per_sec,
             "short_read_ops_per_sec": read_ops_per_sec,
             "short_write_bytes_per_sec": write_bytes_per_sec,
+            "short_write_ops_per_file": short_write_ops_per_file,
+            "short_write_bytes_per_file": short_write_bytes_per_file,
+            "short_read_to_write_ratio": short_read_to_write_ratio,
             "short_mean_entropy": mean_entropy,
             "short_max_entropy": max_entropy,
             "short_entropy_diff": entropy_diff,
