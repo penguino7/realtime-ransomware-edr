@@ -30,11 +30,14 @@ class DatasetBuilder:
         "pid",
         "process_name",
         "tick_index",
-        # Short Window Features (10)
+        # Short Window Features (13)
         "short_duration_sec",
         "short_write_ops_per_sec",
         "short_read_ops_per_sec",
         "short_write_bytes_per_sec",
+        "short_write_ops_per_file",
+        "short_write_bytes_per_file",
+        "short_read_to_write_ratio",
         "short_mean_entropy",
         "short_max_entropy",
         "short_entropy_diff",
