@@ -151,11 +151,14 @@ class FeatureVector:
     process_name: str                   # Tên tiến trình thực thi
     tick_index: int                     # Chỉ số Tick (1, 2, 3...)
 
-    # 2. Short Window Features (10 đặc trưng)
+    # 2. Short Window Features (13 đặc trưng)
     short_duration_sec: float
     short_write_ops_per_sec: float
     short_read_ops_per_sec: float
     short_write_bytes_per_sec: float
+    short_write_ops_per_file: float     # [MỚI] Tần suất ghi trên mỗi file trong cửa sổ ngắn (Clock-Free)
+    short_write_bytes_per_file: float   # [MỚI] Dung lượng byte ghi trên mỗi file trong cửa sổ ngắn (Clock-Free)
+    short_read_to_write_ratio: float    # [MỚI] Tỷ lệ Đọc/Ghi trong cửa sổ ngắn (Clock-Free)
     short_mean_entropy: float
     short_max_entropy: float
     short_entropy_diff: float
@@ -189,7 +192,7 @@ class FeatureVector:
 
     def to_dict(self) -> Dict[str, Any]:
         """
-        Xuất toàn bộ 32 trường dữ liệu thành Dictionary chuẩn
+        Xuất toàn bộ 35 trường dữ liệu thành Dictionary chuẩn
         khớp chính xác 100% với header của dataset.csv.
         """
         return {
@@ -198,18 +201,21 @@ class FeatureVector:
             "pid": self.pid,
             "process_name": self.process_name,
             "tick_index": self.tick_index,
-            # Short Window
+            # Short Window (13)
             "short_duration_sec": self.short_duration_sec,
             "short_write_ops_per_sec": self.short_write_ops_per_sec,
             "short_read_ops_per_sec": self.short_read_ops_per_sec,
             "short_write_bytes_per_sec": self.short_write_bytes_per_sec,
+            "short_write_ops_per_file": self.short_write_ops_per_file,
+            "short_write_bytes_per_file": self.short_write_bytes_per_file,
+            "short_read_to_write_ratio": self.short_read_to_write_ratio,
             "short_mean_entropy": self.short_mean_entropy,
             "short_max_entropy": self.short_max_entropy,
             "short_entropy_diff": self.short_entropy_diff,
             "short_rename_count": self.short_rename_count,
             "short_delete_count": self.short_delete_count,
             "short_ext_diversity": self.short_ext_diversity,
-            # Medium Window
+            # Medium Window (9)
             "med_duration_sec": self.med_duration_sec,
             "med_write_ops_per_sec": self.med_write_ops_per_sec,
             "med_read_to_write_ratio": self.med_read_to_write_ratio,
@@ -219,7 +225,7 @@ class FeatureVector:
             "med_delete_count": self.med_delete_count,
             "med_ext_diversity": self.med_ext_diversity,
             "med_dir_traversal_count": self.med_dir_traversal_count,
-            # Long Window
+            # Long Window (8)
             "long_total_files": self.long_total_files,
             "long_duration_sec": self.long_duration_sec,
             "long_mean_entropy": self.long_mean_entropy,
@@ -234,15 +240,18 @@ class FeatureVector:
 
     def to_feature_list(self) -> List[float]:
         """
-        Trích xuất danh sách đúng 27 giá trị đặc trưng số học theo thứ tự chuẩn
-        để phục vụ suy luận mô hình AI (model.predict).
+        Trích xuất danh sách đúng 30 giá trị đặc trưng số học theo thứ tự chuẩn
+        (Model A - Time-Aware / Full Model) để phục vụ suy luận mô hình AI.
         """
         return [
-            # Short Window (10)
+            # Short Window (13)
             self.short_duration_sec,
             self.short_write_ops_per_sec,
             self.short_read_ops_per_sec,
             self.short_write_bytes_per_sec,
+            self.short_write_ops_per_file,
+            self.short_write_bytes_per_file,
+            self.short_read_to_write_ratio,
             self.short_mean_entropy,
             self.short_max_entropy,
             self.short_entropy_diff,
@@ -262,6 +271,40 @@ class FeatureVector:
             # Long Window (8)
             float(self.long_total_files),
             self.long_duration_sec,
+            self.long_mean_entropy,
+            float(self.long_rename_count),
+            float(self.long_delete_count),
+            float(self.long_new_ext_count),
+            float(self.long_dir_traversal_count),
+            self.long_inplace_rewrite_ratio,
+        ]
+
+    def to_time_invariant_feature_list(self) -> List[float]:
+        """
+        Trích xuất danh sách 23 đặc trưng độc lập thời gian (Model B - Clock-Free / Anti-Sleep-Evasion).
+        Loại bỏ 7 đặc trưng phụ thuộc thời gian (short/med/long duration, 3 ops_per_sec, write_bytes_per_sec).
+        """
+        return [
+            # Short Window (9 features không phụ thuộc thời gian)
+            self.short_write_ops_per_file,
+            self.short_write_bytes_per_file,
+            self.short_read_to_write_ratio,
+            self.short_mean_entropy,
+            self.short_max_entropy,
+            self.short_entropy_diff,
+            float(self.short_rename_count),
+            float(self.short_delete_count),
+            self.short_ext_diversity,
+            # Medium Window (7 features không phụ thuộc thời gian)
+            self.med_read_to_write_ratio,
+            self.med_mean_entropy,
+            self.med_high_entropy_ratio,
+            float(self.med_rename_count),
+            float(self.med_delete_count),
+            self.med_ext_diversity,
+            float(self.med_dir_traversal_count),
+            # Long Window (7 features không phụ thuộc thời gian)
+            float(self.long_total_files),
             self.long_mean_entropy,
             float(self.long_rename_count),
             float(self.long_delete_count),
