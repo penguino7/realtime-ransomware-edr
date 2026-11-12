@@ -28,44 +28,6 @@ class DatasetSplits:
     metadata_val: pd.DataFrame
     metadata_test: pd.DataFrame
 
-    # Trích xuất bảng thống kê số lượng mẫu và tỷ lệ mã độc của 3 tập
-    def get_summary(self) -> Dict[str, Any]:
-        return {
-            "variant": self.variant,
-            "num_features": len(self.feature_names),
-            "train": {
-                "total": len(self.X_train),
-                "benign": int((self.y_train == 0).sum()),
-                "ransomware": int((self.y_train == 1).sum()),
-                "pos_ratio": round(float(self.y_train.mean()) * 100, 2),
-            },
-            "val": {
-                "total": len(self.X_val),
-                "benign": int((self.y_val == 0).sum()),
-                "ransomware": int((self.y_val == 1).sum()),
-                "pos_ratio": round(float(self.y_val.mean()) * 100, 2),
-            },
-            "test": {
-                "total": len(self.X_test),
-                "benign": int((self.y_test == 0).sum()),
-                "ransomware": int((self.y_test == 1).sum()),
-                "pos_ratio": round(float(self.y_test.mean()) * 100, 2),
-            },
-        }
-
-    # In bảng tóm tắt phân tách dữ liệu ra màn hình
-    def print_summary(self) -> None:
-        s = self.get_summary()
-        print(f"\n=======================================================")
-        print(f" DATA SPLIT SUMMARY [{s['variant'].upper()}] - {s['num_features']} Features")
-        print(f"=======================================================")
-        for split_name in ["train", "val", "test"]:
-            info = s[split_name]
-            print(f"  * {split_name.upper():5s}: {info['total']:4d} mẫu "
-                  f"(Benign: {info['benign']:3d}, Ransomware: {info['ransomware']:3d} "
-                  f"| Tỷ lệ mã độc: {info['pos_ratio']}%)")
-        print(f"=======================================================\n")
-
 
 # Lớp điều phối đọc dataset và phân tách Train/Val/Test chống rò rỉ
 class DataSplitter:

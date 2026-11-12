@@ -240,7 +240,6 @@ class ModelTrainer:
         results: Dict[str, Tuple[TrainedModelBundle, DatasetSplits]] = {}
         for variant in ("model_a", "model_b"):
             splits = self.splitter.split(variant=variant)
-            splits.print_summary()
             bundle = self.train_random_forest(splits=splits)
             results[variant] = (bundle, splits)
 
