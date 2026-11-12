@@ -70,7 +70,8 @@ class DatasetSplits:
 # Lớp điều phối đọc dataset và phân tách Train/Val/Test chống rò rỉ
 class DataSplitter:
 
-    METADATA_COLS: List[str] = ["sample_id", "pid", "process_name", "tick_index"]
+    # Giữ long_total_files ở metadata để đối chiếu quy mô nhưng không đưa vào tập đặc trưng huấn luyện
+    METADATA_COLS: List[str] = ["sample_id", "pid", "process_name", "tick_index", "long_total_files"]
     LABEL_COL: str = "label"
 
     # 7 đặc trưng phụ thuộc thời gian / tốc độ cần loại bỏ đối với Model B (Clock-Free)
