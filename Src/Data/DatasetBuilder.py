@@ -24,14 +24,14 @@ class DatasetBuilder:
     # Tiến trình Watchdog đo entropy cần loại trừ riêng trong các phiên mã độc (label=1)
     WATCHDOG_PROCESSES = {"python.exe", "pythonw.exe"}
 
-    # Danh sách 36 cột chuẩn xác của dataset.csv (5 metadata + 30 đặc trưng + 1 label)
+    # Danh sách 39 cột chuẩn xác của dataset.csv (5 metadata + 33 đặc trưng + 1 label)
     DATASET_HEADER = [
         # Metadata định danh (4)
         "sample_id",
         "pid",
         "process_name",
         "tick_index",
-        # Short Window Features (13)
+        # Short Window Features (16)
         "short_duration_sec",
         "short_write_ops_per_sec",
         "short_read_ops_per_sec",
@@ -42,9 +42,12 @@ class DatasetBuilder:
         "short_mean_entropy",
         "short_max_entropy",
         "short_entropy_diff",
+        "short_high_entropy_ratio",
         "short_rename_count",
         "short_delete_count",
         "short_ext_diversity",
+        "short_new_ext_files_ratio",
+        "short_inplace_rewrite_ratio",
         # Medium Window Features (9)
         "med_duration_sec",
         "med_write_ops_per_sec",
@@ -271,7 +274,7 @@ class DatasetBuilder:
     # Quy trình xây dựng toàn diện tập dữ liệu:
     # 1. Quét hoặc làm sạch các phiên thô sang Data/Interim/.
     # 2. Duyệt qua từng phiên Interim, tạo vector đặc trưng tại mỗi Tick.
-    # 3. Ghi toàn bộ dữ liệu 36 cột vào Data/Processed/dataset.csv.
+    # 3. Ghi toàn bộ dữ liệu 39 cột vào Data/Processed/dataset.csv.
     def build(self, reparse_raw: bool = False) -> Path:
         # Nếu thư mục interim trống hoặc có yêu cầu reparse
         interim_sessions = self.discover_interim_sessions()

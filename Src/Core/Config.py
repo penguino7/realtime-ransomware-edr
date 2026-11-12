@@ -77,9 +77,9 @@ class Config:
     TEST_SIZE: float = 0.20                # 20% dữ liệu dùng cho tập kiểm thử độc lập
     VAL_SIZE: float = 0.20                 # 20% dữ liệu dùng cho tập kiểm chứng nội bộ (Validation)
 
-    # Danh sách 30 đặc trưng vật lý đa tầng đã chuẩn hóa (13 Short + 9 Medium + 8 Long)
+    # Danh sách 33 đặc trưng vật lý đa tầng đã chuẩn hóa (16 Short + 9 Medium + 8 Long)
     FEATURE_NAMES: list = [
-        # --- Short Window (13 features) ---
+        # --- Short Window (16 features) ---
         "short_duration_sec",
         "short_write_ops_per_sec",
         "short_read_ops_per_sec",
@@ -90,9 +90,12 @@ class Config:
         "short_mean_entropy",
         "short_max_entropy",
         "short_entropy_diff",
+        "short_high_entropy_ratio",
         "short_rename_count",
         "short_delete_count",
         "short_ext_diversity",
+        "short_new_ext_files_ratio",
+        "short_inplace_rewrite_ratio",
         # --- Medium Window (9 features) ---
         "med_duration_sec",
         "med_write_ops_per_sec",
