@@ -1,6 +1,4 @@
-"""
-Phân hệ Data: Tiền xử lý dữ liệu và Xây dựng Dataset
-"""
+# Phân hệ Data: Tiền xử lý dữ liệu và Xây dựng Dataset
 
 from .ParsersRawLog import (
     LogFormatters,

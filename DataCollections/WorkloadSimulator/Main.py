@@ -29,8 +29,8 @@ except (ImportError, ValueError):
     from Managers.WorkloadManager import WorkloadManager
 
 
+# Định nghĩa và phân tích các tham số dòng lệnh
 def parse_arguments() -> argparse.Namespace:
-    """Định nghĩa và phân tích các tham số dòng lệnh."""
     parser = argparse.ArgumentParser(
         description="WorkloadSimulator - Bộ giả lập hành vi người dùng lành tính (Benign Workloads) trên Windows Sandbox."
     )
@@ -82,8 +82,8 @@ def parse_arguments() -> argparse.Namespace:
     return parser.parse_args()
 
 
+# Hàm điều khiển chính của chương trình
 def main() -> None:
-    """Hàm điều khiển chính của chương trình."""
     args = parse_arguments()
 
     if args.delay_min < 0 or args.delay_max < 0 or args.delay_min > args.delay_max:

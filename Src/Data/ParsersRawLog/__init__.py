@@ -1,6 +1,4 @@
-"""
-Phân hệ ParsersRawLog: Các module nạp, chuẩn hóa và ghép cặp log thô
-"""
+# Phân hệ ParsersRawLog: Các module nạp, chuẩn hóa và ghép cặp log thô
 
 from .LogFormatters import LogFormatters
 from .EntropyLoader import EntropyLoader

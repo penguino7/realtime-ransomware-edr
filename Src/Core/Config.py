@@ -3,12 +3,9 @@ from pathlib import Path
 from typing import Set, Dict, Any, List
 
 
+# Lớp quản lý toàn bộ cấu hình và hằng số vận hành của hệ thống EDR.
+# Tất cả các thuộc tính đều được định nghĩa tĩnh (static attributes) để truy xuất thuận tiện.
 class Config:
-    """
-    Lớp quản lý toàn bộ cấu hình và hằng số vận hành của hệ thống EDR.
-    Tất cả các thuộc tính đều được định nghĩa tĩnh (static attributes) để truy xuất thuận tiện.
-    """
-
     # =========================================================================
     # 1. QUẢN LÝ ĐƯỜNG DẪN DỰ ÁN (PROJECT DIRECTORY LAYOUT - CCDS)
     # =========================================================================
@@ -124,12 +121,10 @@ class Config:
     # =========================================================================
     # 7. PHƯƠNG THỨC TIỆN ÍCH (HELPER METHODS)
     # =========================================================================
+    # Nguồn chuẩn duy nhất (SSoT) định nghĩa 8 thư mục người dùng + C:\DecoyDocs, D:\DecoyDocs.
+    # Dùng chung cho toàn bộ FileGenerator, WorkloadSimulator và EntropyInspector.
     @classmethod
     def get_monitored_directories(cls) -> List[Path]:
-        r"""
-        Nguồn chuẩn duy nhất (SSoT) định nghĩa 8 thư mục người dùng + C:\DecoyDocs, D:\DecoyDocs.
-        Dùng chung cho toàn bộ FileGenerator, WorkloadSimulator và EntropyInspector.
-        """
         home = Path.home()
         standard_user_folders = [
             "Desktop",
@@ -164,12 +159,10 @@ class Config:
 
         return directories
 
+    # Tự động kiểm tra và khởi tạo toàn bộ các thư mục làm việc theo chuẩn CCDS.
+    # Đảm bảo các thư mục luôn sẵn sàng trước khi ghi dữ liệu hoặc lưu mô hình.
     @classmethod
     def ensure_directories(cls) -> None:
-        """
-        Tự động kiểm tra và khởi tạo toàn bộ các thư mục làm việc theo chuẩn CCDS.
-        Đảm bảo các thư mục luôn sẵn sàng trước khi ghi dữ liệu hoặc lưu mô hình.
-        """
         directories = [
             cls.RAW_DATA_DIR,
             cls.INTERIM_DATA_DIR,
@@ -181,11 +174,9 @@ class Config:
         for directory in directories:
             directory.mkdir(parents=True, exist_ok=True)
 
+    # Trích xuất toàn bộ cấu hình dưới dạng từ điển (Dictionary) phục vụ logging.
     @classmethod
     def to_dict(cls) -> Dict[str, Any]:
-        """
-        Trích xuất toàn bộ cấu hình dưới dạng từ điển (Dictionary) phục vụ logging.
-        """
         return {
             "PROJECT_ROOT": str(cls.PROJECT_ROOT),
             "N_BASE": cls.N_BASE,

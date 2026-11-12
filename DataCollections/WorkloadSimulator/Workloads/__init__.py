@@ -1,8 +1,4 @@
-"""
-Package Workloads
-=================
-Chứa các chiến lược mô phỏng hành vi người dùng lành tính (Benign Workloads).
-"""
+# Package Workloads: các chiến lược mô phỏng hành vi người dùng lành tính (Benign Workloads)
 
 from .BaseWorkload import BaseWorkload
 from .CompressionWorkload import CompressionWorkload

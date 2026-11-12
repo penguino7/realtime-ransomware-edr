@@ -42,19 +42,15 @@ except (ImportError, ValueError):
     )
 
 
+# Bộ quản lý và điều phối các workload mô phỏng hành vi người dùng
 class WorkloadManager:
-    """
-    Bộ quản lý và điều phối các workload mô phỏng hành vi người dùng.
-    """
 
+    # Khởi tạo WorkloadManager và nạp các kịch bản hành vi
     def __init__(
         self,
         target_dirs: Optional[List[Path]] = None,
         custom_tool_path: Optional[str] = None
     ) -> None:
-        """
-        Khởi tạo WorkloadManager và nạp 5 kịch bản hành vi.
-        """
         self.target_dirs: List[Path] = target_dirs or self._default_directories()
         self.custom_tool_path = custom_tool_path
         self.history: List[Dict[str, Any]] = []
@@ -68,7 +64,7 @@ class WorkloadManager:
             "office": OfficeWorkload(target_dirs=self.target_dirs),
             "development": DevelopmentWorkload(target_dirs=self.target_dirs),
             "fileops": FileOpsWorkload(target_dirs=self.target_dirs, mode="mixed"),
-            # 4 Chế độ thao tác tệp tin độc lập quy mô lớn (30 - 50 files) kích hoạt Ticks
+            # 4 chế độ thao tác tệp độc lập quy mô lớn (80 - 200 files) kích hoạt Ticks
             "copy": FileOpsWorkload(target_dirs=self.target_dirs, mode="copy"),
             "rename": FileOpsWorkload(target_dirs=self.target_dirs, mode="rename"),
             "delete": FileOpsWorkload(target_dirs=self.target_dirs, mode="delete"),
@@ -84,11 +80,12 @@ class WorkloadManager:
     def _default_directories(self) -> List[Path]:
         return Config.get_monitored_directories()
 
+    # Nghỉ ngẫu nhiên giữa các lần thực thi
     def _delay(self, min_sec: float, max_sec: float) -> None:
-        """Nghỉ ngẫu nhiên giữa các lần thực thi."""
         if max_sec > 0:
             time.sleep(random.uniform(min_sec, max_sec))
 
+    # Thực thi một kịch bản chỉ định trong N chu kỳ
     def run_workload(
         self,
         task_name: str,
@@ -96,9 +93,6 @@ class WorkloadManager:
         min_delay: float = 1.0,
         max_delay: float = 3.0
     ) -> List[Dict[str, Any]]:
-        """
-        Thực thi một kịch bản chỉ định trong N chu kỳ.
-        """
         task_key = task_name.lower().strip()
         if task_key not in self.workloads:
             print(f"[!] Kịch bản '{task_name}' không tồn tại. Các kịch bản khả dụng: {list(self.workloads.keys())}")
@@ -156,6 +150,7 @@ class WorkloadManager:
 
         return results
 
+    # Mô phỏng ngày làm việc bằng cách chọn xen kẽ các kịch bản theo trọng số xác suất
     def run_mixed(
         self,
         total_actions: int = 10,
@@ -163,15 +158,6 @@ class WorkloadManager:
         max_delay: float = 3.0,
         weights: Optional[Dict[str, float]] = None
     ) -> List[Dict[str, Any]]:
-        """
-        Mô phỏng ngày làm việc tự nhiên của người dùng bằng cách chọn ngẫu nhiên
-        các kịch bản xen kẽ nhau dựa trên phân phối trọng số xác suất thực tế:
-        - Soạn thảo Office/Text: 30%
-        - Lập trình Development & Database/Config: 25%
-        - Thao tác tệp Copy/Rename/Delete: 20%
-        - Xử lý đồ họa ảnh (Hard Benign): 15%
-        - Nén/Giải nén tệp tin (thường & mật khẩu): 10%
-        """
         if weights is None:
             weights = {
                 "office": 0.30,
@@ -203,10 +189,8 @@ class WorkloadManager:
 
         return results
 
+    # In báo cáo thống kê tổng kết số lượt chạy của các kịch bản
     def print_summary(self, results: Optional[List[Dict[str, Any]]] = None) -> None:
-        """
-        In báo cáo thống kê tổng kết số lượt chạy của các kịch bản.
-        """
         target_results = results if results is not None else self.history
         if not target_results:
             print("\n[i] Không có lịch sử thực thi để thống kê.")

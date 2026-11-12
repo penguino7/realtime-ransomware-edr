@@ -5,18 +5,13 @@ from datetime import datetime
 from typing import Optional
 
 
+# Tập hợp các tiện ích tĩnh chuyển đổi định dạng và biểu thức chính quy (Regex)
+# xử lý các trường dữ liệu chuỗi trong file log thô.
 class LogFormatters:
-    """
-    Tập hợp các tiện ích tĩnh chuyển đổi định dạng và biểu thức chính quy (Regex)
-    xử lý các trường dữ liệu chuỗi trong file log thô.
-    """
-
+    # Chuyển đổi chuỗi thời gian 12-giờ của Procmon (ví dụ: '3:20:58.7449945 PM')
+    # thành số giây thực tính từ đầu ngày (độ chính xác micro-giây).
     @staticmethod
     def parse_procmon_timestamp(ts_str: str) -> float:
-        """
-        Chuyển đổi chuỗi thời gian 12-giờ của Procmon (ví dụ: '3:20:58.7449945 PM')
-        thành số giây thực tính từ đầu ngày (độ chính xác micro-giây).
-        """
         ts_str = ts_str.strip().strip('"')
         parts = ts_str.split()
         if len(parts) == 2:
@@ -35,12 +30,10 @@ class LogFormatters:
                 pass
         return 0.0
 
+    # Chuyển đổi chuỗi thời gian 24-giờ của Watchdog (ví dụ: '15:20:58.833709')
+    # thành số giây thực tính từ đầu ngày.
     @staticmethod
     def parse_realtime_timestamp(ts_str: str) -> float:
-        """
-        Chuyển đổi chuỗi thời gian 24-giờ của Watchdog (ví dụ: '15:20:58.833709')
-        thành số giây thực tính từ đầu ngày.
-        """
         ts_str = ts_str.strip().strip('"')
         try:
             if "." in ts_str:
@@ -51,12 +44,10 @@ class LogFormatters:
         except ValueError:
             return 0.0
 
+    # Trích xuất số lượng bytes (Length: X) từ cột Detail của Procmon.
+    # Ví dụ: 'Offset: 1,328, Length: 142, Priority: Normal' -> 142.
     @staticmethod
     def extract_length(detail_str: str) -> int:
-        """
-        Trích xuất số lượng bytes (Length: X) từ cột Detail của Procmon.
-        Ví dụ: 'Offset: 1,328, Length: 142, Priority: Normal' -> 142.
-        """
         match = re.search(r"Length:\s*([0-9,]+)", detail_str)
         if match:
             clean_digits = match.group(1).replace(",", "")
@@ -66,26 +57,22 @@ class LogFormatters:
                 return 0
         return 0
 
+    # Chuẩn hóa đường dẫn tập tin theo quy chuẩn Windows:
+    # - Xử lý None/rỗng.
+    # - Bỏ dấu ngoặc kép và khoảng trắng thừa.
+    # - Thống nhất dấu gạch chéo ngược (\).
+    # - Chuẩn hóa chữ thường (case-insensitive) và chuẩn đường dẫn Windows (os.path.normpath).
     @staticmethod
     def normalize_windows_path(path: Optional[str]) -> str:
-        """
-        Chuẩn hóa đường dẫn tập tin theo quy chuẩn Windows:
-        - Xử lý None/rỗng.
-        - Bỏ dấu ngoặc kép và khoảng trắng thừa.
-        - Thống nhất dấu gạch chéo ngược (\\).
-        - Chuẩn hóa chữ thường (case-insensitive) và chuẩn đường dẫn Windows (os.path.normpath).
-        """
         if not path:
             return ""
         clean_path = path.strip().strip('"').replace("/", "\\")
         return os.path.normpath(clean_path).lower()
 
+    # Trích xuất đường dẫn file mới từ cột Detail khi có thao tác đổi tên (SetRenameInformationFile).
+    # Ví dụ: 'FileName: C:\Users\...\file.docx.locked' -> 'C:\Users\...\file.docx.locked'.
     @staticmethod
     def extract_rename_path(detail_str: str) -> Optional[str]:
-        """
-        Trích xuất đường dẫn file mới từ cột Detail khi có thao tác đổi tên (SetRenameInformationFile).
-        Ví dụ: 'FileName: C:\\Users\\...\\file.docx.locked' -> 'C:\\Users\\...\\file.docx.locked'.
-        """
         match = re.search(r"FileName:\s*(.+)", detail_str)
         if match:
             return match.group(1).strip()

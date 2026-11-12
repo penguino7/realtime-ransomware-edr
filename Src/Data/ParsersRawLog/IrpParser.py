@@ -79,40 +79,36 @@ class IrpParser:
             tolerance_sec=self.tolerance_sec
         )
 
+    # Đọc tuần tự từng dòng dữ liệu từ tệp Procmon CSV, bỏ qua header.
     def _read_procmon_rows(self) -> Generator[List[str], None, None]:
-        """Đọc tuần tự từng dòng dữ liệu từ tệp Procmon CSV, bỏ qua header."""
         with open(self.procmon_path, "r", encoding="utf-8", errors="replace") as f:
             reader = csv.reader(f)
             next(reader, None)
             for row in reader:
                 yield row
 
+    # Kiểm tra tiến trình có thuộc danh sách loại trừ (hệ thống, đo đạc) không.
     def _is_excluded_process(self, proc_name: str) -> bool:
-        """Kiểm tra tiến trình có thuộc danh sách loại trừ (hệ thống, đo đạc) không."""
         return proc_name.lower() in self.excluded_processes
 
+    # Kiểm tra kết quả thực thi IRP có thành công hoặc buffer overflow không.
     @staticmethod
     def _is_success_result(raw_result: str) -> bool:
-        """Kiểm tra kết quả thực thi IRP có thành công hoặc buffer overflow không."""
         return raw_result in ("SUCCESS", "BUFFER OVERFLOW")
 
+    # Kiểm tra xem sự kiện CreateFile có thực sự truy cập hoặc thao tác dữ liệu hay không.
+    # Bỏ qua các sự kiện mở file chỉ để đọc thuộc tính (Read Attributes, Read Control, stat, exists).
     @classmethod
     def _is_meaningful_create(cls, raw_detail: str) -> bool:
-        """
-        Kiểm tra xem sự kiện CreateFile có thực sự truy cập hoặc thao tác dữ liệu hay không.
-        Bỏ qua các sự kiện mở file chỉ để đọc thuộc tính (Read Attributes, Read Control, stat, exists).
-        """
         detail_lower = raw_detail.lower()
         return any(kw in detail_lower for kw in cls.MEANINGFUL_CREATE_KEYWORDS)
 
+    # Bóc tách và xác định target_path, old_path, new_path.
+    # Đặc biệt với SetRenameInformationFile, new_path nằm trong cột Detail.
     @staticmethod
     def _resolve_paths(
         op: IRPOperation, raw_path: str, raw_detail: str
     ) -> Tuple[str, Optional[str], Optional[str]]:
-        """
-        Bóc tách và xác định target_path, old_path, new_path.
-        Đặc biệt với SetRenameInformationFile, new_path nằm trong cột Detail.
-        """
         old_path: Optional[str] = None
         new_path: Optional[str] = None
         if op == IRPOperation.RENAME:
@@ -126,19 +122,17 @@ class IrpParser:
             target_path = raw_path
         return target_path, old_path, new_path
 
+    # Kiểm tra thao tác có tác động tới thư mục mồi DecoyDocs hay không.
     def _is_decoy_path(self, raw_path: str, new_path: Optional[str]) -> bool:
-        """Kiểm tra thao tác có tác động tới thư mục mồi DecoyDocs hay không."""
         if not self.decoy_keyword:
             return True
         in_src = self.decoy_keyword in raw_path.lower()
         in_dst = new_path is not None and self.decoy_keyword in new_path.lower()
         return in_src or in_dst
 
+    # Phân tích và lọc 1 dòng Procmon log, ghép cặp Entropy và tạo IRPEvent.
+    # Trả về None nếu dòng không thỏa mãn các cổng kiểm tra.
     def _parse_row(self, row: List[str]) -> Optional[IRPEvent]:
-        """
-        Phân tích và lọc 1 dòng Procmon log, ghép cặp Entropy và tạo IRPEvent.
-        Trả về None nếu dòng không thỏa mãn các cổng kiểm tra.
-        """
         if len(row) < 7:
             return None
 
@@ -205,12 +199,10 @@ class IrpParser:
             entropy_source=match_res.entropy_source
         )
 
+    # Quét trước toàn bộ sự kiện SetRenameInformationFile trong Procmon CSV
+    # để nạp đầy đủ các cặp bí danh (A.docx <-> A.docx.lockbit) vào alias_map
+    # trước khi bắt đầu phân tích các thao tác WriteFile diễn ra trước đó.
     def _pre_scan_renames(self) -> None:
-        """
-        Quét trước toàn bộ sự kiện SetRenameInformationFile trong Procmon CSV
-        để nạp đầy đủ các cặp bí danh (A.docx <-> A.docx.lockbit) vào alias_map
-        trước khi bắt đầu phân tích các thao tác WriteFile diễn ra trước đó.
-        """
         for row in self._read_procmon_rows():
             if len(row) < 7:
                 continue
@@ -222,10 +214,8 @@ class IrpParser:
                 if new_path and self._is_decoy_path(raw_path, new_path):
                     self.loader.register_alias(raw_path, new_path)
 
+    # Duyệt qua Procmon log, áp dụng các cổng lọc và ghép cặp tạo danh sách IRPEvent.
     def parse(self, limit: Optional[int] = None) -> List[IRPEvent]:
-        """
-        Duyệt qua Procmon log, áp dụng các cổng lọc và ghép cặp tạo danh sách IRPEvent.
-        """
         if not self.procmon_path.exists():
             raise FileNotFoundError(f"Không tìm thấy Procmon log: {self.procmon_path}")
 
@@ -242,10 +232,8 @@ class IrpParser:
 
         return parsed_events
 
+    # Lưu danh sách IRPEvent vào tệp CSV trung gian tại Data/Interim/.
     def export_interim_csv(self, output_path: Union[str, Path], limit: Optional[int] = None) -> Path:
-        """
-        Lưu danh sách IRPEvent vào tệp CSV trung gian tại Data/Interim/.
-        """
         output_file = Path(output_path)
         output_file.parent.mkdir(parents=True, exist_ok=True)
 

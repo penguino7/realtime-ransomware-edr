@@ -10,10 +10,8 @@ except (ImportError, ValueError):
     from Src.Core.Config import Config
 
 
+# Phân loại các thao tác I/O hệ thống tệp chuẩn hóa từ Procmon hoặc Kernel IRP.
 class IRPOperation(str, Enum):
-    """
-    Phân loại các thao tác I/O hệ thống tệp chuẩn hóa từ Procmon hoặc Kernel IRP.
-    """
     CREATE = "CREATE"
     WRITE = "WRITE"
     READ = "READ"
@@ -22,11 +20,9 @@ class IRPOperation(str, Enum):
     CLOSE = "CLOSE"
     OTHER = "OTHER"
 
+    # Chuẩn hóa tên thao tác từ chuỗi Procmon hoặc Minifilter Driver.
     @classmethod
     def from_str(cls, op_name: str) -> "IRPOperation":
-        """
-        Chuẩn hóa tên thao tác từ chuỗi Procmon hoặc Minifilter Driver.
-        """
         op_upper = op_name.strip().upper()
         if "CREATE" in op_upper:
             return cls.CREATE
@@ -43,12 +39,10 @@ class IRPOperation(str, Enum):
         return cls.OTHER
 
 
+# Đại diện cho 1 sự kiện I/O hoàn chỉnh sau khi ghép cặp
+# thao tác hệ thống tệp và độ hỗn loạn Shannon Entropy.
 @dataclass(slots=True)
 class IRPEvent:
-    """
-    Đại diện cho 1 sự kiện I/O hoàn chỉnh sau khi ghép cặp
-    thao tác hệ thống tệp và độ hỗn loạn Shannon Entropy.
-    """
     timestamp: float                    # Dấu thời gian micro-giây 
     pid: int                            # Process ID thực thi thao tác
     process_name: str                   # Tên file thực thi 
@@ -62,23 +56,23 @@ class IRPEvent:
     match_delta_sec: Optional[float] = None # Sai lệch thời gian giữa IRP và Watchdog (giây)
     entropy_source: str = "baseline_fallback" # Nguồn entropy: "realtime", "baseline_fallback", "deletion"
 
+    # Độ biến thiên Entropy so với Baseline (Delta H = H_current - H_baseline).
     @property
     def entropy_diff(self) -> float:
-        """Độ biến thiên Entropy so với Baseline (Delta H = H_current - H_baseline)."""
         return round(self.entropy - self.baseline_entropy, 4)
 
+    # Phần mở rộng định dạng file (ví dụ: .docx, .txt).
     @property
     def extension(self) -> str:
-        """Phần mở rộng định dạng file (ví dụ: .docx, .txt)."""
         return Path(self.file_path).suffix.lower()
 
+    # Kiểm tra tệp tin có đạt ngưỡng Entropy mã hóa theo Config hay không.
     @property
     def is_high_entropy(self) -> bool:
-        """Kiểm tra tệp tin có đạt ngưỡng Entropy mã hóa theo Config hay không."""
         return self.entropy >= Config.HIGH_ENTROPY_THRESHOLD
 
+    # Chuyển đổi thành từ điển phục vụ lưu trữ trung gian (Interim CSV).
     def to_dict(self) -> Dict[str, Any]:
-        """Chuyển đổi thành từ điển phục vụ lưu trữ trung gian (Interim CSV)."""
         return {
             "timestamp": self.timestamp,
             "pid": self.pid,
@@ -96,55 +90,51 @@ class IRPEvent:
         }
 
 
+# Đại diện cho một lát cắt dữ liệu trong cửa sổ trượt (Short, Medium hoặc Long)
+# tại thời điểm tính toán đặc trưng của tiến trình.
 @dataclass(slots=True)
 class WindowSlice:
-    """
-    Đại diện cho một lát cắt dữ liệu trong cửa sổ trượt (Short, Medium hoặc Long)
-    tại thời điểm tính toán đặc trưng của tiến trình.
-    """
     window_type: str                            # Loại cửa sổ ("SHORT", "MEDIUM", "LONG")
     events: List[IRPEvent] = field(default_factory=list)
     distinct_files: Set[str] = field(default_factory=set)
     start_time: float = 0.0                     # Thời điểm bắt đầu sự kiện đầu tiên trong cửa sổ
     end_time: float = 0.0                       # Thời điểm kết thúc sự kiện cuối cùng trong cửa sổ
 
+    # Khoảng thời gian tồn tại của cửa sổ tính bằng giây (Delta t).
     @property
     def duration_sec(self) -> float:
-        """Khoảng thời gian tồn tại của cửa sổ tính bằng giây (Delta t)."""
         duration = self.end_time - self.start_time
         return max(0.0, round(duration, 6))
 
+    # Tổng dung lượng byte đã ghi trong cửa sổ.
     @property
     def total_write_bytes(self) -> int:
-        """Tổng dung lượng byte đã ghi trong cửa sổ."""
         return sum(ev.size_bytes for ev in self.events if ev.operation == IRPOperation.WRITE)
 
+    # Tổng số lần thực hiện thao tác WRITE trong cửa sổ.
     @property
     def write_ops_count(self) -> int:
-        """Tổng số lần thực hiện thao tác WRITE trong cửa sổ."""
         return sum(1 for ev in self.events if ev.operation == IRPOperation.WRITE)
 
+    # Tổng số lần thực hiện thao tác READ trong cửa sổ.
     @property
     def read_ops_count(self) -> int:
-        """Tổng số lần thực hiện thao tác READ trong cửa sổ."""
         return sum(1 for ev in self.events if ev.operation == IRPOperation.READ)
 
+    # Tổng số lần thực hiện thao tác RENAME trong cửa sổ.
     @property
     def rename_count(self) -> int:
-        """Tổng số lần thực hiện thao tác RENAME trong cửa sổ."""
         return sum(1 for ev in self.events if ev.operation == IRPOperation.RENAME)
 
+    # Tổng số lần thực hiện thao tác DELETE trong cửa sổ.
     @property
     def delete_count(self) -> int:
-        """Tổng số lần thực hiện thao tác DELETE trong cửa sổ."""
         return sum(1 for ev in self.events if ev.operation == IRPOperation.DELETE)
 
 
+# Vector đặc trưng hoàn chỉnh của một Tick
 @dataclass(slots=True)
 class FeatureVector:
-    """
-    Vector đặc trưng hoàn chỉnh của một Tick
-    """
     # 1. Metadata định danh (4 cột)
     sample_id: str                      # Mã định danh phiên chạy (ví dụ: session_benign_01)
     pid: int                            # Định danh duy nhất của tiến trình (Process ID)
@@ -190,11 +180,9 @@ class FeatureVector:
     # 5. Target Label (1 cột)
     label: int                          # 0 = Benign, 1 = Ransomware
 
+    # Xuất toàn bộ 35 trường dữ liệu thành Dictionary chuẩn
+    # khớp chính xác 100% với header của dataset.csv.
     def to_dict(self) -> Dict[str, Any]:
-        """
-        Xuất toàn bộ 35 trường dữ liệu thành Dictionary chuẩn
-        khớp chính xác 100% với header của dataset.csv.
-        """
         return {
             # Metadata
             "sample_id": self.sample_id,
@@ -238,11 +226,9 @@ class FeatureVector:
             "label": self.label,
         }
 
+    # Trích xuất danh sách đúng 30 giá trị đặc trưng số học theo thứ tự chuẩn
+    # (Model A - Time-Aware / Full Model) để phục vụ suy luận mô hình AI.
     def to_feature_list(self) -> List[float]:
-        """
-        Trích xuất danh sách đúng 30 giá trị đặc trưng số học theo thứ tự chuẩn
-        (Model A - Time-Aware / Full Model) để phục vụ suy luận mô hình AI.
-        """
         return [
             # Short Window (13)
             self.short_duration_sec,
@@ -279,11 +265,9 @@ class FeatureVector:
             self.long_inplace_rewrite_ratio,
         ]
 
+    # Trích xuất danh sách 23 đặc trưng độc lập thời gian (Model B - Clock-Free / Anti-Sleep-Evasion).
+    # Loại bỏ 7 đặc trưng phụ thuộc thời gian (short/med/long duration, 3 ops_per_sec, write_bytes_per_sec).
     def to_time_invariant_feature_list(self) -> List[float]:
-        """
-        Trích xuất danh sách 23 đặc trưng độc lập thời gian (Model B - Clock-Free / Anti-Sleep-Evasion).
-        Loại bỏ 7 đặc trưng phụ thuộc thời gian (short/med/long duration, 3 ops_per_sec, write_bytes_per_sec).
-        """
         return [
             # Short Window (9 features không phụ thuộc thời gian)
             self.short_write_ops_per_file,
@@ -314,12 +298,10 @@ class FeatureVector:
         ]
 
 
+# Cảnh báo phát hiện hành vi Ransomware thời gian thực do Detector sinh ra
+# để chuyển sang Responder kích hoạt phản ứng tiêu diệt tiến trình.
 @dataclass(slots=True)
 class DetectionAlert:
-    """
-    Cảnh báo phát hiện hành vi Ransomware thời gian thực do Detector sinh ra
-    để chuyển sang Responder kích hoạt phản ứng tiêu diệt tiến trình.
-    """
     pid: int                            # PID của tiến trình độc hại
     process_name: str                   # Tên file thực thi độc hại
     confidence: float                   # Điểm xác suất dự đoán của mô hình AI (>= 0.95)

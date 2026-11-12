@@ -10,13 +10,11 @@ except (ImportError, ValueError):
     from Src.Core.Schemas import WindowSlice, FeatureVector, IRPOperation, IRPEvent
 
 
+# Bộ trích xuất đặc trưng toán học của hệ thống Realtime Ransomware EDR.
 class FeatureExtractor:
-    """
-    Bộ trích xuất đặc trưng toán học của hệ thống Realtime Ransomware EDR.
-    """
-
     MAX_READ_TO_WRITE_RATIO: float = 100.0
 
+    # Khởi tạo FeatureExtractor với các tham số cấu hình lấy từ Config.
     def __init__(
         self,
         epsilon: Optional[float] = None,
@@ -25,9 +23,6 @@ class FeatureExtractor:
         monitored_extensions: Optional[Set[str]] = None,
         max_read_to_write_ratio: Optional[float] = None,
     ) -> None:
-        """
-        Khởi tạo FeatureExtractor với các tham số cấu hình lấy từ Config.
-        """
         self.epsilon: float = epsilon or Config.EPSILON
         self.min_duration_floor: float = min_duration_floor or Config.MIN_DURATION_FLOOR_SEC
         self.high_entropy_threshold: float = high_entropy_threshold or Config.HIGH_ENTROPY_THRESHOLD
@@ -38,6 +33,7 @@ class FeatureExtractor:
             else getattr(Config, "MAX_READ_TO_WRITE_RATIO", self.MAX_READ_TO_WRITE_RATIO)
         )
 
+    # Phương thức điều phối chính: Tính toán toàn bộ 27 đặc trưng và đóng gói vào FeatureVector.
     def extract_features(
         self,
         short_slice: WindowSlice,
@@ -49,9 +45,6 @@ class FeatureExtractor:
         tick_index: int,
         label: int = 0
     ) -> FeatureVector:
-        """
-        Phương thức điều phối chính: Tính toán toàn bộ 27 đặc trưng và đóng gói vào FeatureVector.
-        """
         short_feats = self._compute_short_features(short_slice)
         med_feats = self._compute_medium_features(med_slice)
         long_feats = self._compute_long_features(long_slice)
@@ -99,11 +92,9 @@ class FeatureExtractor:
             label=label,
         )
 
+    # Tính toán 13 đặc trưng của Cửa Sổ Ngắn (10 file riêng biệt gần nhất):
+    # Bao gồm 10 đặc trưng gốc và 3 đặc trưng độc lập thời gian (Model B / Clock-Free).
     def _compute_short_features(self, short_slice: WindowSlice) -> Dict[str, Any]:
-        """
-        Tính toán 13 đặc trưng của Cửa Sổ Ngắn (10 file riêng biệt gần nhất):
-        Bao gồm 10 đặc trưng gốc và 3 đặc trưng độc lập thời gian (Model B / Clock-Free).
-        """
         duration = short_slice.duration_sec
         write_ops = short_slice.write_ops_count
         read_ops = short_slice.read_ops_count
@@ -159,10 +150,8 @@ class FeatureExtractor:
             "short_ext_diversity": ext_diversity,
         }
 
+    # Tính toán 9 đặc trưng của Cửa Sổ Vừa (tối đa 50 file riêng biệt gần nhất).
     def _compute_medium_features(self, med_slice: WindowSlice) -> Dict[str, Any]:
-        """
-        Tính toán 9 đặc trưng của Cửa Sổ Vừa (tối đa 50 file riêng biệt gần nhất).
-        """
         duration = med_slice.duration_sec
         write_ops = med_slice.write_ops_count
         read_ops = med_slice.read_ops_count
@@ -214,10 +203,8 @@ class FeatureExtractor:
             "med_dir_traversal_count": dir_traversal_count,
         }
 
+    # Tính toán 8 đặc trưng của Cửa Sổ Dài (Tích lũy toàn bộ vòng đời tiến trình).
     def _compute_long_features(self, long_slice: WindowSlice) -> Dict[str, Any]:
-        """
-        Tính toán 8 đặc trưng của Cửa Sổ Dài (Tích lũy toàn bộ vòng đời tiến trình).
-        """
         total_files = len(long_slice.distinct_files)
         duration = long_slice.duration_sec
 
@@ -261,15 +248,13 @@ class FeatureExtractor:
             "long_inplace_rewrite_ratio": inplace_rewrite_ratio,
         }
 
+    # Trích xuất giá trị Entropy mới nhất và Delta H của từng file riêng biệt trong lát cắt.
+    # Áp dụng nguyên lý Write-Entropy (ShieldFS):
+    # - Chỉ xét các sự kiện thay đổi nội dung dữ liệu (WRITE, RENAME mang dữ liệu mới).
+    # - Tuyệt đối loại trừ các sự kiện DELETE (H=0.0) và READ để không làm méo mó và pha loãng phân phối entropy.
+    # - Đảm bảo mỗi file chỉ đóng góp đúng 1 giá trị mới nhất vào thống kê trung bình.
     @classmethod
     def _get_per_file_entropy_stats(cls, window_slice: WindowSlice) -> tuple[List[float], List[float]]:
-        """
-        Trích xuất giá trị Entropy mới nhất và Delta H của từng file riêng biệt trong lát cắt.
-        Áp dụng nguyên lý Write-Entropy (ShieldFS):
-        - Chỉ xét các sự kiện thay đổi nội dung dữ liệu (WRITE, RENAME mang dữ liệu mới).
-        - Tuyệt đối loại trừ các sự kiện DELETE (H=0.0) và READ để không làm méo mó và pha loãng phân phối entropy.
-        - Đảm bảo mỗi file chỉ đóng góp đúng 1 giá trị mới nhất vào thống kê trung bình.
-        """
         latest_entropy_map: Dict[str, float] = {}
         latest_diff_map: Dict[str, float] = {}
 

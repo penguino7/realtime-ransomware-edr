@@ -11,20 +11,15 @@ except (ImportError, ValueError):
     from Src.Data.ParsersRawLog.LogFormatters import LogFormatters
 
 
+# Chịu trách nhiệm nạp, chuẩn hóa đường dẫn và tổ chức bộ đệm tra cứu
+# cho Baseline Entropy Snapshot và Realtime Entropy Logs.
 class EntropyLoader:
-    """
-    Chịu trách nhiệm nạp, chuẩn hóa đường dẫn và tổ chức bộ đệm tra cứu
-    cho Baseline Entropy Snapshot và Realtime Entropy Logs.
-    """
-
+    # Khởi tạo EntropyLoader với đường dẫn 2 file log entropy.
     def __init__(
         self,
         baseline_path: Union[str, Path],
         realtime_path: Union[str, Path]
     ) -> None:
-        """
-        Khởi tạo EntropyLoader với đường dẫn 2 file log entropy.
-        """
         self.baseline_path = Path(baseline_path)
         self.realtime_path = Path(realtime_path)
 
@@ -53,10 +48,8 @@ class EntropyLoader:
             self.load_all()
         return self._alias_map
 
+    # Đăng ký thủ công liên kết bí danh 2 chiều giữa hai đường dẫn file.
     def register_alias(self, path1: str, path2: str) -> None:
-        """
-        Đăng ký thủ công liên kết bí danh 2 chiều giữa hai đường dẫn file.
-        """
         if not path1 or not path2:
             return
         norm1 = LogFormatters.normalize_windows_path(path1)
@@ -65,16 +58,14 @@ class EntropyLoader:
             self._alias_map[norm1] = norm2
             self._alias_map[norm2] = norm1
 
+    # Nạp đồng thời cả baseline và realtime entropy vào bộ nhớ đệm.
     def load_all(self) -> None:
-        """Nạp đồng thời cả baseline và realtime entropy vào bộ nhớ đệm."""
         self.load_baseline()
         self.load_realtime()
         self._is_loaded = True
 
+    # Đọc file baseline snapshot, tạo bảng tra cứu nhanh O(1).
     def load_baseline(self) -> Dict[str, float]:
-        """
-        Đọc file baseline snapshot, tạo bảng tra cứu nhanh O(1).
-        """
         if not self.baseline_path.exists():
             raise FileNotFoundError(f"Không tìm thấy baseline snapshot: {self.baseline_path}")
 
@@ -91,11 +82,9 @@ class EntropyLoader:
                         continue
         return self._baseline_map
 
+    # Đọc file realtime entropy, lưu đầy đủ event_type và old_path,
+    # gom nhóm theo file và sắp xếp theo trục thời gian tăng dần.
     def load_realtime(self) -> Dict[str, List[Tuple[float, float, int, str, Optional[str]]]]:
-        """
-        Đọc file realtime entropy, lưu đầy đủ event_type và old_path,
-        gom nhóm theo file và sắp xếp theo trục thời gian tăng dần.
-        """
         if not self.realtime_path.exists():
             raise FileNotFoundError(f"Không tìm thấy realtime entropy: {self.realtime_path}")
 

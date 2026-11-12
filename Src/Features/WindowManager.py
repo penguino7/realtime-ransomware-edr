@@ -11,11 +11,9 @@ except (ImportError, ValueError):
     from Src.Core.Schemas import IRPEvent, WindowSlice, IRPOperation
 
 
+# Bộ đệm trạng thái nội bộ lưu trữ toàn bộ lịch sử thao tác của 1 tiến trình (PID).
 @dataclass
 class _ProcessBuffer:
-    """
-    Bộ đệm trạng thái nội bộ lưu trữ toàn bộ lịch sử thao tác của 1 tiến trình (PID).
-    """
     pid: int
     process_name: str
     events: List[IRPEvent] = field(default_factory=list)
@@ -23,8 +21,8 @@ class _ProcessBuffer:
     distinct_files_order: List[str] = field(default_factory=list)
     ticks_emitted: int = 0
 
+    # Thêm một sự kiện IRP vào bộ đệm và cập nhật tập hợp file riêng biệt.
     def add_event(self, event: IRPEvent) -> None:
-        """Thêm một sự kiện IRP vào bộ đệm và cập nhật tập hợp file riêng biệt."""
         self.events.append(event)
         if event.file_path:
             norm_path = event.file_path.strip().lower()
@@ -32,19 +30,17 @@ class _ProcessBuffer:
                 self.distinct_files_seen.add(norm_path)
                 self.distinct_files_order.append(norm_path)
 
+    # Kiểm tra xem tiến trình đã tích lũy đủ file để kích hoạt Tick tiếp theo chưa.
     def is_tick_ready(self, n_base: int) -> bool:
-        """Kiểm tra xem tiến trình đã tích lũy đủ file để kích hoạt Tick tiếp theo chưa."""
         next_threshold = (self.ticks_emitted + 1) * n_base
         return len(self.distinct_files_seen) >= next_threshold
 
+    # Cắt 3 tầng cửa sổ (Short, Medium, Long) tại thời điểm kích hoạt Tick hiện tại.
     def create_slices(
         self,
         short_size: int,
         medium_size: int
     ) -> Tuple[WindowSlice, WindowSlice, WindowSlice]:
-        """
-        Cắt 3 tầng cửa sổ (Short, Medium, Long) tại thời điểm kích hoạt Tick hiện tại.
-        """
         # 1. Cửa sổ Dài (Long Window): Toàn bộ sự kiện từ đầu đến hiện tại
         long_distinct_files = set(self.distinct_files_seen)
         long_events = list(self.events)
@@ -91,15 +87,13 @@ class _ProcessBuffer:
 
         return short_slice, med_slice, long_slice
 
+    # Lọc danh sách các sự kiện thuộc về tập hợp các file mục tiêu,
+    # bắt đầu từ thời điểm file mục tiêu đầu tiên được truy cập đến sự kiện cuối cùng.
     @staticmethod
     def _filter_events_by_files(
         all_events: List[IRPEvent],
         target_files: Set[str]
     ) -> List[IRPEvent]:
-        """
-        Lọc danh sách các sự kiện thuộc về tập hợp các file mục tiêu,
-        bắt đầu từ thời điểm file mục tiêu đầu tiên được truy cập đến sự kiện cuối cùng.
-        """
         if not target_files or not all_events:
             return []
 
@@ -121,21 +115,16 @@ class _ProcessBuffer:
         ]
 
 
+# Lớp điều phối quản lý cửa sổ trượt đa tầng và kích hoạt sự kiện Tick theo PID.
+# Được dùng chung cho cả DatasetBuilder (offline) và Detector (online).
 class WindowManager:
-    """
-    Lớp điều phối quản lý cửa sổ trượt đa tầng và kích hoạt sự kiện Tick theo PID.
-    Được dùng chung cho cả DatasetBuilder (offline) và Detector (online).
-    """
-
+    # Khởi tạo WindowManager với các tham số cấu hình lấy từ Config.
     def __init__(
         self,
         n_base: Optional[int] = None,
         short_window_size: Optional[int] = None,
         medium_window_size: Optional[int] = None,
     ) -> None:
-        """
-        Khởi tạo WindowManager với các tham số cấu hình lấy từ Config.
-        """
         self.n_base: int = n_base or Config.N_BASE
         self.short_window_size: int = short_window_size or Config.SHORT_WINDOW_SIZE
         self.medium_window_size: int = medium_window_size or Config.MEDIUM_WINDOW_SIZE
@@ -143,18 +132,15 @@ class WindowManager:
         # Bảng băm lưu trữ bộ đệm tiến trình: Dict[PID, _ProcessBuffer]
         self._buffers: Dict[int, _ProcessBuffer] = {}
 
+    # Tiếp nhận một sự kiện IRP, nạp vào bộ đệm của PID tương ứng và kiểm tra điều kiện Tick.
+    # Returns:
+    # Tuple[WindowSlice, WindowSlice, WindowSlice, int]: (short, med, long, tick_index)
+    # nếu sự kiện này kích hoạt Tick mới.
+    # None: nếu tiến trình chưa tích lũy đủ số file riêng biệt để đạt mốc Tick mới.
     def add_event(
         self,
         event: IRPEvent
     ) -> Optional[Tuple[WindowSlice, WindowSlice, WindowSlice, int]]:
-        """
-        Tiếp nhận một sự kiện IRP, nạp vào bộ đệm của PID tương ứng và kiểm tra điều kiện Tick.
-
-        Returns:
-            Tuple[WindowSlice, WindowSlice, WindowSlice, int]: (short, med, long, tick_index)
-            nếu sự kiện này kích hoạt Tick mới.
-            None: nếu tiến trình chưa tích lũy đủ số file riêng biệt để đạt mốc Tick mới.
-        """
         pid = event.pid
         if pid not in self._buffers:
             self._buffers[pid] = _ProcessBuffer(
@@ -177,13 +163,11 @@ class WindowManager:
 
         return None
 
+    # Truy vấn nhanh bộ 3 lát cắt cửa sổ hiện tại của một tiến trình mà không làm tăng Tick.
     def get_process_windows(
         self,
         pid: int
     ) -> Optional[Tuple[WindowSlice, WindowSlice, WindowSlice, int]]:
-        """
-        Truy vấn nhanh bộ 3 lát cắt cửa sổ hiện tại của một tiến trình mà không làm tăng Tick.
-        """
         buf = self._buffers.get(pid)
         if not buf or not buf.events:
             return None
@@ -194,17 +178,17 @@ class WindowManager:
         )
         return short_s, med_s, long_s, buf.ticks_emitted
 
+    # Trả về số lượng file riêng biệt mà tiến trình PID đã tác động đến thời điểm hiện tại.
     def get_distinct_files_count(self, pid: int) -> int:
-        """Trả về số lượng file riêng biệt mà tiến trình PID đã tác động đến thời điểm hiện tại."""
         buf = self._buffers.get(pid)
         return len(buf.distinct_files_seen) if buf else 0
 
+    # Giải phóng bộ đệm của một tiến trình khi tiến trình đó kết thúc hoặc bị tiêu diệt.
     def cleanup_process(self, pid: int) -> None:
-        """Giải phóng bộ đệm của một tiến trình khi tiến trình đó kết thúc hoặc bị tiêu diệt."""
         if pid in self._buffers:
             del self._buffers[pid]
 
+    # Xóa sạch bộ đệm của toàn bộ tiến trình (dùng khi bắt đầu phiên mới).
     def reset(self) -> None:
-        """Xóa sạch bộ đệm của toàn bộ tiến trình (dùng khi bắt đầu phiên mới)."""
         self._buffers.clear()
 

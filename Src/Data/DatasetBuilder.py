@@ -86,15 +86,13 @@ class DatasetBuilder:
         self.window_manager = window_manager or WindowManager()
         self.feature_extractor = feature_extractor or FeatureExtractor()
 
+    # Quét các thư mục session chuẩn trong Data/Raw/:
+    # Quy ước cấu trúc: Data/Raw/<Session_Name>/
+    # Mỗi thư mục hợp lệ bắt buộc chứa đủ 3 tệp:
+    # - before_entropy.csv (Snapshot baseline)
+    # - realtime_entropy.csv (Entropy đo bởi Watchdog)
+    # - procmon.csv (Nhật ký IRP Procmon)
     def discover_raw_sessions(self) -> List[Dict[str, Any]]:
-        """
-        Quét các thư mục session chuẩn trong Data/Raw/:
-        Quy ước cấu trúc: Data/Raw/<Session_Name>/
-        Mỗi thư mục hợp lệ bắt buộc chứa đủ 3 tệp:
-        - before_entropy.csv (Snapshot baseline)
-        - realtime_entropy.csv (Entropy đo bởi Watchdog)
-        - procmon.csv (Nhật ký IRP Procmon)
-        """
         sessions: List[Dict[str, Any]] = []
         if not self.raw_dir.exists():
             return sessions
@@ -125,11 +123,8 @@ class DatasetBuilder:
 
         return sessions
 
+    # Gọi IrpParser hàng loạt để làm sạch các phiên thô và lưu vào Data/Interim/.
     def build_interim_from_raw(self, reparse: bool = False) -> List[Path]:
-        """
-        Gọi IrpParser hàng loạt để làm sạch các phiên thô và lưu vào Data/Interim/.
-
-        """
         self.interim_dir.mkdir(parents=True, exist_ok=True)
         raw_sessions = self.discover_raw_sessions()
         interim_paths: List[Path] = []
@@ -152,13 +147,10 @@ class DatasetBuilder:
 
         return interim_paths
 
+    # Quét thư mục Data/Interim/ để tìm toàn bộ các file *_cleaned.csv có sẵn,
+    # tự động xác định nhãn dựa trên tên tệp tin.
+    # :return: Danh sách các bộ (interim_path, sample_id, label).
     def discover_interim_sessions(self) -> List[Tuple[Path, str, int]]:
-        """
-        Quét thư mục Data/Interim/ để tìm toàn bộ các file *_cleaned.csv có sẵn,
-        tự động xác định nhãn dựa trên tên tệp tin.
-
-        :return: Danh sách các bộ (interim_path, sample_id, label).
-        """
         if not self.interim_dir.exists():
             return []
 
@@ -175,9 +167,9 @@ class DatasetBuilder:
         sessions.sort(key=lambda s: s[1])
         return sessions
 
+    # Chuyển đổi một dòng Dict từ file interim CSV thành đối tượng IRPEvent.
     @staticmethod
     def _parse_interim_row(row: Dict[str, str]) -> Optional[IRPEvent]:
-        """Chuyển đổi một dòng Dict từ file interim CSV thành đối tượng IRPEvent."""
         try:
             ts = float(row["timestamp"])
             pid = int(row["pid"])
@@ -212,6 +204,7 @@ class DatasetBuilder:
             entropy_source=entropy_source
         )
 
+    # Trích xuất vector 27 đặc trưng vật lý từ bộ 3 cửa sổ trượt tại mốc Tick.
     def _extract_tick_vector(
         self,
         slices_tuple: Tuple[Any, Any, Any, int],
@@ -220,7 +213,6 @@ class DatasetBuilder:
         proc_name: str,
         label: int
     ) -> FeatureVector:
-        """Trích xuất vector 27 đặc trưng vật lý từ bộ 3 cửa sổ trượt tại mốc Tick."""
         short_slice, med_slice, long_slice, tick_index = slices_tuple
         return self.feature_extractor.extract_features(
             short_slice=short_slice,
@@ -233,15 +225,13 @@ class DatasetBuilder:
             label=label
         )
 
+    # Đọc một file interim CSV dạng luồng, bơm vào WindowManager và trích xuất đặc trưng.
     def process_interim_session(
         self,
         interim_path: Union[str, Path],
         sample_id: str,
         label: int
     ) -> List[FeatureVector]:
-        """
-        Đọc một file interim CSV dạng luồng, bơm vào WindowManager và trích xuất đặc trưng.
-        """
         file_path = Path(interim_path)
         if not file_path.exists():
             raise FileNotFoundError(f"Không tìm thấy interim log: {file_path}")
@@ -272,14 +262,11 @@ class DatasetBuilder:
 
         return vectors
 
+    # Quy trình xây dựng toàn diện tập dữ liệu:
+    # 1. Quét hoặc làm sạch các phiên thô sang Data/Interim/.
+    # 2. Duyệt qua từng phiên Interim, tạo vector đặc trưng tại mỗi Tick.
+    # 3. Ghi toàn bộ dữ liệu 31 cột vào Data/Processed/dataset.csv.
     def build(self, reparse_raw: bool = False) -> Path:
-        """
-        Quy trình xây dựng toàn diện tập dữ liệu:
-        1. Quét hoặc làm sạch các phiên thô sang Data/Interim/.
-        2. Duyệt qua từng phiên Interim, tạo vector đặc trưng tại mỗi Tick.
-        3. Ghi toàn bộ dữ liệu 31 cột vào Data/Processed/dataset.csv.
-
-        """
         # Nếu thư mục interim trống hoặc có yêu cầu reparse
         interim_sessions = self.discover_interim_sessions()
         if not interim_sessions or reparse_raw:
@@ -310,10 +297,8 @@ class DatasetBuilder:
 
         return self.output_csv_path
 
+    # Thống kê tổng quan về tệp dữ liệu đã xây dựng (số dòng, số cột, phân bố nhãn).
     def get_dataset_summary(self) -> Dict[str, Any]:
-        """
-        Thống kê tổng quan về tệp dữ liệu đã xây dựng (số dòng, số cột, phân bố nhãn).
-        """
         if not self.output_csv_path.exists():
             return {"exists": False, "message": "dataset.csv chưa được khởi tạo."}
 
