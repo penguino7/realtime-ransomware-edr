@@ -1,25 +1,32 @@
-
 import random
 from pathlib import Path
-from typing import List, Dict, Optional, Any
+from typing import Any, Dict, List, Optional
+
 from PIL import Image
+
 from .BaseWorkload import BaseWorkload
 
 
+# Kịch bản xử lý ảnh hàng loạt (xoay, resize, lật) theo cụm thư mục ảnh
 class ImageWorkload(BaseWorkload):
-    """
-    Kịch bản xử lý ảnh hàng loạt (xoay ảnh, resize, lật ảnh) trên các thư mục mồi DecoyDocs.
-    """
 
-    def __init__(self, target_dirs: Optional[List[Path]] = None) -> None:
+    BURST_SIZE = 15
+
+    # Khởi tạo workload đồ họa với dải số lượng ảnh mục tiêu
+    def __init__(
+        self,
+        target_dirs: Optional[List[Path]] = None,
+        min_files: int = 40,
+        max_files: int = 100
+    ) -> None:
         super().__init__(target_dirs=target_dirs, name="ImageWorkload")
+        self.min_files = max(5, min_files)
+        self.max_files = max(self.min_files, max_files)
 
+    # Đọc, chỉnh sửa một tệp ảnh trong RAM và lưu đè lại vào đĩa
     def _process_single_image(self, image_path: Path) -> bool:
-        """
-        Đọc và chỉnh sửa một tệp tin ảnh, sau đó lưu đè lại vào đĩa.
-        """
         try:
-            # Mở và nạp dữ liệu ảnh vào RAM trước để đóng file handle, tránh lock file trên Windows
+            # Nạp ảnh vào RAM trước để đóng file handle, tránh lock file trên Windows
             with Image.open(image_path) as img:
                 img.load()
                 action = random.choice(["rotate", "resize", "flip"])
@@ -35,7 +42,6 @@ class ImageWorkload(BaseWorkload):
                 else:
                     processed = img.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
 
-            # Xác định định dạng ảnh và lưu đè lại
             is_png = image_path.suffix.lower() == ".png"
             fmt = "PNG" if is_png else "JPEG"
 
@@ -47,10 +53,8 @@ class ImageWorkload(BaseWorkload):
         except Exception:
             return False
 
+    # Thực thi kịch bản xử lý ảnh hàng loạt theo cụm thư mục và nhịp burst/pause
     def execute(self) -> Dict[str, Any]:
-        """
-        Thực thi kịch bản xử lý ảnh hàng loạt trên danh sách file mồi.
-        """
         target_extensions = [".jpg", ".jpeg", ".png"]
         files = self.find_files(extensions=target_extensions)
 
@@ -58,19 +62,21 @@ class ImageWorkload(BaseWorkload):
             print("[!] Không tìm thấy file ảnh nào trong DecoyDocs.")
             return {"workload": self.name, "status": "skipped", "message": "Không có file ảnh"}
 
-        # Chọn ngẫu nhiên từ 6 đến 15 file ảnh để xử lý
-        random.shuffle(files)
-        selected_files = files[:min(len(files), 15)]
+        target_count = (
+            random.randint(self.min_files, min(len(files), self.max_files))
+            if len(files) >= self.min_files
+            else len(files)
+        )
+        selected_files = self.select_files_clustered(files, target_count=target_count, locality_ratio=0.85)
 
         print(f"[*] [{self.name}] Bắt đầu mở và xử lý đồ họa hàng loạt trên {len(selected_files)} file ảnh...")
         processed_count = 0
 
-        for file_path in selected_files:
+        for idx, file_path in enumerate(selected_files):
             if self._process_single_image(file_path):
                 processed_count += 1
 
-            # Tạm dừng ngắn mô phỏng nhịp xử lý liên tiếp của phần mềm đồ họa
-            self.random_delay(0.1, 0.3)
+            self.burst_or_pause(idx, burst_size=self.BURST_SIZE, burst_delay=(0.01, 0.05), pause_range=(1.0, 2.5))
 
         print(f"[+] [{self.name}] Đã xử lý và lưu thành công {processed_count}/{len(selected_files)} tệp tin ảnh.")
 
