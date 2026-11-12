@@ -21,9 +21,10 @@ except (ImportError, ValueError):
 
 
 class DatasetBuilder:
+    # Tiến trình Watchdog đo entropy cần loại trừ riêng trong các phiên mã độc (label=1)
+    WATCHDOG_PROCESSES = {"python.exe", "pythonw.exe"}
 
-
-    # Danh sách 32 cột chuẩn xác của dataset.csv
+    # Danh sách 35 cột chuẩn xác của dataset.csv (4 metadata + 30 đặc trưng + 1 label)
     DATASET_HEADER = [
         # Metadata định danh (4)
         "sample_id",
@@ -204,7 +205,7 @@ class DatasetBuilder:
             entropy_source=entropy_source
         )
 
-    # Trích xuất vector 27 đặc trưng vật lý từ bộ 3 cửa sổ trượt tại mốc Tick.
+    # Trích xuất vector 30 đặc trưng vật lý từ bộ 3 cửa sổ trượt tại mốc Tick.
     def _extract_tick_vector(
         self,
         slices_tuple: Tuple[Any, Any, Any, int],
@@ -249,6 +250,10 @@ class DatasetBuilder:
                 if event is None:
                     continue
 
+                # Trong phiên mã độc (label=1), bỏ qua Watchdog python.exe để tránh ô nhiễm nhãn
+                if label == 1 and event.process_name.strip().lower() in self.WATCHDOG_PROCESSES:
+                    continue
+
                 slices_tuple = self.window_manager.add_event(event)
                 if slices_tuple is not None:
                     vec = self._extract_tick_vector(
@@ -265,7 +270,7 @@ class DatasetBuilder:
     # Quy trình xây dựng toàn diện tập dữ liệu:
     # 1. Quét hoặc làm sạch các phiên thô sang Data/Interim/.
     # 2. Duyệt qua từng phiên Interim, tạo vector đặc trưng tại mỗi Tick.
-    # 3. Ghi toàn bộ dữ liệu 31 cột vào Data/Processed/dataset.csv.
+    # 3. Ghi toàn bộ dữ liệu 35 cột vào Data/Processed/dataset.csv.
     def build(self, reparse_raw: bool = False) -> Path:
         # Nếu thư mục interim trống hoặc có yêu cầu reparse
         interim_sessions = self.discover_interim_sessions()
@@ -327,7 +332,7 @@ class DatasetBuilder:
             "malware_samples": malware_count,
             "imbalance_ratio": f"{imbalance_ratio}:1" if malware_count > 0 else "N/A (chỉ có benign)",
             "columns_count": len(columns),
-            "features_count": len(columns) - 4  # Trừ 3 metadata và 1 label = 27 đặc trưng
+            "features_count": len(columns) - 5  # Trừ 4 metadata và 1 label = 30 đặc trưng
         }
 
 
