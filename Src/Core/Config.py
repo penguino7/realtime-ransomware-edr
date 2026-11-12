@@ -76,15 +76,17 @@ class Config:
     RANDOM_STATE: int = 42                 # Hạt giống cố định để bảo đảm tính tái lập (Reproducibility)
     TEST_SIZE: float = 0.20                # 20% dữ liệu dùng cho tập kiểm thử độc lập
     VAL_SIZE: float = 0.20                 # 20% dữ liệu dùng cho tập kiểm chứng nội bộ (Validation)
-    MALWARE_CONFIDENCE_THRESHOLD: float = 0.95  # Yêu cầu độ tin cậy >= 95% mới kích hoạt tiêu diệt tiến trình (chống FPR)
 
-    # Danh sách 27 đặc trưng vật lý đa tầng đã chuẩn hóa
+    # Danh sách 30 đặc trưng vật lý đa tầng đã chuẩn hóa (13 Short + 9 Medium + 8 Long)
     FEATURE_NAMES: list = [
-        # --- Short Window (10 features) ---
+        # --- Short Window (13 features) ---
         "short_duration_sec",
         "short_write_ops_per_sec",
         "short_read_ops_per_sec",
         "short_write_bytes_per_sec",
+        "short_write_ops_per_file",
+        "short_write_bytes_per_file",
+        "short_read_to_write_ratio",
         "short_mean_entropy",
         "short_max_entropy",
         "short_entropy_diff",
@@ -190,7 +192,6 @@ class Config:
             "RANDOM_STATE": cls.RANDOM_STATE,
             "TEST_SIZE": cls.TEST_SIZE,
             "VAL_SIZE": cls.VAL_SIZE,
-            "MALWARE_CONFIDENCE_THRESHOLD": cls.MALWARE_CONFIDENCE_THRESHOLD,
             "TOTAL_FEATURES": len(cls.FEATURE_NAMES),
             "PORT_NAME": cls.PORT_NAME,
         }
