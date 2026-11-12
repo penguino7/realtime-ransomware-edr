@@ -1,14 +1,3 @@
-"""
-Module DataSplitter: Tiền xử lý và phân tách tập dữ liệu huấn luyện/kiểm thử.
-- Đọc và kiểm định tính toàn vẹn của Data/Processed/dataset.csv.
-- Hỗ trợ kiến trúc song mô hình (Dual-Model Paradigm):
-    + Model A (Full, Time-Aware): 30 đặc trưng vật lý đa tầng.
-    + Model B (Clock-Free / Anti-Sleep-Evasion): 23 đặc trưng độc lập thời gian.
-- Áp dụng chiến lược phân tách chống rò rỉ dữ liệu (Anti-Leakage Protocol):
-    + Lớp Benign: GroupShuffleSplit theo sample_id (cách ly hoàn toàn các phiên giữa Train, Val, Test).
-    + Lớp Ransomware: Phân tách theo chuỗi thời gian/mốc tick (Time-series Sequence Split)
-      hoặc GroupShuffleSplit khi có nhiều phiên mã độc.
-"""
 
 from dataclasses import dataclass
 from pathlib import Path
@@ -24,11 +13,9 @@ except (ImportError, ValueError):
     from Src.Core.Config import Config
 
 
+# Gói kết quả dữ liệu sau khi tách Train, Validation và Test
 @dataclass
 class DatasetSplits:
-    """
-    Cấu trúc dữ liệu đóng gói kết quả phân tách tập dữ liệu huấn luyện, kiểm chứng và kiểm thử.
-    """
     X_train: pd.DataFrame
     y_train: pd.Series
     X_val: pd.DataFrame
@@ -41,8 +28,8 @@ class DatasetSplits:
     metadata_val: pd.DataFrame
     metadata_test: pd.DataFrame
 
+    # Trích xuất bảng thống kê số lượng mẫu và tỷ lệ mã độc của 3 tập
     def get_summary(self) -> Dict[str, Any]:
-        """Trích xuất bảng thống kê tóm tắt số lượng mẫu và phân bố nhãn."""
         return {
             "variant": self.variant,
             "num_features": len(self.feature_names),
@@ -66,8 +53,8 @@ class DatasetSplits:
             },
         }
 
+    # In bảng tóm tắt phân tách dữ liệu ra màn hình
     def print_summary(self) -> None:
-        """In báo cáo phân tách dữ liệu trực quan ra console."""
         s = self.get_summary()
         print(f"\n=======================================================")
         print(f" DATA SPLIT SUMMARY [{s['variant'].upper()}] - {s['num_features']} Features")
@@ -80,10 +67,8 @@ class DatasetSplits:
         print(f"=======================================================\n")
 
 
+# Lớp điều phối đọc dataset và phân tách Train/Val/Test chống rò rỉ
 class DataSplitter:
-    """
-    Lớp điều phối tiền xử lý và phân tách dữ liệu chống rò rỉ (Data Leakage Protection).
-    """
 
     METADATA_COLS: List[str] = ["sample_id", "pid", "process_name", "tick_index"]
     LABEL_COL: str = "label"
@@ -99,6 +84,7 @@ class DataSplitter:
         "long_duration_sec",
     }
 
+    # Khởi tạo bộ chia dữ liệu với đường dẫn dataset và tỷ lệ tách
     def __init__(
         self,
         dataset_path: Optional[Path] = None,
@@ -106,9 +92,6 @@ class DataSplitter:
         val_size: float = Config.VAL_SIZE,
         random_state: int = Config.RANDOM_STATE
     ) -> None:
-        """
-        Khởi tạo DataSplitter với đường dẫn dataset và siêu tham số phân tách.
-        """
         self.dataset_path: Path = Path(
             dataset_path if dataset_path is not None
             else Config.PROCESSED_DATA_DIR / Config.DATASET_FILENAME
@@ -117,10 +100,8 @@ class DataSplitter:
         self.val_size: float = float(val_size)
         self.random_state: int = int(random_state)
 
+    # Đọc file dataset.csv và kiểm tra tính toàn vẹn (không rỗng, không NaN)
     def load_dataset(self) -> pd.DataFrame:
-        """
-        Đọc và kiểm định tính toàn vẹn của tệp dataset.csv.
-        """
         if not self.dataset_path.exists():
             raise FileNotFoundError(
                 f"Không tìm thấy tập dữ liệu tại: {self.dataset_path}. "
@@ -142,12 +123,8 @@ class DataSplitter:
 
         return df
 
+    # Lấy danh sách tên cột đặc trưng cho Model A (30 cột) hoặc Model B (23 cột)
     def get_feature_names(self, df: pd.DataFrame, variant: str = "model_a") -> List[str]:
-        """
-        Trích xuất danh sách tên cột đặc trưng theo biến thể mô hình:
-        - "model_a": 30 đặc trưng vật lý đầy đủ (Time-Aware).
-        - "model_b": 23 đặc trưng độc lập thời gian (Clock-Free / Anti-Sleep-Evasion).
-        """
         excluded = set(self.METADATA_COLS) | {self.LABEL_COL}
         all_features = [col for col in df.columns if col not in excluded]
 
@@ -164,14 +141,10 @@ class DataSplitter:
                 f"Biến thể '{variant}' không hợp lệ! Chỉ chấp nhận: 'model_a' hoặc 'model_b'."
             )
 
+    # Tách lớp Benign theo từng phiên (GroupShuffleSplit theo sample_id)
     def _split_benign(
         self, benign_df: pd.DataFrame
     ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-        """
-        Phân tách lớp Benign theo nhóm phiên (GroupShuffleSplit theo sample_id).
-        Đảm bảo 100% không rò rỉ dữ liệu: các tick của cùng 1 phiên lành tính
-        chỉ được nằm ở đúng một tập duy nhất (Train, Val hoặc Test).
-        """
         num_sessions = benign_df["sample_id"].nunique()
         if num_sessions < 3:
             raise ValueError(
@@ -201,16 +174,10 @@ class DataSplitter:
 
         return b_train, b_val, b_test
 
+    # Tách lớp Ransomware theo phiên (>=3 phiên) hoặc theo chuỗi thời gian tick_index
     def _split_ransomware(
         self, rw_df: pd.DataFrame
     ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-        """
-        Phân tách lớp Ransomware chống rò rỉ:
-        - Nếu có >= 3 phiên mã độc: Dùng GroupShuffleSplit theo sample_id.
-        - Nếu chỉ có 1-2 phiên mã độc (ví dụ hiện tại có LockBit 3.0):
-          Dùng chiến lược phân tách chuỗi thời gian (Time-series / Sequence Split theo tick_index).
-          Mô hình học từ các tick sớm và kiểm thử mù trên các tick muộn.
-        """
         num_rw_sessions = rw_df["sample_id"].nunique()
 
         if num_rw_sessions >= 3:
@@ -248,14 +215,8 @@ class DataSplitter:
 
         return rw_train, rw_val, rw_test
 
+    # Chạy toàn bộ quy trình chia Train/Val/Test và đóng gói thành DatasetSplits
     def split(self, variant: str = "model_a") -> DatasetSplits:
-        """
-        Quy trình điều phối chính:
-        1. Nạp và kiểm định dataset.
-        2. Xác định tập đặc trưng theo biến thể ('model_a' hoặc 'model_b').
-        3. Phân tách Benign (Group-aware) và Ransomware (Time-aware) độc lập.
-        4. Ghép cặp, xáo trộn nội bộ (shuffle) và đóng gói đối tượng DatasetSplits.
-        """
         df = self.load_dataset()
         feature_names = self.get_feature_names(df, variant=variant)
 
