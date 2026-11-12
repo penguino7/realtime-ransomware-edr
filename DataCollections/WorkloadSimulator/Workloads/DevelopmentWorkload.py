@@ -1,11 +1,12 @@
-
-import sys
-import time
 import random
 import sqlite3
+import sys
+import time
 from pathlib import Path
-from typing import List, Dict, Optional, Any
+from typing import Any, Dict, List, Optional
+
 from faker import Faker
+
 from .BaseWorkload import BaseWorkload
 
 # Thiết lập encoding UTF-8 cho console Windows tránh UnicodeEncodeError
@@ -21,16 +22,17 @@ if sys.stderr and hasattr(sys.stderr, "reconfigure"):
         pass
 
 
+# Kịch bản giả lập thao tác lập trình, cập nhật cấu hình và ghi cơ sở dữ liệu theo cụm thư mục
 class DevelopmentWorkload(BaseWorkload):
-    """
-    Kịch bản thực hiện các thao tác lập trình, cập nhật cấu hình và tương tác cơ sở dữ liệu.
-    """
 
+    BURST_SIZE = 20
+
+    # Khởi tạo workload lập trình với dải số lượng tệp mục tiêu
     def __init__(
         self,
         target_dirs: Optional[List[Path]] = None,
-        min_files: int = 30,
-        max_files: int = 50,
+        min_files: int = 60,
+        max_files: int = 150,
         locale: str = "vi_VN"
     ) -> None:
         super().__init__(target_dirs=target_dirs, name="DevelopmentWorkload")
@@ -41,14 +43,13 @@ class DevelopmentWorkload(BaseWorkload):
         except Exception:
             self.faker = Faker("en_US")
 
+    # Bổ sung hàm tiện ích mới vào tệp mã nguồn Python (.py)
     def _modify_python(self, file_path: Path) -> bool:
-        """Mở tệp mã nguồn Python .py, bổ sung hàm tiện ích mới và lưu đè lại."""
         try:
             func_name = f"helper_{self.faker.word()}_{random.randint(100, 999)}"
             new_code = (
                 f"\n\ndef {func_name}(payload: dict) -> bool:\n"
-                f"    \"\"\"{self.faker.sentence()}\"\"\"\n"
-                f"    # Tự động cập nhật logic nghiệp vụ ngày {time.strftime('%Y-%m-%d')}\n"
+                f"    # {self.faker.sentence()} (cập nhật ngày {time.strftime('%Y-%m-%d')})\n"
                 f"    validated_data = {{k: str(v) for k, v in payload.items()}}\n"
                 f"    return len(validated_data) > 0\n"
             )
@@ -58,8 +59,8 @@ class DevelopmentWorkload(BaseWorkload):
         except Exception:
             return False
 
+    # Chèn thêm hàm tính toán mới vào tệp mã nguồn C++ (.cpp)
     def _modify_cpp(self, file_path: Path) -> bool:
-        """Mở tệp mã nguồn C++ .cpp, chèn thêm một hàm tính toán và lưu đè lại."""
         try:
             func_name = f"Process{self.faker.word().capitalize()}{random.randint(10, 99)}"
             new_code = (
@@ -78,8 +79,8 @@ class DevelopmentWorkload(BaseWorkload):
         except Exception:
             return False
 
+    # Bổ sung khối phần tử mới vào cuối tệp HTML hoặc XML
     def _modify_markup(self, file_path: Path) -> bool:
-        """Mở tệp HTML hoặc XML, bổ sung khối phần tử mới vào cuối văn bản."""
         try:
             ext = file_path.suffix.lower()
             if ext == ".html":
@@ -104,8 +105,8 @@ class DevelopmentWorkload(BaseWorkload):
         except Exception:
             return False
 
+    # Thêm câu lệnh INSERT giao dịch vào tệp kịch bản SQL (.sql)
     def _modify_sql(self, file_path: Path) -> bool:
-        """Mở tệp kịch bản SQL .sql, thêm câu lệnh chèn bản ghi giao dịch."""
         try:
             query = (
                 f"\n-- Giao dịch kế toán lúc {time.strftime('%Y-%m-%d %H:%M:%S')}\n"
@@ -118,29 +119,19 @@ class DevelopmentWorkload(BaseWorkload):
         except Exception:
             return False
 
+    # Kết nối SQLite (.db, .sqlite) và chèn bản ghi kiểm toán theo block 4KB
     def _modify_sqlite(self, file_path: Path) -> bool:
-        """
-        Kết nối tới tệp SQLite (.db, .sqlite), thực thi câu lệnh INSERT giao dịch thật.
-        Kích hoạt cơ chế ghi đè dữ liệu theo từng block 4KB chuẩn của database engine.
-        """
         conn = None
         try:
             conn = sqlite3.connect(str(file_path), timeout=3.0)
             cursor = conn.cursor()
 
-            # Tạo bảng nhật ký nếu chưa có để đảm bảo tương thích mọi file DB
             cursor.execute(
-                """
-                CREATE TABLE IF NOT EXISTS audit_logs (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    event_time TEXT,
-                    user_name TEXT,
-                    action_detail TEXT
-                )
-                """
+                "CREATE TABLE IF NOT EXISTS audit_logs ("
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                "event_time TEXT, user_name TEXT, action_detail TEXT)"
             )
 
-            # Chèn 1-2 dòng nhật ký kiểm toán hệ thống
             for _ in range(random.randint(1, 2)):
                 cursor.execute(
                     "INSERT INTO audit_logs (event_time, user_name, action_detail) VALUES (?, ?, ?)",
@@ -158,8 +149,8 @@ class DevelopmentWorkload(BaseWorkload):
                 except Exception:
                     pass
 
+    # Chèn thêm section/trường cấu hình mới vào tệp .ini hoặc .yaml
     def _modify_config(self, file_path: Path) -> bool:
-        """Mở tệp cấu hình .ini hoặc .yaml, chèn thêm trường thiết lập mới."""
         try:
             ext = file_path.suffix.lower()
             timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
@@ -183,8 +174,8 @@ class DevelopmentWorkload(BaseWorkload):
         except Exception:
             return False
 
+    # Ghi nối tiếp các dòng nhật ký vận hành hệ thống vào cuối file .log
     def _modify_log(self, file_path: Path) -> bool:
-        """Ghi nối tiếp các dòng nhật ký vận hành hệ thống vào cuối file .log."""
         try:
             levels = ["INFO", "DEBUG", "WARNING"]
             entries = []
@@ -201,56 +192,42 @@ class DevelopmentWorkload(BaseWorkload):
         except Exception:
             return False
 
+    # Thực thi kịch bản lập trình và quản trị hệ thống theo cụm thư mục
     def execute(self) -> Dict[str, Any]:
-        """
-        Thực thi kịch bản mô phỏng các hoạt động lập trình và quản trị hệ thống.
-        """
-        target_extensions = [
-            ".py", ".cpp", ".html", ".xml", ".sql",
-            ".db", ".sqlite", ".ini", ".yaml", ".log"
-        ]
-        files = self.find_files(extensions=target_extensions)
+        handlers = {
+            ".py": self._modify_python,
+            ".cpp": self._modify_cpp,
+            ".html": self._modify_markup,
+            ".xml": self._modify_markup,
+            ".sql": self._modify_sql,
+            ".db": self._modify_sqlite,
+            ".sqlite": self._modify_sqlite,
+            ".ini": self._modify_config,
+            ".yaml": self._modify_config,
+            ".log": self._modify_log,
+        }
+        files = self.find_files(extensions=list(handlers.keys()))
 
         if not files:
             print("[!] Không tìm thấy file mã nguồn/database/config nào trong DecoyDocs.")
             return {"workload": self.name, "status": "skipped", "message": "Không có file mã nguồn hoặc cấu hình"}
 
-        # Chọn ngẫu nhiên từ min_files đến max_files để thao tác (30 - 50 files)
-        random.shuffle(files)
         target_count = (
             random.randint(self.min_files, min(len(files), self.max_files))
             if len(files) >= self.min_files
             else len(files)
         )
-        selected_files = files[:target_count]
+        selected_files = self.select_files_clustered(files, target_count=target_count, locality_ratio=0.85)
 
         print(f"[*] [{self.name}] Bắt đầu thao tác trên {len(selected_files)} file mã nguồn & dữ liệu...")
         modified_count = 0
 
-        for file_path in selected_files:
-            ext = file_path.suffix.lower()
-            success = False
-
-            if ext == ".py":
-                success = self._modify_python(file_path)
-            elif ext == ".cpp":
-                success = self._modify_cpp(file_path)
-            elif ext in (".html", ".xml"):
-                success = self._modify_markup(file_path)
-            elif ext == ".sql":
-                success = self._modify_sql(file_path)
-            elif ext in (".db", ".sqlite"):
-                success = self._modify_sqlite(file_path)
-            elif ext in (".ini", ".yaml"):
-                success = self._modify_config(file_path)
-            elif ext == ".log":
-                success = self._modify_log(file_path)
-
-            if success:
+        for idx, file_path in enumerate(selected_files):
+            handler = handlers.get(file_path.suffix.lower())
+            if handler and handler(file_path):
                 modified_count += 1
 
-            # Tạm dừng ngắn mô phỏng thao tác gõ bàn phím và biên dịch
-            self.random_delay(0.1, 0.4)
+            self.burst_or_pause(idx, burst_size=self.BURST_SIZE, burst_delay=(0.01, 0.05), pause_range=(1.0, 2.5))
 
         print(f"[+] [{self.name}] Đã thao tác thành công trên {modified_count}/{len(selected_files)} tệp tin.")
 
