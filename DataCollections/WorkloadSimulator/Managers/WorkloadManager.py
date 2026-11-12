@@ -28,6 +28,7 @@ try:
         CompressionWorkload,
         OfficeWorkload,
         DevelopmentWorkload,
+        CompileWorkload,
         FileOpsWorkload,
         ImageWorkload,
     )
@@ -37,6 +38,7 @@ except (ImportError, ValueError):
         CompressionWorkload,
         OfficeWorkload,
         DevelopmentWorkload,
+        CompileWorkload,
         FileOpsWorkload,
         ImageWorkload,
     )
@@ -63,6 +65,7 @@ class WorkloadManager:
             ),
             "office": OfficeWorkload(target_dirs=self.target_dirs),
             "development": DevelopmentWorkload(target_dirs=self.target_dirs),
+            "compile": CompileWorkload(target_dirs=self.target_dirs),
             "fileops": FileOpsWorkload(target_dirs=self.target_dirs, mode="mixed"),
             # 4 chế độ thao tác tệp độc lập quy mô lớn (80 - 200 files) kích hoạt Ticks
             "copy": FileOpsWorkload(target_dirs=self.target_dirs, mode="copy"),
@@ -125,6 +128,7 @@ class WorkloadManager:
         sequential_tasks = [
             "office",
             "development",
+            "compile",
             "copy",
             "rename",
             "delete",
@@ -160,9 +164,10 @@ class WorkloadManager:
     ) -> List[Dict[str, Any]]:
         if weights is None:
             weights = {
-                "office": 0.30,
-                "development": 0.25,
-                "fileops": 0.20,
+                "office": 0.25,
+                "development": 0.20,
+                "compile": 0.15,
+                "fileops": 0.15,
                 "image": 0.15,
                 "compression": 0.10,
             }

@@ -39,12 +39,12 @@ def parse_arguments() -> argparse.Namespace:
         type=str,
         default="mixed",
         choices=[
-            "mixed", "all", "compression", "office", "development",
+            "mixed", "all", "compression", "office", "development", "compile",
             "fileops", "copy", "rename", "delete", "read", "image"
         ],
         help=(
-            "Chế độ thực thi: 'mixed' (hỗn hợp), 'all' (tuần tự 8 kịch bản), hoặc tác vụ riêng biệt "
-            "('compression', 'office', 'development', 'copy', 'rename', 'delete', 'read', 'image'). Mặc định: mixed."
+            "Chế độ thực thi: 'mixed' (hỗn hợp), 'all' (tuần tự 9 kịch bản), hoặc tác vụ riêng biệt "
+            "('compression', 'office', 'development', 'compile', 'copy', 'rename', 'delete', 'read', 'image'). Mặc định: mixed."
         )
     )
     parser.add_argument(
