@@ -215,8 +215,66 @@ class DataSplitter:
 
         return rw_train, rw_val, rw_test
 
+    # Xuất các tập train/val/test và bảng tổng hợp phiên ra file CSV để kiểm tra trực quan
+    def export_splits(
+        self,
+        splits: DatasetSplits,
+        output_dir: Optional[Path] = None
+    ) -> Path:
+        variant_dir = (
+            "Model_A"
+            if splits.variant.strip().lower() in ("model_a", "a", "full")
+            else "Model_B"
+        )
+        target_dir = Path(
+            output_dir if output_dir is not None
+            else self.dataset_path.parent / "Splits" / variant_dir
+        )
+        target_dir.mkdir(parents=True, exist_ok=True)
+
+        split_items = [
+            ("train", splits.metadata_train, splits.X_train, splits.y_train),
+            ("val", splits.metadata_val, splits.X_val, splits.y_val),
+            ("test", splits.metadata_test, splits.X_test, splits.y_test),
+        ]
+
+        session_rows: List[Dict[str, Any]] = []
+        for split_name, meta_df, feat_df, label_series in split_items:
+            full_df = pd.concat(
+                [meta_df, feat_df, label_series.rename(self.LABEL_COL)],
+                axis=1,
+            )
+            full_df.to_csv(target_dir / f"{split_name}.csv", index=False)
+
+            grouped = (
+                full_df.groupby([self.LABEL_COL, "sample_id"], sort=True)["tick_index"]
+                .agg(num_ticks="count", tick_min="min", tick_max="max")
+                .reset_index()
+            )
+            for _, row in grouped.iterrows():
+                session_rows.append(
+                    {
+                        "split": split_name,
+                        "label": int(row[self.LABEL_COL]),
+                        "sample_id": row["sample_id"],
+                        "num_ticks": int(row["num_ticks"]),
+                        "tick_min": int(row["tick_min"]),
+                        "tick_max": int(row["tick_max"]),
+                    }
+                )
+
+        pd.DataFrame(session_rows).to_csv(
+            target_dir / "split_sessions.csv", index=False
+        )
+        print(f"[+] Đã xuất dữ liệu chia [{variant_dir}] tại: {target_dir}")
+        return target_dir
+
     # Chạy toàn bộ quy trình chia Train/Val/Test và đóng gói thành DatasetSplits
-    def split(self, variant: str = "model_a") -> DatasetSplits:
+    def split(
+        self,
+        variant: str = "model_a",
+        save_splits: bool = True
+    ) -> DatasetSplits:
         df = self.load_dataset()
         feature_names = self.get_feature_names(df, variant=variant)
 
@@ -243,7 +301,7 @@ class DataSplitter:
         val_df = shuffle(val_df, random_state=self.random_state).reset_index(drop=True)
         test_df = shuffle(test_df, random_state=self.random_state).reset_index(drop=True)
 
-        return DatasetSplits(
+        splits = DatasetSplits(
             X_train=train_df[feature_names].copy(),
             y_train=train_df[self.LABEL_COL].copy(),
             X_val=val_df[feature_names].copy(),
@@ -256,3 +314,8 @@ class DataSplitter:
             metadata_val=val_df[self.METADATA_COLS].copy(),
             metadata_test=test_df[self.METADATA_COLS].copy(),
         )
+
+        if save_splits:
+            self.export_splits(splits)
+
+        return splits
