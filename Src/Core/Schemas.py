@@ -141,7 +141,7 @@ class FeatureVector:
     process_name: str                   # Tên tiến trình thực thi
     tick_index: int                     # Chỉ số Tick (1, 2, 3...)
 
-    # 2. Short Window Features (13 đặc trưng)
+    # 2. Short Window Features (16 đặc trưng)
     short_duration_sec: float
     short_write_ops_per_sec: float
     short_read_ops_per_sec: float
@@ -152,9 +152,12 @@ class FeatureVector:
     short_mean_entropy: float
     short_max_entropy: float
     short_entropy_diff: float
+    short_high_entropy_ratio: float
     short_rename_count: int
     short_delete_count: int
     short_ext_diversity: float
+    short_new_ext_files_ratio: float
+    short_inplace_rewrite_ratio: float
 
     # 3. Medium Window Features (9 đặc trưng)
     med_duration_sec: float
@@ -181,7 +184,7 @@ class FeatureVector:
     # 5. Target Label (1 cột)
     label: int                          # 0 = Benign, 1 = Ransomware
 
-    # Xuất toàn bộ 36 trường dữ liệu thành Dictionary chuẩn
+    # Xuất toàn bộ 39 trường dữ liệu thành Dictionary chuẩn
     # khớp chính xác 100% với header của dataset.csv.
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -190,7 +193,7 @@ class FeatureVector:
             "pid": self.pid,
             "process_name": self.process_name,
             "tick_index": self.tick_index,
-            # Short Window (13)
+            # Short Window (16)
             "short_duration_sec": self.short_duration_sec,
             "short_write_ops_per_sec": self.short_write_ops_per_sec,
             "short_read_ops_per_sec": self.short_read_ops_per_sec,
@@ -201,9 +204,12 @@ class FeatureVector:
             "short_mean_entropy": self.short_mean_entropy,
             "short_max_entropy": self.short_max_entropy,
             "short_entropy_diff": self.short_entropy_diff,
+            "short_high_entropy_ratio": self.short_high_entropy_ratio,
             "short_rename_count": self.short_rename_count,
             "short_delete_count": self.short_delete_count,
             "short_ext_diversity": self.short_ext_diversity,
+            "short_new_ext_files_ratio": self.short_new_ext_files_ratio,
+            "short_inplace_rewrite_ratio": self.short_inplace_rewrite_ratio,
             # Medium Window (9)
             "med_duration_sec": self.med_duration_sec,
             "med_write_ops_per_sec": self.med_write_ops_per_sec,
@@ -228,11 +234,11 @@ class FeatureVector:
             "label": self.label,
         }
 
-    # Trích xuất danh sách đúng 30 giá trị đặc trưng số học theo thứ tự chuẩn
+    # Trích xuất danh sách đúng 33 giá trị đặc trưng số học theo thứ tự chuẩn
     # (Model A - Time-Aware / Full Model) để phục vụ suy luận mô hình AI.
     def to_feature_list(self) -> List[float]:
         return [
-            # Short Window (13)
+            # Short Window (16)
             self.short_duration_sec,
             self.short_write_ops_per_sec,
             self.short_read_ops_per_sec,
@@ -243,9 +249,12 @@ class FeatureVector:
             self.short_mean_entropy,
             self.short_max_entropy,
             self.short_entropy_diff,
+            self.short_high_entropy_ratio,
             float(self.short_rename_count),
             float(self.short_delete_count),
             self.short_ext_diversity,
+            self.short_new_ext_files_ratio,
+            self.short_inplace_rewrite_ratio,
             # Medium Window (9)
             self.med_duration_sec,
             self.med_write_ops_per_sec,
@@ -267,21 +276,24 @@ class FeatureVector:
             self.long_inplace_rewrite_ratio,
         ]
 
-    # Trích xuất danh sách 23 đặc trưng độc lập thời gian (Model B - Clock-Free / Anti-Sleep-Evasion).
+    # Trích xuất danh sách 26 đặc trưng độc lập thời gian (Model B - Clock-Free / Anti-Sleep-Evasion).
     # Loại bỏ 7 đặc trưng phụ thuộc thời gian (short/med/long duration, 3 ops_per_sec, write_bytes_per_sec)
     # và không gồm long_total_files.
     def to_time_invariant_feature_list(self) -> List[float]:
         return [
-            # Short Window (9 features không phụ thuộc thời gian)
+            # Short Window (12 features không phụ thuộc thời gian)
             self.short_write_ops_per_file,
             self.short_write_bytes_per_file,
             self.short_read_to_write_ratio,
             self.short_mean_entropy,
             self.short_max_entropy,
             self.short_entropy_diff,
+            self.short_high_entropy_ratio,
             float(self.short_rename_count),
             float(self.short_delete_count),
             self.short_ext_diversity,
+            self.short_new_ext_files_ratio,
+            self.short_inplace_rewrite_ratio,
             # Medium Window (7 features không phụ thuộc thời gian)
             self.med_read_to_write_ratio,
             self.med_mean_entropy,
