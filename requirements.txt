@@ -1,6 +1,15 @@
+# Thư viện thu thập dữ liệu & giả lập hành vi (DataCollections)
 faker==40.43.0
 python-docx==1.2.0
 openpyxl==3.1.5
 reportlab==5.1.0
 pillow==12.2.0
 watchdog==4.0.0
+
+# Thư viện huấn luyện, đánh giá mô hình & trực quan hóa (Src/Models)
+numpy==2.4.4
+pandas==3.0.2
+scikit-learn==1.9.1
+joblib==1.6.0
+matplotlib==3.10.9
+seaborn==0.13.2
