@@ -33,7 +33,7 @@ class FeatureExtractor:
             else getattr(Config, "MAX_READ_TO_WRITE_RATIO", self.MAX_READ_TO_WRITE_RATIO)
         )
 
-    # Phương thức điều phối chính: Tính toán toàn bộ 27 đặc trưng và đóng gói vào FeatureVector.
+    # Phương thức điều phối chính: Tính toán toàn bộ 30 đặc trưng và đóng gói vào FeatureVector.
     def extract_features(
         self,
         short_slice: WindowSlice,
@@ -79,14 +79,15 @@ class FeatureExtractor:
             med_delete_count=med_feats["med_delete_count"],
             med_ext_diversity=med_feats["med_ext_diversity"],
             med_dir_traversal_count=med_feats["med_dir_traversal_count"],
-            # 4. Long Window Features (8 đặc trưng)
+            # 4. Long Window Features (1 metadata + 8 đặc trưng)
             long_total_files=long_feats["long_total_files"],
             long_duration_sec=long_feats["long_duration_sec"],
             long_mean_entropy=long_feats["long_mean_entropy"],
-            long_rename_count=long_feats["long_rename_count"],
-            long_delete_count=long_feats["long_delete_count"],
-            long_new_ext_count=long_feats["long_new_ext_count"],
-            long_dir_traversal_count=long_feats["long_dir_traversal_count"],
+            long_entropy_diff=long_feats["long_entropy_diff"],
+            long_high_entropy_ratio=long_feats["long_high_entropy_ratio"],
+            long_rename_ratio=long_feats["long_rename_ratio"],
+            long_delete_ratio=long_feats["long_delete_ratio"],
+            long_new_ext_files_ratio=long_feats["long_new_ext_files_ratio"],
             long_inplace_rewrite_ratio=long_feats["long_inplace_rewrite_ratio"],
             # 5. Target Label (1 cột)
             label=label,
@@ -203,48 +204,48 @@ class FeatureExtractor:
             "med_dir_traversal_count": dir_traversal_count,
         }
 
-    # Tính toán 8 đặc trưng của Cửa Sổ Dài (Tích lũy toàn bộ vòng đời tiến trình).
+    # Tính toán đặc trưng của Cửa Sổ Dài (Tích lũy toàn bộ vòng đời tiến trình).
+    # Lưu ý: long_total_files chỉ lưu làm metadata CSV (không đưa vào train);
+    # các đặc trưng hành vi được chuẩn hóa sang tỷ lệ để bất biến theo độ dài phiên.
     def _compute_long_features(self, long_slice: WindowSlice) -> Dict[str, Any]:
         total_files = len(long_slice.distinct_files)
         duration = long_slice.duration_sec
 
-        # Entropy trung bình tích lũy toàn bộ vòng đời
-        file_entropies, _ = self._get_per_file_entropy_stats(long_slice)
-        mean_entropy = round(sum(file_entropies) / len(file_entropies), 4) if file_entropies else 0.0
+        # Thống kê Write-Entropy tích lũy toàn bộ vòng đời
+        file_entropies, file_diffs = self._get_per_file_entropy_stats(long_slice)
+        total_written_files = len(file_entropies)
+        mean_entropy = round(sum(file_entropies) / total_written_files, 4) if total_written_files > 0 else 0.0
+        entropy_diff = round(sum(file_diffs) / len(file_diffs), 4) if file_diffs else 0.0
+        high_entropy_count = sum(1 for h in file_entropies if h >= self.high_entropy_threshold)
+        high_entropy_ratio = round(high_entropy_count / total_written_files, 4) if total_written_files > 0 else 0.0
 
-        # Tổng số lần đổi tên và xóa tích lũy
-        rename_count = long_slice.rename_count
-        delete_count = long_slice.delete_count
+        # Tỷ lệ đổi tên và xóa tích lũy trên tổng số file đã chạm
+        rename_ratio = round(long_slice.rename_count / (total_files + self.epsilon), 4) if total_files > 0 else 0.0
+        delete_ratio = round(long_slice.delete_count / (total_files + self.epsilon), 4) if total_files > 0 else 0.0
 
-        # Đếm số lượng phần mở rộng lạ sinh ra lần đầu (không thuộc danh mục mồi chuẩn)
-        new_exts = {
-            Path(f).suffix.lower() for f in long_slice.distinct_files
+        # Tỷ lệ số file mang phần mở rộng lạ (không thuộc danh mục mồi chuẩn)
+        new_ext_files = sum(
+            1 for f in long_slice.distinct_files
             if Path(f).suffix and Path(f).suffix.lower() not in self.monitored_extensions
-        }
-        new_ext_count = len(new_exts)
-
-        # Tổng số thư mục khác nhau đã bị xâm nhập từ đầu đến giờ
-        unique_dirs = {
-            str(Path(f).parent).lower() for f in long_slice.distinct_files
-            if f
-        }
-        dir_traversal_count = len(unique_dirs)
+        )
+        new_ext_files_ratio = round(new_ext_files / (total_files + self.epsilon), 4) if total_files > 0 else 0.0
 
         # Tỷ lệ ghi đè trực tiếp lên chính file cũ (In-place rewrite ratio)
         written_files = {
             ev.file_path.strip().lower() for ev in long_slice.events
             if ev.operation == IRPOperation.WRITE and ev.file_path
         }
-        inplace_rewrite_ratio = round(len(written_files) / (total_files + self.epsilon), 4) if total_files else 0.0
+        inplace_rewrite_ratio = round(len(written_files) / (total_files + self.epsilon), 4) if total_files > 0 else 0.0
 
         return {
             "long_total_files": total_files,
             "long_duration_sec": duration,
             "long_mean_entropy": mean_entropy,
-            "long_rename_count": rename_count,
-            "long_delete_count": delete_count,
-            "long_new_ext_count": new_ext_count,
-            "long_dir_traversal_count": dir_traversal_count,
+            "long_entropy_diff": entropy_diff,
+            "long_high_entropy_ratio": high_entropy_ratio,
+            "long_rename_ratio": rename_ratio,
+            "long_delete_ratio": delete_ratio,
+            "long_new_ext_files_ratio": new_ext_files_ratio,
             "long_inplace_rewrite_ratio": inplace_rewrite_ratio,
         }
 
