@@ -33,7 +33,7 @@ class FeatureExtractor:
             else getattr(Config, "MAX_READ_TO_WRITE_RATIO", self.MAX_READ_TO_WRITE_RATIO)
         )
 
-    # Phương thức điều phối chính: Tính toán toàn bộ 30 đặc trưng và đóng gói vào FeatureVector.
+    # Phương thức điều phối chính: Tính toán toàn bộ 33 đặc trưng và đóng gói vào FeatureVector.
     def extract_features(
         self,
         short_slice: WindowSlice,
@@ -55,7 +55,7 @@ class FeatureExtractor:
             pid=pid,
             process_name=process_name,
             tick_index=tick_index,
-            # 2. Short Window Features (13 đặc trưng)
+            # 2. Short Window Features (16 đặc trưng)
             short_duration_sec=short_feats["short_duration_sec"],
             short_write_ops_per_sec=short_feats["short_write_ops_per_sec"],
             short_read_ops_per_sec=short_feats["short_read_ops_per_sec"],
@@ -66,9 +66,12 @@ class FeatureExtractor:
             short_mean_entropy=short_feats["short_mean_entropy"],
             short_max_entropy=short_feats["short_max_entropy"],
             short_entropy_diff=short_feats["short_entropy_diff"],
+            short_high_entropy_ratio=short_feats["short_high_entropy_ratio"],
             short_rename_count=short_feats["short_rename_count"],
             short_delete_count=short_feats["short_delete_count"],
             short_ext_diversity=short_feats["short_ext_diversity"],
+            short_new_ext_files_ratio=short_feats["short_new_ext_files_ratio"],
+            short_inplace_rewrite_ratio=short_feats["short_inplace_rewrite_ratio"],
             # 3. Medium Window Features (9 đặc trưng)
             med_duration_sec=med_feats["med_duration_sec"],
             med_write_ops_per_sec=med_feats["med_write_ops_per_sec"],
@@ -93,8 +96,46 @@ class FeatureExtractor:
             label=label,
         )
 
-    # Tính toán 13 đặc trưng của Cửa Sổ Ngắn (10 file riêng biệt gần nhất):
-    # Bao gồm 10 đặc trưng gốc và 3 đặc trưng độc lập thời gian (Model B / Clock-Free).
+    # Tính tỷ lệ Đọc/Ghi có chặn trần max_read_to_write_ratio chống bùng nổ khi write_ops = 0.
+    def _compute_read_to_write_ratio(self, read_ops: int, write_ops: int) -> float:
+        if write_ops == 0:
+            return self.max_read_to_write_ratio if read_ops > 0 else 0.0
+        return round(min(read_ops / write_ops, self.max_read_to_write_ratio), 4)
+
+    # Tính các chỉ số Write-Entropy dùng chung cho cả 3 tầng cửa sổ.
+    def _compute_write_entropy_metrics(
+        self, window_slice: WindowSlice
+    ) -> tuple[float, float, float, float]:
+        file_entropies, file_diffs = self._get_per_file_entropy_stats(window_slice)
+        total_written_files = len(file_entropies)
+        if total_written_files == 0:
+            return 0.0, 0.0, 0.0, 0.0
+        mean_entropy = round(sum(file_entropies) / total_written_files, 4)
+        max_entropy = round(max(file_entropies), 4)
+        entropy_diff = round(sum(file_diffs) / len(file_diffs), 4) if file_diffs else 0.0
+        high_entropy_count = sum(1 for h in file_entropies if h >= self.high_entropy_threshold)
+        high_entropy_ratio = round(high_entropy_count / total_written_files, 4)
+        return mean_entropy, max_entropy, entropy_diff, high_entropy_ratio
+
+    # Tính tỷ lệ file mang đuôi lạ và tỷ lệ ghi đè in-place trên tổng số file của lát cắt.
+    def _compute_new_ext_and_inplace_ratios(
+        self, window_slice: WindowSlice, total_files: int
+    ) -> tuple[float, float]:
+        if total_files <= 0:
+            return 0.0, 0.0
+        new_ext_files = sum(
+            1 for f in window_slice.distinct_files
+            if Path(f).suffix and Path(f).suffix.lower() not in self.monitored_extensions
+        )
+        new_ext_files_ratio = round(new_ext_files / (total_files + self.epsilon), 4)
+        written_files = {
+            ev.file_path.strip().lower() for ev in window_slice.events
+            if ev.operation == IRPOperation.WRITE and ev.file_path
+        }
+        inplace_rewrite_ratio = round(len(written_files) / (total_files + self.epsilon), 4)
+        return new_ext_files_ratio, inplace_rewrite_ratio
+
+    # Tính toán 16 đặc trưng của Cửa Sổ Ngắn (10 file riêng biệt gần nhất).
     def _compute_short_features(self, short_slice: WindowSlice) -> Dict[str, Any]:
         duration = short_slice.duration_sec
         write_ops = short_slice.write_ops_count
@@ -108,21 +149,18 @@ class FeatureExtractor:
         read_ops_per_sec = round(read_ops / eff_duration, 4)
         write_bytes_per_sec = round(write_bytes / eff_duration, 4)
 
-        # 3 đặc trưng độc lập thời gian (Clock-Free / Per-File Metrics)
+        # Các đặc trưng độc lập thời gian (Clock-Free / Per-File & Tỷ lệ hành vi)
         eff_files = max(total_files, 1)
         short_write_ops_per_file = round(write_ops / eff_files, 4)
         short_write_bytes_per_file = round(write_bytes / eff_files, 4)
-        if write_ops == 0:
-            short_read_to_write_ratio = self.max_read_to_write_ratio if read_ops > 0 else 0.0
-        else:
-            raw_ratio = read_ops / write_ops
-            short_read_to_write_ratio = round(min(raw_ratio, self.max_read_to_write_ratio), 4)
+        short_read_to_write_ratio = self._compute_read_to_write_ratio(read_ops, write_ops)
 
-        # Trích xuất Entropy của từng file riêng biệt trong cửa sổ ngắn
-        file_entropies, file_diffs = self._get_per_file_entropy_stats(short_slice)
-        mean_entropy = round(sum(file_entropies) / len(file_entropies), 4) if file_entropies else 0.0
-        max_entropy = round(max(file_entropies), 4) if file_entropies else 0.0
-        entropy_diff = round(sum(file_diffs) / len(file_diffs), 4) if file_diffs else 0.0
+        mean_entropy, max_entropy, entropy_diff, high_entropy_ratio = (
+            self._compute_write_entropy_metrics(short_slice)
+        )
+        new_ext_files_ratio, inplace_rewrite_ratio = (
+            self._compute_new_ext_and_inplace_ratios(short_slice, total_files)
+        )
 
         # Thao tác cấu trúc
         rename_count = short_slice.rename_count
@@ -146,9 +184,12 @@ class FeatureExtractor:
             "short_mean_entropy": mean_entropy,
             "short_max_entropy": max_entropy,
             "short_entropy_diff": entropy_diff,
+            "short_high_entropy_ratio": high_entropy_ratio,
             "short_rename_count": rename_count,
             "short_delete_count": delete_count,
             "short_ext_diversity": ext_diversity,
+            "short_new_ext_files_ratio": new_ext_files_ratio,
+            "short_inplace_rewrite_ratio": inplace_rewrite_ratio,
         }
 
     # Tính toán 9 đặc trưng của Cửa Sổ Vừa (tối đa 50 file riêng biệt gần nhất).
@@ -157,21 +198,13 @@ class FeatureExtractor:
         write_ops = med_slice.write_ops_count
         read_ops = med_slice.read_ops_count
 
-        # Tốc độ ghi và tỷ lệ Đọc/Ghi (chặn trần max_read_to_write_ratio để tránh số rác triệu đơn vị khi chia cho epsilon)
+        # Tốc độ ghi và tỷ lệ Đọc/Ghi
         eff_duration = max(duration, self.min_duration_floor)
         write_ops_per_sec = round(write_ops / eff_duration, 4)
-        if write_ops == 0:
-            read_to_write_ratio = self.max_read_to_write_ratio if read_ops > 0 else 0.0
-        else:
-            raw_ratio = read_ops / write_ops
-            read_to_write_ratio = round(min(raw_ratio, self.max_read_to_write_ratio), 4)
+        read_to_write_ratio = self._compute_read_to_write_ratio(read_ops, write_ops)
 
         # Trích xuất thống kê Write-Entropy (ShieldFS: chỉ tính trên các file có thao tác ghi/sửa đổi)
-        file_entropies, _ = self._get_per_file_entropy_stats(med_slice)
-        mean_entropy = round(sum(file_entropies) / len(file_entropies), 4) if file_entropies else 0.0
-        high_entropy_count = sum(1 for h in file_entropies if h >= self.high_entropy_threshold)
-        total_written_files = len(file_entropies)
-        high_entropy_ratio = round(high_entropy_count / total_written_files, 4) if total_written_files > 0 else 0.0
+        mean_entropy, _, _, high_entropy_ratio = self._compute_write_entropy_metrics(med_slice)
 
         # Thao tác cấu trúc
         total_files = len(med_slice.distinct_files)
@@ -212,30 +245,18 @@ class FeatureExtractor:
         duration = long_slice.duration_sec
 
         # Thống kê Write-Entropy tích lũy toàn bộ vòng đời
-        file_entropies, file_diffs = self._get_per_file_entropy_stats(long_slice)
-        total_written_files = len(file_entropies)
-        mean_entropy = round(sum(file_entropies) / total_written_files, 4) if total_written_files > 0 else 0.0
-        entropy_diff = round(sum(file_diffs) / len(file_diffs), 4) if file_diffs else 0.0
-        high_entropy_count = sum(1 for h in file_entropies if h >= self.high_entropy_threshold)
-        high_entropy_ratio = round(high_entropy_count / total_written_files, 4) if total_written_files > 0 else 0.0
+        mean_entropy, _, entropy_diff, high_entropy_ratio = (
+            self._compute_write_entropy_metrics(long_slice)
+        )
 
         # Tỷ lệ đổi tên và xóa tích lũy trên tổng số file đã chạm
         rename_ratio = round(long_slice.rename_count / (total_files + self.epsilon), 4) if total_files > 0 else 0.0
         delete_ratio = round(long_slice.delete_count / (total_files + self.epsilon), 4) if total_files > 0 else 0.0
 
-        # Tỷ lệ số file mang phần mở rộng lạ (không thuộc danh mục mồi chuẩn)
-        new_ext_files = sum(
-            1 for f in long_slice.distinct_files
-            if Path(f).suffix and Path(f).suffix.lower() not in self.monitored_extensions
+        # Tỷ lệ file mang đuôi lạ và tỷ lệ ghi đè trực tiếp lên file cũ
+        new_ext_files_ratio, inplace_rewrite_ratio = (
+            self._compute_new_ext_and_inplace_ratios(long_slice, total_files)
         )
-        new_ext_files_ratio = round(new_ext_files / (total_files + self.epsilon), 4) if total_files > 0 else 0.0
-
-        # Tỷ lệ ghi đè trực tiếp lên chính file cũ (In-place rewrite ratio)
-        written_files = {
-            ev.file_path.strip().lower() for ev in long_slice.events
-            if ev.operation == IRPOperation.WRITE and ev.file_path
-        }
-        inplace_rewrite_ratio = round(len(written_files) / (total_files + self.epsilon), 4) if total_files > 0 else 0.0
 
         return {
             "long_total_files": total_files,
