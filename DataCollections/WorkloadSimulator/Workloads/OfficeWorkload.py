@@ -1,28 +1,28 @@
-
-import time
 import random
+import time
 from pathlib import Path
-from typing import List, Dict, Optional, Any
-from faker import Faker
+from typing import Any, Dict, List, Optional
+
 import docx
 import openpyxl
+from faker import Faker
+
 from .BaseWorkload import BaseWorkload
 
 
+# Kịch bản mở đọc và chỉnh sửa các tệp Word (.docx), Excel (.xlsx) và Text (.txt) theo cụm thư mục
 class OfficeWorkload(BaseWorkload):
-    """
-    Kịch bản mở đọc và chỉnh sửa các tệp tin Word (.docx), Excel (.xlsx)
-    và Text (.txt) có sẵn
-    """
 
+    BURST_SIZE = 15
+
+    # Khởi tạo workload văn phòng với dải số lượng tài liệu mục tiêu
     def __init__(
         self,
         target_dirs: Optional[List[Path]] = None,
-        min_files: int = 30,
-        max_files: int = 50,
+        min_files: int = 50,
+        max_files: int = 120,
         locale: str = "vi_VN"
     ) -> None:
-        
         super().__init__(target_dirs=target_dirs, name="OfficeWorkload")
         self.min_files = max(5, min_files)
         self.max_files = max(self.min_files, max_files)
@@ -31,8 +31,8 @@ class OfficeWorkload(BaseWorkload):
         except Exception:
             self.faker = Faker("en_US")
 
+    # Mở file Word .docx, chèn thêm đoạn văn mới và lưu đè
     def _modify_docx(self, file_path: Path) -> bool:
-        """Mở file Word .docx, chèn thêm đoạn văn mới và lưu đè lại."""
         try:
             doc = docx.Document(str(file_path))
             p = doc.add_paragraph(self.faker.paragraph(nb_sentences=random.randint(3, 6)))
@@ -42,8 +42,8 @@ class OfficeWorkload(BaseWorkload):
         except Exception:
             return False
 
+    # Mở file Excel .xlsx, thêm 2-5 dòng giao dịch mới và lưu đè
     def _modify_xlsx(self, file_path: Path) -> bool:
-        """Mở file Excel .xlsx, thêm 2-4 dòng giao dịch mới và lưu đè lại."""
         try:
             wb = openpyxl.load_workbook(str(file_path))
             ws = wb.active
@@ -65,8 +65,8 @@ class OfficeWorkload(BaseWorkload):
         except Exception:
             return False
 
+    # Mở file Text .txt và nối thêm đoạn văn bản mới vào cuối file
     def _modify_txt(self, file_path: Path) -> bool:
-        """Mở file Text .txt và nối thêm đoạn văn bản mới vào cuối file."""
         try:
             timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
             note_content = (
@@ -79,10 +79,8 @@ class OfficeWorkload(BaseWorkload):
         except Exception:
             return False
 
+    # Thực thi kịch bản chỉnh sửa tài liệu văn phòng theo cụm thư mục và nhịp burst/pause
     def execute(self) -> Dict[str, Any]:
-        """
-        Thực thi kịch bản mở đọc và chỉnh sửa tài liệu văn phòng.
-        """
         target_extensions = [".docx", ".xlsx", ".txt"]
         files = self.find_files(extensions=target_extensions)
 
@@ -90,34 +88,27 @@ class OfficeWorkload(BaseWorkload):
             print("[!] Không tìm thấy file tài liệu Word/Excel/Text nào trong DecoyDocs.")
             return {"workload": self.name, "status": "skipped", "message": "Không có file văn bản"}
 
-        # Chọn ngẫu nhiên từ min_files đến max_files để chỉnh sửa (30 - 50 files)
-        random.shuffle(files)
         target_count = (
             random.randint(self.min_files, min(len(files), self.max_files))
             if len(files) >= self.min_files
             else len(files)
         )
-        selected_files = files[:target_count]
+        selected_files = self.select_files_clustered(files, target_count=target_count, locality_ratio=0.85)
 
         print(f"[*] [{self.name}] Bắt đầu mở và chỉnh sửa {len(selected_files)} tài liệu văn phòng...")
+        handlers = {
+            ".docx": self._modify_docx,
+            ".xlsx": self._modify_xlsx,
+            ".txt": self._modify_txt,
+        }
         modified_count = 0
 
-        for file_path in selected_files:
-            ext = file_path.suffix.lower()
-            success = False
-
-            if ext == ".docx":
-                success = self._modify_docx(file_path)
-            elif ext == ".xlsx":
-                success = self._modify_xlsx(file_path)
-            elif ext == ".txt":
-                success = self._modify_txt(file_path)
-
-            if success:
+        for idx, file_path in enumerate(selected_files):
+            handler = handlers.get(file_path.suffix.lower())
+            if handler and handler(file_path):
                 modified_count += 1
 
-            # Tạm nghỉ tự nhiên (0.2s - 0.6s) mô phỏng nhịp điệu thao tác người dùng
-            self.random_delay(0.2, 0.6)
+            self.burst_or_pause(idx, burst_size=self.BURST_SIZE, burst_delay=(0.02, 0.08), pause_range=(1.0, 2.5))
 
         print(f"[+] [{self.name}] Đã chỉnh sửa thành công {modified_count}/{len(selected_files)} tài liệu.")
 
