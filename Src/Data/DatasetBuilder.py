@@ -24,7 +24,7 @@ class DatasetBuilder:
     # Tiến trình Watchdog đo entropy cần loại trừ riêng trong các phiên mã độc (label=1)
     WATCHDOG_PROCESSES = {"python.exe", "pythonw.exe"}
 
-    # Danh sách 35 cột chuẩn xác của dataset.csv (4 metadata + 30 đặc trưng + 1 label)
+    # Danh sách 36 cột chuẩn xác của dataset.csv (5 metadata + 30 đặc trưng + 1 label)
     DATASET_HEADER = [
         # Metadata định danh (4)
         "sample_id",
@@ -55,14 +55,15 @@ class DatasetBuilder:
         "med_delete_count",
         "med_ext_diversity",
         "med_dir_traversal_count",
-        # Long Window Features (8)
+        # Long Window Features (1 metadata quy mô + 8 đặc trưng)
         "long_total_files",
         "long_duration_sec",
         "long_mean_entropy",
-        "long_rename_count",
-        "long_delete_count",
-        "long_new_ext_count",
-        "long_dir_traversal_count",
+        "long_entropy_diff",
+        "long_high_entropy_ratio",
+        "long_rename_ratio",
+        "long_delete_ratio",
+        "long_new_ext_files_ratio",
         "long_inplace_rewrite_ratio",
         # Target Label (1)
         "label"
@@ -270,7 +271,7 @@ class DatasetBuilder:
     # Quy trình xây dựng toàn diện tập dữ liệu:
     # 1. Quét hoặc làm sạch các phiên thô sang Data/Interim/.
     # 2. Duyệt qua từng phiên Interim, tạo vector đặc trưng tại mỗi Tick.
-    # 3. Ghi toàn bộ dữ liệu 35 cột vào Data/Processed/dataset.csv.
+    # 3. Ghi toàn bộ dữ liệu 36 cột vào Data/Processed/dataset.csv.
     def build(self, reparse_raw: bool = False) -> Path:
         # Nếu thư mục interim trống hoặc có yêu cầu reparse
         interim_sessions = self.discover_interim_sessions()
@@ -323,6 +324,8 @@ class DatasetBuilder:
                     benign_count += 1
 
         imbalance_ratio = round(benign_count / max(1, malware_count), 2)
+        non_feature_cols = {"sample_id", "pid", "process_name", "tick_index", "long_total_files", "label"}
+        feature_cols = [c for c in columns if c not in non_feature_cols]
 
         return {
             "exists": True,
@@ -332,7 +335,7 @@ class DatasetBuilder:
             "malware_samples": malware_count,
             "imbalance_ratio": f"{imbalance_ratio}:1" if malware_count > 0 else "N/A (chỉ có benign)",
             "columns_count": len(columns),
-            "features_count": len(columns) - 5  # Trừ 4 metadata và 1 label = 30 đặc trưng
+            "features_count": len(feature_cols),
         }
 
 
