@@ -103,14 +103,14 @@ class Config:
         "med_delete_count",
         "med_ext_diversity",
         "med_dir_traversal_count",
-        # --- Long Window (8 features) ---
-        "long_total_files",
+        # --- Long Window (8 features - không gồm long_total_files) ---
         "long_duration_sec",
         "long_mean_entropy",
-        "long_rename_count",
-        "long_delete_count",
-        "long_new_ext_count",
-        "long_dir_traversal_count",
+        "long_entropy_diff",
+        "long_high_entropy_ratio",
+        "long_rename_ratio",
+        "long_delete_ratio",
+        "long_new_ext_files_ratio",
         "long_inplace_rewrite_ratio",
     ]
 
