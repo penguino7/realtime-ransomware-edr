@@ -167,20 +167,21 @@ class FeatureVector:
     med_ext_diversity: float
     med_dir_traversal_count: int
 
-    # 4. Long Window Features (8 đặc trưng)
-    long_total_files: int
+    # 4. Long Window Features (1 metadata quy mô + 8 đặc trưng)
+    long_total_files: int               # Metadata lưu CSV, loại khỏi tập train để tránh bias độ dài phiên
     long_duration_sec: float
     long_mean_entropy: float
-    long_rename_count: int
-    long_delete_count: int
-    long_new_ext_count: int
-    long_dir_traversal_count: int
+    long_entropy_diff: float
+    long_high_entropy_ratio: float
+    long_rename_ratio: float
+    long_delete_ratio: float
+    long_new_ext_files_ratio: float
     long_inplace_rewrite_ratio: float
 
     # 5. Target Label (1 cột)
     label: int                          # 0 = Benign, 1 = Ransomware
 
-    # Xuất toàn bộ 35 trường dữ liệu thành Dictionary chuẩn
+    # Xuất toàn bộ 36 trường dữ liệu thành Dictionary chuẩn
     # khớp chính xác 100% với header của dataset.csv.
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -213,14 +214,15 @@ class FeatureVector:
             "med_delete_count": self.med_delete_count,
             "med_ext_diversity": self.med_ext_diversity,
             "med_dir_traversal_count": self.med_dir_traversal_count,
-            # Long Window (8)
+            # Long Window (1 metadata + 8 đặc trưng)
             "long_total_files": self.long_total_files,
             "long_duration_sec": self.long_duration_sec,
             "long_mean_entropy": self.long_mean_entropy,
-            "long_rename_count": self.long_rename_count,
-            "long_delete_count": self.long_delete_count,
-            "long_new_ext_count": self.long_new_ext_count,
-            "long_dir_traversal_count": self.long_dir_traversal_count,
+            "long_entropy_diff": self.long_entropy_diff,
+            "long_high_entropy_ratio": self.long_high_entropy_ratio,
+            "long_rename_ratio": self.long_rename_ratio,
+            "long_delete_ratio": self.long_delete_ratio,
+            "long_new_ext_files_ratio": self.long_new_ext_files_ratio,
             "long_inplace_rewrite_ratio": self.long_inplace_rewrite_ratio,
             # Label
             "label": self.label,
@@ -254,19 +256,20 @@ class FeatureVector:
             float(self.med_delete_count),
             self.med_ext_diversity,
             float(self.med_dir_traversal_count),
-            # Long Window (8)
-            float(self.long_total_files),
+            # Long Window (8 features - không gồm long_total_files)
             self.long_duration_sec,
             self.long_mean_entropy,
-            float(self.long_rename_count),
-            float(self.long_delete_count),
-            float(self.long_new_ext_count),
-            float(self.long_dir_traversal_count),
+            self.long_entropy_diff,
+            self.long_high_entropy_ratio,
+            self.long_rename_ratio,
+            self.long_delete_ratio,
+            self.long_new_ext_files_ratio,
             self.long_inplace_rewrite_ratio,
         ]
 
     # Trích xuất danh sách 23 đặc trưng độc lập thời gian (Model B - Clock-Free / Anti-Sleep-Evasion).
-    # Loại bỏ 7 đặc trưng phụ thuộc thời gian (short/med/long duration, 3 ops_per_sec, write_bytes_per_sec).
+    # Loại bỏ 7 đặc trưng phụ thuộc thời gian (short/med/long duration, 3 ops_per_sec, write_bytes_per_sec)
+    # và không gồm long_total_files.
     def to_time_invariant_feature_list(self) -> List[float]:
         return [
             # Short Window (9 features không phụ thuộc thời gian)
@@ -288,12 +291,12 @@ class FeatureVector:
             self.med_ext_diversity,
             float(self.med_dir_traversal_count),
             # Long Window (7 features không phụ thuộc thời gian)
-            float(self.long_total_files),
             self.long_mean_entropy,
-            float(self.long_rename_count),
-            float(self.long_delete_count),
-            float(self.long_new_ext_count),
-            float(self.long_dir_traversal_count),
+            self.long_entropy_diff,
+            self.long_high_entropy_ratio,
+            self.long_rename_ratio,
+            self.long_delete_ratio,
+            self.long_new_ext_files_ratio,
             self.long_inplace_rewrite_ratio,
         ]
 
@@ -304,7 +307,7 @@ class FeatureVector:
 class DetectionAlert:
     pid: int                            # PID của tiến trình độc hại
     process_name: str                   # Tên file thực thi độc hại
-    confidence: float                   # Điểm xác suất dự đoán của mô hình AI (>= 0.95)
+    confidence: float                   # Điểm xác suất dự đoán của mô hình AI
     tick_index: int                     # Chỉ số Tick phát hiện
     blast_radius: int                   # Số lượng file riêng biệt đã bị tác động
     timestamp: float                    # Thời điểm đưa ra quyết định cảnh báo
