@@ -2,6 +2,7 @@
 import sys
 import json
 import random
+import shutil
 from pathlib import Path
 from typing import List, Dict, Optional, Any
 from faker import Faker
@@ -193,55 +194,55 @@ class FileEnvironmentManager:
         print(f"[+] Hoàn tất! Đã tạo thành công {len(self.created_files)}/{total_files} file mồi.")
         return self.created_files
 
+    # Xóa cưỡng bức một cây thư mục, tự động gỡ cờ read-only nếu tệp tin bị khóa
+    @staticmethod
+    def _force_remove_tree(dir_path: Path) -> None:
+        import os
+        import stat
+
+        def _handle_remove_readonly(func, path, exc_info):
+            try:
+                os.chmod(path, stat.S_IWRITE)
+                func(path)
+            except Exception:
+                pass
+
+        try:
+            shutil.rmtree(dir_path, onerror=_handle_remove_readonly)
+        except Exception:
+            shutil.rmtree(dir_path, ignore_errors=True)
+
+    # Dọn dẹp môi trường: Xóa sạch tận gốc các thư mục DecoyDocs (gồm cả file mồi, file mã hóa, tệp rác và registry)
     def cleanup(self) -> int:
-        """
-        Dọn dẹp môi trường (Rollback): Xóa toàn bộ file mồi đã tạo và các thư mục Decoy rỗng.
-        Truy vết qua decoy_registry.json để đảm bảo an toàn tuyệt đối, không xóa nhầm file cá nhân.
-        """
-        print("[*] Đang tiến hành dọn dẹp môi trường tệp tin mồi an toàn...")
+        print("[*] Đang tiến hành dọn dẹp sạch tận gốc các thư mục mồi (DecoyDocs)...")
         deleted_count = 0
 
-        # Lấy danh sách file cần xóa từ bộ nhớ hoặc nạp từ file sổ hộ khẩu registry
-        files_to_delete = [str(f.resolve()) for f in self.created_files]
-        if not files_to_delete:
-            files_to_delete = self._load_registry()
+        # Quét và xóa tận gốc từng thư mục mồi mục tiêu
+        for directory in self.target_dirs:
+            dir_path = Path(directory)
+            if not dir_path.exists():
+                continue
 
-        for f_str in files_to_delete:
+            # Kiểm tra an toàn nghiêm ngặt: chỉ xóa nếu tên thư mục là DecoyDocs hoặc chứa từ khóa decoy
+            # Tránh tuyệt đối việc xóa nhầm thư mục người dùng (Desktop, Documents, Downloads, root drive)
+            dir_name = dir_path.name.lower()
+            if "decoy" not in dir_name and dir_path != (Path.cwd() / "DecoyDocs"):
+                print(f"[!] Bỏ qua thư mục không an toàn: {dir_path}", file=sys.stderr)
+                continue
+
             try:
-                f_path = Path(f_str)
-                if f_path.exists():
-                    f_path.unlink()
-                    deleted_count += 1
+                # Đếm tổng số tệp bên trong trước khi xóa để báo cáo chính xác
+                file_count = sum(1 for p in dir_path.rglob("*") if p.is_file())
+                self._force_remove_tree(dir_path)
+                deleted_count += file_count
+                print(f"[+] Đã xóa sạch toàn bộ thư mục: {dir_path} ({file_count} tệp tin)")
             except Exception as error:
-                print(f"[!] Không thể xóa file {f_str}: {error}", file=sys.stderr)
+                print(f"[!] Lỗi khi xóa thư mục {dir_path}: {error}", file=sys.stderr)
 
         self.created_files.clear()
         self._clear_registry()
 
-        # Quét dọn các thư mục Decoy rỗng
-        for directory in self.target_dirs:
-            if directory.exists():
-                for remaining_file in directory.rglob("*"):
-                    if remaining_file.is_file():
-                        fname = remaining_file.name.lower()
-                        if fname.startswith("decoy_") or fname.startswith("!00_") or fname.startswith("000_"):
-                            try:
-                                remaining_file.unlink()
-                                deleted_count += 1
-                            except Exception:
-                                pass
-                for sub in sorted(directory.rglob("*"), reverse=True):
-                    if sub.is_dir():
-                        try:
-                            sub.rmdir()
-                        except Exception:
-                            pass
-                try:
-                    directory.rmdir()
-                except Exception:
-                    pass
-
-        print(f"[+] Dọn dẹp hoàn tất. Đã xóa sạch {deleted_count} file mồi.")
+        print(f"[+] Dọn dẹp hoàn tất. Đã xóa sạch {deleted_count} file và toàn bộ các thư mục DecoyDocs.")
         return deleted_count
 
     def _save_registry(self, entries: List[str]) -> None:
