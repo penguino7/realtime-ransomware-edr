@@ -105,11 +105,7 @@ class DatasetBuilder:
         for sdir in sorted(self.raw_dir.iterdir()):
             if sdir.is_dir() and not sdir.name.startswith("."):
                 procmon = sdir / "procmon.csv"
-                realtime = (
-                    sdir / "realtime_entropy.csv"
-                    if (sdir / "realtime_entropy.csv").exists()
-                    else sdir / "raw_entropy_events.csv"
-                )
+                realtime = sdir / "realtime_entropy.csv"
                 baseline = (
                     sdir / "baseline_entropy.csv"
                     if (sdir / "baseline_entropy.csv").exists()

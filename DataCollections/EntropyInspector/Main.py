@@ -67,7 +67,7 @@ def parse_arguments() -> argparse.Namespace:
         "--output",
         type=str,
         default=None,
-        help="Tên file hoặc đường dẫn lưu file CSV kết quả (mặc định: baseline_entropy.csv, final_entropy.csv hoặc raw_entropy_events.csv)."
+        help="Tên file hoặc đường dẫn lưu file CSV kết quả (mặc định: baseline_entropy.csv, final_entropy.csv hoặc realtime_entropy.csv)."
     )
     parser.add_argument(
         "--baseline-file",
@@ -158,7 +158,7 @@ def main() -> None:
         manager.compare_snapshots(baseline_csv=baseline_path, final_csv=final_path)
 
     elif args.mode == "realtime":
-        filename = args.output or "raw_entropy_events.csv"
+        filename = args.output or "realtime_entropy.csv"
         print("[*] Đang khởi động tiến trình giám sát thời gian thực...")
         print("[*] Nhấn Ctrl+C để dừng giám sát và xuất dữ liệu ra CSV.\n")
         

@@ -218,7 +218,7 @@ class EntropyManager:
         """Kích hoạt RealtimeWatcher chạy ngầm."""
         self.realtime_watcher.start()
 
-    def stop_realtime_watch(self, filename: str = "raw_entropy_events.csv") -> Path:
+    def stop_realtime_watch(self, filename: str = "realtime_entropy.csv") -> Path:
         """
         Dừng RealtimeWatcher, xuất toàn bộ sự kiện ra file CSV và in tóm tắt.
         Lưu kết quả trực tiếp vào Data/Raw/<filename>.
