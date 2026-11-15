@@ -1,0 +1,327 @@
+Timestamp,EventType,FilePath,OldPath,Entropy,FileSize,Status,ReadTimeMs
+11:10:56.214592,RENAMED,C:\DecoyDocs\Config_Prod\000_Contract_Master_nhưng_292.sqlite.mallab,C:\DecoyDocs\Config_Prod\000_Contract_Master_nhưng_292.sqlite,7.9919,20588,STATUS_SUCCESS,4.120
+11:10:56.214592,RENAMED,C:\DecoyDocs\Config_Prod\$_Payroll_2026_giống_467.sqlite.mallab,C:\DecoyDocs\Config_Prod\$_Payroll_2026_giống_467.sqlite,7.9841,12396,STATUS_SUCCESS,5.142
+11:10:56.214592,MODIFIED,C:\DecoyDocs\Config_Prod\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.412
+11:10:56.214592,CREATED,C:\DecoyDocs\Config_Prod\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.980
+11:10:56.214592,RENAMED,C:\DecoyDocs\decoy_Contract_Master_vì_263.sqlite.mallab,C:\DecoyDocs\decoy_Contract_Master_vì_263.sqlite,7.9904,20588,STATUS_SUCCESS,0.807
+11:10:56.214592,RENAMED,C:\DecoyDocs\000_Confidential_này_618.sqlite.mallab,C:\DecoyDocs\000_Confidential_này_618.sqlite,7.9839,12396,STATUS_SUCCESS,8.148
+11:10:56.230136,CREATED,C:\DecoyDocs\Financial_Reports\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.600
+11:10:56.230136,MODIFIED,C:\DecoyDocs\Financial_Reports\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.394
+11:10:56.230136,MODIFIED,C:\DecoyDocs\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.362
+11:10:56.230136,CREATED,C:\DecoyDocs\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.908
+11:10:57.159254,MODIFIED,C:\Users\nhat\Contacts\DecoyDocs\$_Confidential_nhiều_329.sqlite,,7.9859,12396,STATUS_SUCCESS,0.659
+11:10:57.159254,CREATED,C:\Users\nhat\Contacts\DecoyDocs\Backup_Data\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.366
+11:10:57.159254,MODIFIED,C:\Users\nhat\Contacts\DecoyDocs\Backup_Data\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.338
+11:10:57.159254,RENAMED,C:\Users\nhat\Contacts\DecoyDocs\$_Confidential_nhiều_329.sqlite.mallab,C:\Users\nhat\Contacts\DecoyDocs\$_Confidential_nhiều_329.sqlite,7.9859,12396,STATUS_SUCCESS,22.920
+11:10:57.181859,CREATED,C:\Users\nhat\Contacts\DecoyDocs\Config_Prod\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.742
+11:10:57.181859,MODIFIED,C:\Users\nhat\Contacts\DecoyDocs\Config_Prod\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.389
+11:10:57.181859,CREATED,C:\Users\nhat\Contacts\DecoyDocs\Financial_Reports\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.341
+11:10:57.181859,MODIFIED,C:\Users\nhat\Contacts\DecoyDocs\Financial_Reports\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.341
+11:10:57.187362,CREATED,C:\Users\nhat\Contacts\DecoyDocs\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,1.115
+11:10:57.187362,MODIFIED,C:\Users\nhat\Contacts\DecoyDocs\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.323
+11:10:57.187362,RENAMED,C:\Users\nhat\Contacts\DecoyDocs\Config_Prod\000_Contract_Master_tại_723.sqlite.mallab,C:\Users\nhat\Contacts\DecoyDocs\Config_Prod\000_Contract_Master_tại_723.sqlite,7.9843,12396,STATUS_SUCCESS,0.568
+11:10:57.187362,MODIFIED,C:\Users\nhat\Desktop\DecoyDocs\Config_Prod\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.355
+11:10:57.187362,RENAMED,C:\Users\nhat\Desktop\DecoyDocs\$_Accounting_chưa_200.sqlite.mallab,C:\Users\nhat\Desktop\DecoyDocs\$_Accounting_chưa_200.sqlite,7.9907,16492,STATUS_SUCCESS,0.945
+11:10:57.187362,CREATED,C:\Users\nhat\Desktop\DecoyDocs\Config_Prod\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,1.519
+11:10:57.187362,RENAMED,C:\Users\nhat\Desktop\DecoyDocs\HR_Contracts\!00_Financial_Report_của_688.sqlite.mallab,C:\Users\nhat\Desktop\DecoyDocs\HR_Contracts\!00_Financial_Report_của_688.sqlite,7.9859,12396,STATUS_SUCCESS,0.867
+11:10:57.197724,RENAMED,C:\Users\nhat\Desktop\DecoyDocs\HR_Contracts\aaa_Contract_Master_như_028.sqlite.mallab,C:\Users\nhat\Desktop\DecoyDocs\HR_Contracts\aaa_Contract_Master_như_028.sqlite,7.9837,12396,STATUS_SUCCESS,0.653
+11:10:57.197724,MODIFIED,C:\Users\nhat\Desktop\DecoyDocs\HR_Contracts\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.931
+11:10:57.197724,CREATED,C:\Users\nhat\Desktop\DecoyDocs\HR_Contracts\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,1.120
+11:10:57.203025,CREATED,C:\Users\nhat\Desktop\DecoyDocs\Personal_Photos\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.430
+11:10:57.219463,MODIFIED,C:\Users\nhat\Desktop\DecoyDocs\Personal_Photos\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.434
+11:10:57.219463,CREATED,C:\Users\nhat\Documents\DecoyDocs\Config_Prod\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.387
+11:10:57.219463,MODIFIED,C:\Users\nhat\Documents\DecoyDocs\Config_Prod\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.336
+11:10:57.219463,CREATED,C:\Users\nhat\Documents\DecoyDocs\Financial_Reports\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.428
+11:10:57.219463,MODIFIED,C:\Users\nhat\Documents\DecoyDocs\Financial_Reports\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.375
+11:10:57.234539,CREATED,C:\Users\nhat\Documents\DecoyDocs\HR_Contracts\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.345
+11:10:57.234539,MODIFIED,C:\Users\nhat\Documents\DecoyDocs\HR_Contracts\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.328
+11:10:57.234539,RENAMED,C:\Users\nhat\Desktop\DecoyDocs\Personal_Photos\aaa_Payroll_2026_lớn_080.sqlite.mallab,C:\Users\nhat\Desktop\DecoyDocs\Personal_Photos\aaa_Payroll_2026_lớn_080.sqlite,7.9912,20588,STATUS_SUCCESS,1.053
+11:10:57.234539,RENAMED,C:\Users\nhat\Documents\DecoyDocs\Financial_Reports\decoy_Payroll_2026_như_194.sqlite.mallab,C:\Users\nhat\Documents\DecoyDocs\Financial_Reports\decoy_Payroll_2026_như_194.sqlite,7.9890,16492,STATUS_SUCCESS,1.035
+11:10:57.234539,CREATED,C:\Users\nhat\Desktop\DecoyDocs\Project_Source\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.328
+11:10:57.234539,MODIFIED,C:\Users\nhat\Desktop\DecoyDocs\Project_Source\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.309
+11:10:57.234539,CREATED,C:\Users\nhat\Desktop\DecoyDocs\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.318
+11:10:57.234539,MODIFIED,C:\Users\nhat\Desktop\DecoyDocs\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.675
+11:10:57.234539,RENAMED,C:\Users\nhat\Desktop\DecoyDocs\Project_Source\!00_Backup_Admin_đi_549.sqlite.mallab,C:\Users\nhat\Desktop\DecoyDocs\Project_Source\!00_Backup_Admin_đi_549.sqlite,7.9899,20588,STATUS_SUCCESS,0.693
+11:10:57.234539,RENAMED,C:\Users\nhat\Desktop\DecoyDocs\Project_Source\aaa_Client_Database_từng_245.sqlite.mallab,C:\Users\nhat\Desktop\DecoyDocs\Project_Source\aaa_Client_Database_từng_245.sqlite,7.9908,16492,STATUS_SUCCESS,0.906
+11:10:57.234539,CREATED,C:\Users\nhat\Documents\DecoyDocs\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.364
+11:10:57.234539,MODIFIED,C:\Users\nhat\Documents\DecoyDocs\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.313
+11:10:57.234539,RENAMED,C:\Users\nhat\Documents\DecoyDocs\HR_Contracts\$_Backup_Admin_đó_669.sqlite.mallab,C:\Users\nhat\Documents\DecoyDocs\HR_Contracts\$_Backup_Admin_đó_669.sqlite,7.9858,12396,STATUS_SUCCESS,0.543
+11:10:57.234539,MODIFIED,C:\Users\nhat\Documents\DecoyDocs\Project_Source\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,8.281
+11:10:57.234539,CREATED,C:\Users\nhat\Documents\DecoyDocs\Project_Source\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,9.328
+11:10:57.250828,RENAMED,C:\Users\nhat\Downloads\DecoyDocs\$_Client_Database_như_759.sqlite.mallab,C:\Users\nhat\Downloads\DecoyDocs\$_Client_Database_như_759.sqlite,7.9892,16492,STATUS_SUCCESS,0.668
+11:10:57.250828,RENAMED,C:\Users\nhat\Downloads\DecoyDocs\000_Confidential_của_692.sqlite.mallab,C:\Users\nhat\Downloads\DecoyDocs\000_Confidential_của_692.sqlite,7.9898,16492,STATUS_SUCCESS,0.637
+11:10:57.265935,RENAMED,C:\Users\nhat\Downloads\DecoyDocs\$_Financial_Report_lớn_663.sqlite.mallab,C:\Users\nhat\Downloads\DecoyDocs\$_Financial_Report_lớn_663.sqlite,7.9891,16492,STATUS_SUCCESS,0.769
+11:10:57.265935,CREATED,C:\Users\nhat\Downloads\DecoyDocs\Config_Prod\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.614
+11:10:57.265935,MODIFIED,C:\Users\nhat\Downloads\DecoyDocs\Config_Prod\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.608
+11:10:57.265935,CREATED,C:\Users\nhat\Downloads\DecoyDocs\Financial_Reports\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,6.115
+11:10:57.265935,RENAMED,C:\Users\nhat\Downloads\DecoyDocs\Financial_Reports\aaa_Accounting_cũng_147.sqlite.mallab,C:\Users\nhat\Downloads\DecoyDocs\Financial_Reports\aaa_Accounting_cũng_147.sqlite,7.9893,16492,STATUS_SUCCESS,0.682
+11:10:57.265935,CREATED,C:\Users\nhat\Downloads\DecoyDocs\HR_Contracts\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.644
+11:10:57.265935,RENAMED,C:\Users\nhat\Downloads\DecoyDocs\Financial_Reports\decoy_Confidential_chỉ_171.sqlite.mallab,C:\Users\nhat\Downloads\DecoyDocs\Financial_Reports\decoy_Confidential_chỉ_171.sqlite,7.9916,20588,STATUS_SUCCESS,0.706
+11:10:57.265935,MODIFIED,C:\Users\nhat\Downloads\DecoyDocs\HR_Contracts\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.330
+11:10:57.265935,RENAMED,C:\Users\nhat\Downloads\DecoyDocs\Project_Source\!00_Client_Database_khiến_671.sqlite.mallab,C:\Users\nhat\Downloads\DecoyDocs\Project_Source\!00_Client_Database_khiến_671.sqlite,7.9915,20588,STATUS_SUCCESS,0.712
+11:10:57.265935,CREATED,C:\Users\nhat\Downloads\DecoyDocs\Project_Source\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.423
+11:10:57.265935,RENAMED,C:\Users\nhat\Downloads\DecoyDocs\Config_Prod\decoy_Client_Database_cho_183.sqlite.mallab,C:\Users\nhat\Downloads\DecoyDocs\Config_Prod\decoy_Client_Database_cho_183.sqlite,7.9921,20588,STATUS_SUCCESS,0.792
+11:10:57.265935,MODIFIED,C:\Users\nhat\Downloads\DecoyDocs\Project_Source\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.358
+11:10:57.265935,CREATED,C:\Users\nhat\Downloads\DecoyDocs\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.771
+11:10:57.265935,MODIFIED,C:\Users\nhat\Downloads\DecoyDocs\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.354
+11:10:57.265935,RENAMED,C:\Users\nhat\Downloads\DecoyDocs\Config_Prod\!00_Accounting_của_036.sqlite.mallab,C:\Users\nhat\Downloads\DecoyDocs\Config_Prod\!00_Accounting_của_036.sqlite,7.9908,20588,STATUS_SUCCESS,15.145
+11:10:57.265935,MODIFIED,C:\Users\nhat\Downloads\DecoyDocs\Financial_Reports\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,15.589
+11:11:13.799165,RENAMED,C:\Users\nhat\Favorites\DecoyDocs\000_Payroll_2026_như_343.sqlite.mallab,C:\Users\nhat\Favorites\DecoyDocs\000_Payroll_2026_như_343.sqlite,7.9889,16492,STATUS_SUCCESS,0.841
+11:11:13.799165,RENAMED,C:\Users\nhat\Favorites\DecoyDocs\Config_Prod\$_Financial_Report_người_126.sqlite.mallab,C:\Users\nhat\Favorites\DecoyDocs\Config_Prod\$_Financial_Report_người_126.sqlite,7.9903,16492,STATUS_SUCCESS,0.894
+11:11:13.814963,CREATED,C:\Users\nhat\Favorites\DecoyDocs\Config_Prod\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.441
+11:11:13.814963,MODIFIED,C:\Users\nhat\Favorites\DecoyDocs\Config_Prod\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.350
+11:11:13.814963,RENAMED,C:\Users\nhat\Favorites\DecoyDocs\Financial_Reports\$_Contract_Master_nơi_454.sqlite.mallab,C:\Users\nhat\Favorites\DecoyDocs\Financial_Reports\$_Contract_Master_nơi_454.sqlite,7.9897,16492,STATUS_SUCCESS,0.798
+11:11:13.814963,CREATED,C:\Users\nhat\Favorites\DecoyDocs\Financial_Reports\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.376
+11:11:13.814963,MODIFIED,C:\Users\nhat\Favorites\DecoyDocs\Financial_Reports\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.349
+11:11:13.814963,RENAMED,C:\Users\nhat\Favorites\DecoyDocs\Financial_Reports\000_Client_Database_có_191.sqlite.mallab,C:\Users\nhat\Favorites\DecoyDocs\Financial_Reports\000_Client_Database_có_191.sqlite,7.9908,20588,STATUS_SUCCESS,35.449
+11:11:13.821410,CREATED,C:\Users\nhat\Favorites\DecoyDocs\Project_Source\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,2.279
+11:11:13.821410,MODIFIED,C:\Users\nhat\Favorites\DecoyDocs\Project_Source\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.721
+11:11:13.821410,CREATED,C:\Users\nhat\Favorites\DecoyDocs\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.341
+11:11:13.821410,MODIFIED,C:\Users\nhat\Favorites\DecoyDocs\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.315
+11:11:13.827651,MODIFIED,C:\Users\nhat\Favorites\DecoyDocs\Financial_Reports\decoy_Client_Database_để_322.sqlite,,7.9832,12396,STATUS_SUCCESS,0.606
+11:11:13.827651,RENAMED,C:\Users\nhat\Favorites\DecoyDocs\Financial_Reports\decoy_Client_Database_để_322.sqlite.mallab,C:\Users\nhat\Favorites\DecoyDocs\Financial_Reports\decoy_Client_Database_để_322.sqlite,7.9832,12396,STATUS_SUCCESS,1.413
+11:11:13.837767,CREATED,C:\Users\nhat\Music\DecoyDocs\Backup_Data\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.793
+11:11:13.837767,CREATED,C:\Users\nhat\Music\DecoyDocs\Financial_Reports\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.364
+11:11:13.837767,MODIFIED,C:\Users\nhat\Music\DecoyDocs\Backup_Data\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,1.090
+11:11:13.837767,MODIFIED,C:\Users\nhat\Music\DecoyDocs\Financial_Reports\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.409
+11:11:13.837767,MODIFIED,C:\Users\nhat\Music\DecoyDocs\HR_Contracts\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.310
+11:11:13.837767,CREATED,C:\Users\nhat\Music\DecoyDocs\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.330
+11:11:13.837767,CREATED,C:\Users\nhat\Music\DecoyDocs\HR_Contracts\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,1.347
+11:11:13.837767,MODIFIED,C:\Users\nhat\Music\DecoyDocs\aaa_Financial_Report_sẽ_420.sqlite,,7.9847,12396,STATUS_SUCCESS,0.607
+11:11:13.837767,MODIFIED,C:\Users\nhat\Music\DecoyDocs\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,4.508
+11:11:13.853605,RENAMED,C:\Users\nhat\Music\DecoyDocs\aaa_Financial_Report_sẽ_420.sqlite.mallab,C:\Users\nhat\Music\DecoyDocs\aaa_Financial_Report_sẽ_420.sqlite,7.9847,12396,STATUS_SUCCESS,6.910
+11:11:13.855137,RENAMED,C:\Users\nhat\Music\DecoyDocs\Backup_Data\$_Accounting_một_348.sqlite.mallab,C:\Users\nhat\Music\DecoyDocs\Backup_Data\$_Accounting_một_348.sqlite,7.9869,16492,STATUS_SUCCESS,0.704
+11:11:13.855137,CREATED,C:\Users\nhat\Pictures\DecoyDocs\Backup_Data\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.359
+11:11:13.855137,MODIFIED,C:\Users\nhat\Pictures\DecoyDocs\Backup_Data\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.309
+11:11:13.860615,CREATED,C:\Users\nhat\Pictures\DecoyDocs\Config_Prod\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.372
+11:11:13.860615,MODIFIED,C:\Users\nhat\Pictures\DecoyDocs\Config_Prod\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.325
+11:11:13.860615,CREATED,C:\Users\nhat\Pictures\DecoyDocs\Financial_Reports\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.388
+11:11:13.860615,MODIFIED,C:\Users\nhat\Pictures\DecoyDocs\Financial_Reports\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.390
+11:11:13.860615,RENAMED,C:\Users\nhat\Pictures\DecoyDocs\HR_Contracts\000_Confidential_nơi_093.sqlite.mallab,C:\Users\nhat\Pictures\DecoyDocs\HR_Contracts\000_Confidential_nơi_093.sqlite,7.9846,12396,STATUS_SUCCESS,4.279
+11:11:13.860615,CREATED,C:\Users\nhat\Pictures\DecoyDocs\HR_Contracts\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,6.363
+11:11:13.860615,CREATED,C:\Users\nhat\Pictures\DecoyDocs\Personal_Photos\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,1.433
+11:11:13.860615,MODIFIED,C:\Users\nhat\Pictures\DecoyDocs\HR_Contracts\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,4.942
+11:11:13.860615,RENAMED,C:\Users\nhat\Pictures\DecoyDocs\HR_Contracts\decoy_Client_Database_một_170.sqlite.mallab,C:\Users\nhat\Pictures\DecoyDocs\HR_Contracts\decoy_Client_Database_một_170.sqlite,7.9843,12396,STATUS_SUCCESS,1.206
+11:11:13.876631,MODIFIED,C:\Users\nhat\Pictures\DecoyDocs\Personal_Photos\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.909
+11:11:13.876631,RENAMED,C:\Users\nhat\Pictures\DecoyDocs\Project_Source\$_Contract_Master_mỗi_130.sqlite.mallab,C:\Users\nhat\Pictures\DecoyDocs\Project_Source\$_Contract_Master_mỗi_130.sqlite,7.9908,16492,STATUS_SUCCESS,0.957
+11:11:13.876631,RENAMED,C:\Users\nhat\Pictures\DecoyDocs\Project_Source\000_Confidential_theo_539.sqlite.mallab,C:\Users\nhat\Pictures\DecoyDocs\Project_Source\000_Confidential_theo_539.sqlite,7.9915,20588,STATUS_SUCCESS,0.761
+11:11:13.876631,RENAMED,C:\Users\nhat\Pictures\DecoyDocs\HR_Contracts\aaa_Financial_Report_tôi_249.sqlite.mallab,C:\Users\nhat\Pictures\DecoyDocs\HR_Contracts\aaa_Financial_Report_tôi_249.sqlite,7.9824,12396,STATUS_SUCCESS,0.629
+11:11:13.876631,CREATED,C:\Users\nhat\Pictures\DecoyDocs\Project_Source\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.335
+11:11:13.876631,RENAMED,C:\Users\nhat\Pictures\DecoyDocs\Project_Source\decoy_Backup_Admin_đã_328.sqlite.mallab,C:\Users\nhat\Pictures\DecoyDocs\Project_Source\decoy_Backup_Admin_đã_328.sqlite,7.9888,16492,STATUS_SUCCESS,0.679
+11:11:13.876631,MODIFIED,C:\Users\nhat\Pictures\DecoyDocs\Project_Source\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.337
+11:11:13.876631,CREATED,C:\Users\nhat\Pictures\DecoyDocs\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.327
+11:11:13.876631,MODIFIED,C:\Users\nhat\Pictures\DecoyDocs\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.563
+11:11:13.892724,RENAMED,C:\Users\nhat\Videos\DecoyDocs\aaa_Payroll_2026_vẫn_426.sqlite.mallab,C:\Users\nhat\Videos\DecoyDocs\aaa_Payroll_2026_vẫn_426.sqlite,7.9877,16492,STATUS_SUCCESS,1.629
+11:11:13.892724,RENAMED,C:\Users\nhat\Videos\DecoyDocs\Financial_Reports\aaa_Accounting_tôi_145.sqlite.mallab,C:\Users\nhat\Videos\DecoyDocs\Financial_Reports\aaa_Accounting_tôi_145.sqlite,7.9851,12396,STATUS_SUCCESS,0.577
+11:11:13.892724,RENAMED,C:\Users\nhat\Videos\DecoyDocs\$_Backup_Admin_cách_121.sqlite.mallab,C:\Users\nhat\Videos\DecoyDocs\$_Backup_Admin_cách_121.sqlite,7.9868,12396,STATUS_SUCCESS,0.610
+11:11:13.892724,CREATED,C:\Users\nhat\Videos\DecoyDocs\Financial_Reports\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.452
+11:11:13.892724,MODIFIED,C:\Users\nhat\Videos\DecoyDocs\Financial_Reports\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.574
+11:11:13.908010,RENAMED,C:\Users\nhat\Videos\DecoyDocs\Personal_Photos\$_Payroll_2026_từ_774.sqlite.mallab,C:\Users\nhat\Videos\DecoyDocs\Personal_Photos\$_Payroll_2026_từ_774.sqlite,7.9868,16492,STATUS_SUCCESS,2.980
+11:11:13.908010,CREATED,C:\Users\nhat\Videos\DecoyDocs\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.354
+11:11:13.908010,MODIFIED,C:\Users\nhat\Videos\DecoyDocs\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.316
+11:11:13.908010,CREATED,C:\Users\nhat\Videos\DecoyDocs\Personal_Photos\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,3.431
+11:11:13.908010,MODIFIED,C:\Users\nhat\Videos\DecoyDocs\Personal_Photos\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,3.128
+11:11:18.451111,MODIFIED,C:\DecoyDocs\Config_Prod\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.456
+11:11:18.451111,MODIFIED,C:\DecoyDocs\Financial_Reports\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.501
+11:11:18.465709,MODIFIED,C:\DecoyDocs\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.463
+11:11:20.778163,MODIFIED,C:\Users\nhat\Contacts\DecoyDocs\Backup_Data\HOW TO BACK FILES.txt,,0.0000,0,STATUS_SUCCESS,2.163
+11:11:20.778163,MODIFIED,C:\Users\nhat\Contacts\DecoyDocs\Config_Prod\HOW TO BACK FILES.txt,,0.0000,0,STATUS_SUCCESS,0.292
+11:11:20.778163,MODIFIED,C:\Users\nhat\Contacts\DecoyDocs\Financial_Reports\HOW TO BACK FILES.txt,,0.0000,0,STATUS_SUCCESS,0.289
+11:11:20.778163,MODIFIED,C:\Users\nhat\Contacts\DecoyDocs\HOW TO BACK FILES.txt,,0.0000,0,STATUS_SUCCESS,0.299
+11:11:20.778163,MODIFIED,C:\Users\nhat\Desktop\DecoyDocs\Config_Prod\HOW TO BACK FILES.txt,,0.0000,0,STATUS_SUCCESS,0.318
+11:11:20.778163,MODIFIED,C:\Users\nhat\Desktop\DecoyDocs\HR_Contracts\HOW TO BACK FILES.txt,,0.0000,0,STATUS_SUCCESS,0.283
+11:11:20.778163,MODIFIED,C:\Users\nhat\Desktop\DecoyDocs\Personal_Photos\HOW TO BACK FILES.txt,,0.0000,0,STATUS_SUCCESS,0.299
+11:11:21.028205,MODIFIED,C:\Users\nhat\Desktop\DecoyDocs\Project_Source\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.598
+11:11:21.028205,MODIFIED,C:\Users\nhat\Desktop\DecoyDocs\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.595
+11:11:21.028205,MODIFIED,C:\Users\nhat\Documents\DecoyDocs\Config_Prod\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.407
+11:11:21.028205,MODIFIED,C:\Users\nhat\Documents\DecoyDocs\Financial_Reports\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.452
+11:11:21.043760,MODIFIED,C:\Users\nhat\Documents\DecoyDocs\HR_Contracts\HOW TO BACK FILES.txt,,0.0000,0,STATUS_SUCCESS,0.309
+11:11:21.043760,MODIFIED,C:\Users\nhat\Documents\DecoyDocs\Project_Source\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.442
+11:11:21.043760,MODIFIED,C:\Users\nhat\Documents\DecoyDocs\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.383
+11:11:21.043760,MODIFIED,C:\Users\nhat\Downloads\DecoyDocs\Config_Prod\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.411
+11:11:21.043760,MODIFIED,C:\Users\nhat\Downloads\DecoyDocs\Financial_Reports\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.402
+11:11:21.043760,MODIFIED,C:\Users\nhat\Downloads\DecoyDocs\HR_Contracts\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.332
+11:11:21.043760,MODIFIED,C:\Users\nhat\Downloads\DecoyDocs\Project_Source\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.318
+11:11:21.043760,MODIFIED,C:\Users\nhat\Downloads\DecoyDocs\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.317
+11:11:27.611124,RENAMED,C:\DecoyDocs\!00_Confidential_nhiều_316.json.mallab,C:\DecoyDocs\!00_Confidential_nhiều_316.json,7.9795,11060,STATUS_SUCCESS,0.609
+11:11:27.641896,MODIFIED,C:\DecoyDocs\Config_Prod\decoy_Payroll_2026_không_037.docx,,7.9948,37406,STATUS_SUCCESS,1.331
+11:11:27.641896,MODIFIED,C:\DecoyDocs\decoy_Confidential_bên_031.db,,7.9913,20588,STATUS_SUCCESS,0.854
+11:11:27.641896,RENAMED,C:\DecoyDocs\Config_Prod\decoy_Payroll_2026_không_037.docx.mallab,C:\DecoyDocs\Config_Prod\decoy_Payroll_2026_không_037.docx,7.9948,37406,STATUS_SUCCESS,7.727
+11:11:27.641896,RENAMED,C:\DecoyDocs\Financial_Reports\$_Payroll_2026_như_072.db.mallab,C:\DecoyDocs\Financial_Reports\$_Payroll_2026_như_072.db,7.9864,12396,STATUS_SUCCESS,0.937
+11:11:27.641896,RENAMED,C:\DecoyDocs\decoy_Confidential_bên_031.db.mallab,C:\DecoyDocs\decoy_Confidential_bên_031.db,7.9913,20588,STATUS_SUCCESS,6.943
+11:11:27.652363,RENAMED,C:\DecoyDocs\Financial_Reports\aaa_Payroll_2026_sau_347.db.mallab,C:\DecoyDocs\Financial_Reports\aaa_Payroll_2026_sau_347.db,7.9849,12396,STATUS_SUCCESS,0.696
+11:11:27.652363,RENAMED,C:\DecoyDocs\Financial_Reports\aaa_Payroll_2026_vài_697.json.mallab,C:\DecoyDocs\Financial_Reports\aaa_Payroll_2026_vài_697.json,7.9848,11720,STATUS_SUCCESS,1.915
+11:11:27.735327,RENAMED,C:\DecoyDocs\Config_Prod\decoy_Client_Database_một_035.db.mallab,C:\DecoyDocs\Config_Prod\decoy_Client_Database_một_035.db,7.9891,16492,STATUS_SUCCESS,8.406
+11:11:33.734149,RENAMED,C:\Users\nhat\Contacts\DecoyDocs\$_Contract_Master_khiến_430.jpg.mallab,C:\Users\nhat\Contacts\DecoyDocs\$_Contract_Master_khiến_430.jpg,7.9838,11180,STATUS_SUCCESS,0.720
+11:11:33.734149,RENAMED,C:\Users\nhat\Contacts\DecoyDocs\$_Financial_Report_khi_079.docx.mallab,C:\Users\nhat\Contacts\DecoyDocs\$_Financial_Report_khi_079.docx,7.9953,37325,STATUS_SUCCESS,1.016
+11:11:33.734149,RENAMED,C:\Users\nhat\Contacts\DecoyDocs\000_Backup_Admin_tại_621.jpg.mallab,C:\Users\nhat\Contacts\DecoyDocs\000_Backup_Admin_tại_621.jpg,7.9852,12531,STATUS_SUCCESS,0.555
+11:11:33.734149,RENAMED,C:\Users\nhat\Contacts\DecoyDocs\aaa_Client_Database_làm_127.jpg.mallab,C:\Users\nhat\Contacts\DecoyDocs\aaa_Client_Database_làm_127.jpg,7.9863,15779,STATUS_SUCCESS,55.899
+11:11:33.864460,MODIFIED,C:\Users\nhat\Contacts\DecoyDocs\aaa_Client_Database_người_096.docx,,7.9945,37160,STATUS_SUCCESS,1.133
+11:11:33.864460,RENAMED,C:\Users\nhat\Contacts\DecoyDocs\aaa_Client_Database_người_096.docx.mallab,C:\Users\nhat\Contacts\DecoyDocs\aaa_Client_Database_người_096.docx,7.9945,37160,STATUS_SUCCESS,8.012
+11:11:33.871368,MODIFIED,C:\Users\nhat\Contacts\DecoyDocs\Backup_Data\!00_Backup_Admin_với_791.jpg,,7.9852,13224,STATUS_SUCCESS,0.612
+11:11:33.871368,MODIFIED,C:\Users\nhat\Contacts\DecoyDocs\Backup_Data\!00_Backup_Admin_với_791.jpg.mallab,,7.9852,13224,STATUS_SUCCESS,1.256
+11:11:33.871368,RENAMED,C:\Users\nhat\Contacts\DecoyDocs\Backup_Data\!00_Backup_Admin_đúng_282.docx.mallab,C:\Users\nhat\Contacts\DecoyDocs\Backup_Data\!00_Backup_Admin_đúng_282.docx,7.9947,37404,STATUS_SUCCESS,1.031
+11:11:33.871368,RENAMED,C:\Users\nhat\Contacts\DecoyDocs\Backup_Data\!00_Client_Database_về_785.docx.mallab,C:\Users\nhat\Contacts\DecoyDocs\Backup_Data\!00_Client_Database_về_785.docx,7.9951,37179,STATUS_SUCCESS,1.077
+11:11:33.871368,RENAMED,C:\Users\nhat\Contacts\DecoyDocs\Backup_Data\!00_Backup_Admin_với_791.jpg.mallab,C:\Users\nhat\Contacts\DecoyDocs\Backup_Data\!00_Backup_Admin_với_791.jpg,7.9852,13224,STATUS_SUCCESS,10.163
+11:11:33.878587,MODIFIED,C:\Users\nhat\Contacts\DecoyDocs\Backup_Data\000_Contract_Master_có_241.json,,7.9814,10765,STATUS_SUCCESS,0.549
+11:11:33.878587,RENAMED,C:\Users\nhat\Contacts\DecoyDocs\Backup_Data\000_Contract_Master_có_241.json.mallab,C:\Users\nhat\Contacts\DecoyDocs\Backup_Data\000_Contract_Master_có_241.json,7.9814,10765,STATUS_SUCCESS,8.104
+11:11:33.886578,MODIFIED,C:\Users\nhat\Contacts\DecoyDocs\Backup_Data\000_Financial_Report_để_527.json,,7.9856,12454,STATUS_SUCCESS,0.561
+11:11:33.886578,MODIFIED,C:\Users\nhat\Contacts\DecoyDocs\Backup_Data\000_Financial_Report_để_527.json.mallab,,7.9856,12454,STATUS_SUCCESS,0.771
+11:11:33.886578,RENAMED,C:\Users\nhat\Contacts\DecoyDocs\Backup_Data\000_Financial_Report_để_527.json.mallab,C:\Users\nhat\Contacts\DecoyDocs\Backup_Data\000_Financial_Report_để_527.json,7.9856,12454,STATUS_SUCCESS,6.901
+11:11:33.894858,MODIFIED,C:\Users\nhat\Contacts\DecoyDocs\Config_Prod\!00_Contract_Master_một_571.db,,7.9901,16492,STATUS_SUCCESS,0.717
+11:11:33.894858,RENAMED,C:\Users\nhat\Contacts\DecoyDocs\Config_Prod\!00_Contract_Master_một_571.db.mallab,C:\Users\nhat\Contacts\DecoyDocs\Config_Prod\!00_Contract_Master_một_571.db,7.9901,16492,STATUS_SUCCESS,6.482
+11:11:33.899715,MODIFIED,C:\Users\nhat\Contacts\DecoyDocs\Config_Prod\!00_Contract_Master_một_571.db.mallab,,7.9901,16492,STATUS_SUCCESS,0.707
+11:11:33.899715,RENAMED,C:\Users\nhat\Contacts\DecoyDocs\Config_Prod\$_Financial_Report_chỉ_269.docx.mallab,C:\Users\nhat\Contacts\DecoyDocs\Config_Prod\$_Financial_Report_chỉ_269.docx,7.9946,37329,STATUS_SUCCESS,8.720
+11:11:33.905036,RENAMED,C:\Users\nhat\Contacts\DecoyDocs\Config_Prod\000_Financial_Report_như_280.jpg.mallab,C:\Users\nhat\Contacts\DecoyDocs\Config_Prod\000_Financial_Report_như_280.jpg,7.9897,16113,STATUS_SUCCESS,0.800
+11:11:33.905036,MODIFIED,C:\Users\nhat\Contacts\DecoyDocs\Config_Prod\aaa_Financial_Report_vài_635.docx,,7.9953,37214,STATUS_SUCCESS,1.295
+11:11:33.905036,RENAMED,C:\Users\nhat\Contacts\DecoyDocs\Financial_Reports\$_Confidential_gần_731.jpg.mallab,C:\Users\nhat\Contacts\DecoyDocs\Financial_Reports\$_Confidential_gần_731.jpg,7.9863,15671,STATUS_SUCCESS,1.291
+11:11:33.905036,RENAMED,C:\Users\nhat\Contacts\DecoyDocs\Financial_Reports\$_Client_Database_như_550.json.mallab,C:\Users\nhat\Contacts\DecoyDocs\Financial_Reports\$_Client_Database_như_550.json,7.9852,11345,STATUS_SUCCESS,6.036
+11:11:33.909590,RENAMED,C:\Users\nhat\Contacts\DecoyDocs\Financial_Reports\$_Financial_Report_sẽ_369.jpg.mallab,C:\Users\nhat\Contacts\DecoyDocs\Financial_Reports\$_Financial_Report_sẽ_369.jpg,7.9854,14751,STATUS_SUCCESS,0.986
+11:11:33.909590,RENAMED,C:\Users\nhat\Contacts\DecoyDocs\Financial_Reports\000_Contract_Master_đi_523.docx.mallab,C:\Users\nhat\Contacts\DecoyDocs\Financial_Reports\000_Contract_Master_đi_523.docx,7.9958,37391,STATUS_SUCCESS,1.686
+11:11:33.909590,RENAMED,C:\Users\nhat\Contacts\DecoyDocs\Config_Prod\aaa_Financial_Report_vài_635.docx.mallab,C:\Users\nhat\Contacts\DecoyDocs\Config_Prod\aaa_Financial_Report_vài_635.docx,7.9953,37214,STATUS_SUCCESS,1.185
+11:11:33.909590,RENAMED,C:\Users\nhat\Desktop\DecoyDocs\!00_Client_Database_cho_727.jpg.mallab,C:\Users\nhat\Desktop\DecoyDocs\!00_Client_Database_cho_727.jpg,7.9889,17199,STATUS_SUCCESS,2.857
+11:11:33.909590,RENAMED,C:\Users\nhat\Desktop\DecoyDocs\000_Confidential_nào_677.json.mallab,C:\Users\nhat\Desktop\DecoyDocs\000_Confidential_nào_677.json,7.9879,15852,STATUS_SUCCESS,0.997
+11:11:33.925646,RENAMED,C:\Users\nhat\Desktop\DecoyDocs\000_Financial_Report_trong_432.jpg.mallab,C:\Users\nhat\Desktop\DecoyDocs\000_Financial_Report_trong_432.jpg,7.9817,10535,STATUS_SUCCESS,0.616
+11:11:33.925646,RENAMED,C:\Users\nhat\Desktop\DecoyDocs\aaa_Accounting_để_415.jpg.mallab,C:\Users\nhat\Desktop\DecoyDocs\aaa_Accounting_để_415.jpg,7.9872,14111,STATUS_SUCCESS,0.980
+11:11:33.925646,RENAMED,C:\Users\nhat\Desktop\DecoyDocs\Config_Prod\$_Backup_Admin_từ_611.jpg.mallab,C:\Users\nhat\Desktop\DecoyDocs\Config_Prod\$_Backup_Admin_từ_611.jpg,7.9877,16510,STATUS_SUCCESS,0.802
+11:11:33.925646,RENAMED,C:\Users\nhat\Desktop\DecoyDocs\Config_Prod\000_Backup_Admin_từng_448.db.mallab,C:\Users\nhat\Desktop\DecoyDocs\Config_Prod\000_Backup_Admin_từng_448.db,7.9894,16492,STATUS_SUCCESS,0.833
+11:11:33.925646,RENAMED,C:\Users\nhat\Desktop\DecoyDocs\Config_Prod\000_Client_Database_số_495.json.mallab,C:\Users\nhat\Desktop\DecoyDocs\Config_Prod\000_Client_Database_số_495.json,7.9866,13680,STATUS_SUCCESS,1.357
+11:11:33.925646,RENAMED,C:\Users\nhat\Desktop\DecoyDocs\Config_Prod\000_Client_Database_tôi_361.jpg.mallab,C:\Users\nhat\Desktop\DecoyDocs\Config_Prod\000_Client_Database_tôi_361.jpg,7.9853,13524,STATUS_SUCCESS,1.439
+11:11:33.925646,MODIFIED,C:\Users\nhat\Desktop\DecoyDocs\$_Backup_Admin_để_210.db,,7.9858,16492,STATUS_SUCCESS,0.664
+11:11:33.925646,RENAMED,C:\Users\nhat\Desktop\DecoyDocs\$_Backup_Admin_để_210.db.mallab,C:\Users\nhat\Desktop\DecoyDocs\$_Backup_Admin_để_210.db,7.9858,16492,STATUS_SUCCESS,0.678
+11:11:33.941784,MODIFIED,C:\Users\nhat\Desktop\DecoyDocs\decoy_Backup_Admin_một_753.docx,,7.9953,37076,STATUS_SUCCESS,1.345
+11:11:33.941784,RENAMED,C:\Users\nhat\Desktop\DecoyDocs\decoy_Backup_Admin_một_753.docx.mallab,C:\Users\nhat\Desktop\DecoyDocs\decoy_Backup_Admin_một_753.docx,7.9953,37076,STATUS_SUCCESS,7.450
+11:11:33.949636,MODIFIED,C:\Users\nhat\Desktop\DecoyDocs\HR_Contracts\$_Accounting_của_206.jpg,,7.9866,13258,STATUS_SUCCESS,0.660
+11:11:33.949636,RENAMED,C:\Users\nhat\Desktop\DecoyDocs\HR_Contracts\$_Accounting_của_206.jpg.mallab,C:\Users\nhat\Desktop\DecoyDocs\HR_Contracts\$_Accounting_của_206.jpg,7.9866,13258,STATUS_SUCCESS,10.076
+11:11:33.954437,RENAMED,C:\Users\nhat\Desktop\DecoyDocs\Config_Prod\aaa_Backup_Admin_để_652.docx.mallab,C:\Users\nhat\Desktop\DecoyDocs\Config_Prod\aaa_Backup_Admin_để_652.docx,7.9946,37195,STATUS_SUCCESS,1.180
+11:11:33.975381,RENAMED,C:\Users\nhat\Desktop\DecoyDocs\Personal_Photos\!00_Accounting_vậy_254.json.mallab,C:\Users\nhat\Desktop\DecoyDocs\Personal_Photos\!00_Accounting_vậy_254.json,7.9897,17278,STATUS_SUCCESS,1.851
+11:11:33.975381,RENAMED,C:\Users\nhat\Desktop\DecoyDocs\HR_Contracts\decoy_Confidential_tại_497.docx.mallab,C:\Users\nhat\Desktop\DecoyDocs\HR_Contracts\decoy_Confidential_tại_497.docx,7.9955,37343,STATUS_SUCCESS,3.314
+11:11:33.975381,RENAMED,C:\Users\nhat\Desktop\DecoyDocs\Personal_Photos\aaa_Client_Database_nếu_507.db.mallab,C:\Users\nhat\Desktop\DecoyDocs\Personal_Photos\aaa_Client_Database_nếu_507.db,7.9848,12396,STATUS_SUCCESS,109.183
+11:11:34.071793,RENAMED,C:\Users\nhat\Desktop\DecoyDocs\Personal_Photos\decoy_Payroll_2026_các_273.jpg.mallab,C:\Users\nhat\Desktop\DecoyDocs\Personal_Photos\decoy_Payroll_2026_các_273.jpg,7.9855,14028,STATUS_SUCCESS,0.878
+11:11:34.071793,RENAMED,C:\Users\nhat\Desktop\DecoyDocs\Project_Source\000_Payroll_2026_để_069.jpg.mallab,C:\Users\nhat\Desktop\DecoyDocs\Project_Source\000_Payroll_2026_để_069.jpg,7.9838,13561,STATUS_SUCCESS,0.649
+11:11:34.071793,RENAMED,C:\Users\nhat\Desktop\DecoyDocs\Project_Source\$_Confidential_vài_638.jpg.mallab,C:\Users\nhat\Desktop\DecoyDocs\Project_Source\$_Confidential_vài_638.jpg,7.9822,10767,STATUS_SUCCESS,1.735
+11:11:34.071793,RENAMED,C:\Users\nhat\Desktop\DecoyDocs\Project_Source\decoy_Client_Database_bạn_786.jpg.mallab,C:\Users\nhat\Desktop\DecoyDocs\Project_Source\decoy_Client_Database_bạn_786.jpg,7.9862,14240,STATUS_SUCCESS,0.974
+11:11:34.071793,RENAMED,C:\Users\nhat\Documents\DecoyDocs\Config_Prod\!00_Accounting_sau_071.jpg.mallab,C:\Users\nhat\Documents\DecoyDocs\Config_Prod\!00_Accounting_sau_071.jpg,7.9865,15037,STATUS_SUCCESS,0.641
+11:11:34.071793,RENAMED,C:\Users\nhat\Documents\DecoyDocs\Config_Prod\!00_Accounting_trong_124.docx.mallab,C:\Users\nhat\Documents\DecoyDocs\Config_Prod\!00_Accounting_trong_124.docx,7.9954,37379,STATUS_SUCCESS,0.970
+11:11:34.071793,RENAMED,C:\Users\nhat\Documents\DecoyDocs\Config_Prod\000_Backup_Admin_từng_542.db.mallab,C:\Users\nhat\Documents\DecoyDocs\Config_Prod\000_Backup_Admin_từng_542.db,7.9877,16492,STATUS_SUCCESS,0.632
+11:11:34.071793,RENAMED,C:\Users\nhat\Documents\DecoyDocs\Config_Prod\000_Financial_Report_như_796.docx.mallab,C:\Users\nhat\Documents\DecoyDocs\Config_Prod\000_Financial_Report_như_796.docx,7.9950,37235,STATUS_SUCCESS,1.020
+11:11:34.071793,RENAMED,C:\Users\nhat\Documents\DecoyDocs\Config_Prod\000_Financial_Report_tại_572.jpg.mallab,C:\Users\nhat\Documents\DecoyDocs\Config_Prod\000_Financial_Report_tại_572.jpg,7.9834,12262,STATUS_SUCCESS,0.547
+11:11:34.071793,RENAMED,C:\Users\nhat\Documents\DecoyDocs\Config_Prod\decoy_Payroll_2026_của_428.docx.mallab,C:\Users\nhat\Documents\DecoyDocs\Config_Prod\decoy_Payroll_2026_của_428.docx,7.9953,37417,STATUS_SUCCESS,0.973
+11:11:34.071793,RENAMED,C:\Users\nhat\Documents\DecoyDocs\Financial_Reports\$_Client_Database_chỉ_264.db.mallab,C:\Users\nhat\Documents\DecoyDocs\Financial_Reports\$_Client_Database_chỉ_264.db,7.9894,20588,STATUS_SUCCESS,0.715
+11:11:34.071793,RENAMED,C:\Users\nhat\Documents\DecoyDocs\Financial_Reports\aaa_Confidential_trong_533.jpg.mallab,C:\Users\nhat\Documents\DecoyDocs\Financial_Reports\aaa_Confidential_trong_533.jpg,7.9904,17923,STATUS_SUCCESS,0.636
+11:11:34.071793,RENAMED,C:\Users\nhat\Documents\DecoyDocs\HR_Contracts\!00_Backup_Admin_khi_594.db.mallab,C:\Users\nhat\Documents\DecoyDocs\HR_Contracts\!00_Backup_Admin_khi_594.db,7.9840,12396,STATUS_SUCCESS,0.529
+11:11:34.071793,RENAMED,C:\Users\nhat\Documents\DecoyDocs\HR_Contracts\000_Accounting_mà_111.jpg.mallab,C:\Users\nhat\Documents\DecoyDocs\HR_Contracts\000_Accounting_mà_111.jpg,7.9837,12432,STATUS_SUCCESS,0.545
+11:11:34.071793,RENAMED,C:\Users\nhat\Documents\DecoyDocs\HR_Contracts\aaa_Accounting_của_416.json.mallab,C:\Users\nhat\Documents\DecoyDocs\HR_Contracts\aaa_Accounting_của_416.json,7.9853,14119,STATUS_SUCCESS,0.555
+11:11:34.071793,RENAMED,C:\Users\nhat\Documents\DecoyDocs\aaa_Accounting_vậy_301.db.mallab,C:\Users\nhat\Documents\DecoyDocs\aaa_Accounting_vậy_301.db,7.9914,20588,STATUS_SUCCESS,11.627
+11:11:34.071793,RENAMED,C:\Users\nhat\Desktop\DecoyDocs\Project_Source\decoy_Backup_Admin_cũng_229.jpg.mallab,C:\Users\nhat\Desktop\DecoyDocs\Project_Source\decoy_Backup_Admin_cũng_229.jpg,7.9883,14924,STATUS_SUCCESS,13.170
+11:11:34.087477,RENAMED,C:\Users\nhat\Documents\DecoyDocs\HR_Contracts\aaa_Confidential_tự_208.db.mallab,C:\Users\nhat\Documents\DecoyDocs\HR_Contracts\aaa_Confidential_tự_208.db,7.9913,20588,STATUS_SUCCESS,0.702
+11:11:34.087477,RENAMED,C:\Users\nhat\Documents\DecoyDocs\HR_Contracts\aaa_Contract_Master_tại_209.json.mallab,C:\Users\nhat\Documents\DecoyDocs\HR_Contracts\aaa_Contract_Master_tại_209.json,7.9889,15644,STATUS_SUCCESS,0.621
+11:11:34.118794,RENAMED,C:\Users\nhat\Desktop\DecoyDocs\Project_Source\!00_Backup_Admin_rất_161.json.mallab,C:\Users\nhat\Desktop\DecoyDocs\Project_Source\!00_Backup_Admin_rất_161.json,7.9898,15201,STATUS_SUCCESS,0.770
+11:11:34.118794,RENAMED,C:\Users\nhat\Documents\DecoyDocs\Project_Source\decoy_Accounting_nếu_243.docx.mallab,C:\Users\nhat\Documents\DecoyDocs\Project_Source\decoy_Accounting_nếu_243.docx,7.9952,37447,STATUS_SUCCESS,1.074
+11:11:34.118794,RENAMED,C:\Users\nhat\Documents\DecoyDocs\Project_Source\aaa_Backup_Admin_đến_104.jpg.mallab,C:\Users\nhat\Documents\DecoyDocs\Project_Source\aaa_Backup_Admin_đến_104.jpg,7.9860,14492,STATUS_SUCCESS,2.227
+11:11:34.151707,RENAMED,C:\Users\nhat\Downloads\DecoyDocs\aaa_Financial_Report_như_038.db.mallab,C:\Users\nhat\Downloads\DecoyDocs\aaa_Financial_Report_như_038.db,7.9893,20588,STATUS_SUCCESS,2.009
+11:11:34.151707,RENAMED,C:\Users\nhat\Downloads\DecoyDocs\Config_Prod\$_Financial_Report_với_730.docx.mallab,C:\Users\nhat\Downloads\DecoyDocs\Config_Prod\$_Financial_Report_với_730.docx,7.9955,37268,STATUS_SUCCESS,1.677
+11:11:34.151707,RENAMED,C:\Users\nhat\Downloads\DecoyDocs\Config_Prod\000_Contract_Master_giống_231.db.mallab,C:\Users\nhat\Downloads\DecoyDocs\Config_Prod\000_Contract_Master_giống_231.db,7.9847,12396,STATUS_SUCCESS,1.468
+11:11:34.151707,RENAMED,C:\Users\nhat\Downloads\DecoyDocs\Config_Prod\aaa_Accounting_vậy_608.db.mallab,C:\Users\nhat\Downloads\DecoyDocs\Config_Prod\aaa_Accounting_vậy_608.db,7.9890,16492,STATUS_SUCCESS,1.665
+11:11:34.165969,RENAMED,C:\Users\nhat\Downloads\DecoyDocs\Config_Prod\aaa_Backup_Admin_để_192.docx.mallab,C:\Users\nhat\Downloads\DecoyDocs\Config_Prod\aaa_Backup_Admin_để_192.docx,7.9951,37246,STATUS_SUCCESS,1.108
+11:11:34.165969,RENAMED,C:\Users\nhat\Downloads\DecoyDocs\Financial_Reports\!00_Financial_Report_giống_400.docx.mallab,C:\Users\nhat\Downloads\DecoyDocs\Financial_Reports\!00_Financial_Report_giống_400.docx,7.9947,37351,STATUS_SUCCESS,1.045
+11:11:34.165969,RENAMED,C:\Users\nhat\Downloads\DecoyDocs\Financial_Reports\aaa_Contract_Master_vậy_693.docx.mallab,C:\Users\nhat\Downloads\DecoyDocs\Financial_Reports\aaa_Contract_Master_vậy_693.docx,7.9950,37266,STATUS_SUCCESS,1.194
+11:11:34.173887,RENAMED,C:\Users\nhat\Downloads\DecoyDocs\HR_Contracts\aaa_Contract_Master_chưa_451.jpg.mallab,C:\Users\nhat\Downloads\DecoyDocs\HR_Contracts\aaa_Contract_Master_chưa_451.jpg,7.9876,17750,STATUS_SUCCESS,1.049
+11:11:34.173887,RENAMED,C:\Users\nhat\Downloads\DecoyDocs\HR_Contracts\!00_Payroll_2026_nhưng_090.json.mallab,C:\Users\nhat\Downloads\DecoyDocs\HR_Contracts\!00_Payroll_2026_nhưng_090.json,7.9841,13058,STATUS_SUCCESS,2.037
+11:11:34.173887,RENAMED,C:\Users\nhat\Downloads\DecoyDocs\HR_Contracts\decoy_Confidential_như_317.docx.mallab,C:\Users\nhat\Downloads\DecoyDocs\HR_Contracts\decoy_Confidential_như_317.docx,7.9946,37197,STATUS_SUCCESS,2.006
+11:11:34.173887,RENAMED,C:\Users\nhat\Downloads\DecoyDocs\HR_Contracts\decoy_Contract_Master_dưới_443.db.mallab,C:\Users\nhat\Downloads\DecoyDocs\HR_Contracts\decoy_Contract_Master_dưới_443.db,7.9918,20588,STATUS_SUCCESS,1.954
+11:11:34.173887,RENAMED,C:\Users\nhat\Downloads\DecoyDocs\Project_Source\$_Payroll_2026_để_002.docx.mallab,C:\Users\nhat\Downloads\DecoyDocs\Project_Source\$_Payroll_2026_để_002.docx,7.9950,37117,STATUS_SUCCESS,1.096
+11:11:34.173887,RENAMED,C:\Users\nhat\Downloads\DecoyDocs\Project_Source\!00_Payroll_2026_bạn_528.jpg.mallab,C:\Users\nhat\Downloads\DecoyDocs\Project_Source\!00_Payroll_2026_bạn_528.jpg,7.9845,13833,STATUS_SUCCESS,2.455
+11:11:34.173887,RENAMED,C:\Users\nhat\Downloads\DecoyDocs\Project_Source\aaa_Client_Database_có_339.db.mallab,C:\Users\nhat\Downloads\DecoyDocs\Project_Source\aaa_Client_Database_có_339.db,7.9922,20588,STATUS_SUCCESS,1.166
+11:11:34.192421,RENAMED,C:\Users\nhat\Downloads\DecoyDocs\Financial_Reports\aaa_Payroll_2026_là_055.db.mallab,C:\Users\nhat\Downloads\DecoyDocs\Financial_Reports\aaa_Payroll_2026_là_055.db,7.9900,20588,STATUS_SUCCESS,7.218
+11:11:38.328609,MODIFIED,C:\Users\nhat\Favorites\DecoyDocs\Config_Prod\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.467
+11:11:38.328609,MODIFIED,C:\Users\nhat\Favorites\DecoyDocs\Financial_Reports\HOW TO BACK FILES.txt,,0.0000,0,STATUS_SUCCESS,0.347
+11:11:38.328609,MODIFIED,C:\Users\nhat\Favorites\DecoyDocs\Project_Source\HOW TO BACK FILES.txt,,0.0000,0,STATUS_SUCCESS,0.287
+11:11:38.328609,MODIFIED,C:\Users\nhat\Favorites\DecoyDocs\HOW TO BACK FILES.txt,,0.0000,0,STATUS_SUCCESS,0.277
+11:11:38.516989,MODIFIED,C:\Users\nhat\Music\DecoyDocs\Backup_Data\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,1.240
+11:11:38.578144,MODIFIED,C:\Users\nhat\Music\DecoyDocs\Financial_Reports\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.807
+11:11:38.612034,MODIFIED,C:\Users\nhat\Music\DecoyDocs\HR_Contracts\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,1.037
+11:11:38.612034,MODIFIED,C:\Users\nhat\Music\DecoyDocs\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.389
+11:11:38.646968,MODIFIED,C:\Users\nhat\Pictures\DecoyDocs\Backup_Data\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.463
+11:11:38.646968,MODIFIED,C:\Users\nhat\Pictures\DecoyDocs\Config_Prod\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.371
+11:11:38.659064,MODIFIED,C:\Users\nhat\Pictures\DecoyDocs\Financial_Reports\HOW TO BACK FILES.txt,,0.0000,0,STATUS_SUCCESS,0.363
+11:11:38.674625,MODIFIED,C:\Users\nhat\Pictures\DecoyDocs\HR_Contracts\HOW TO BACK FILES.txt,,0.0000,0,STATUS_SUCCESS,0.338
+11:11:38.674625,MODIFIED,C:\Users\nhat\Pictures\DecoyDocs\Personal_Photos\HOW TO BACK FILES.txt,,0.0000,0,STATUS_SUCCESS,0.577
+11:11:38.721658,MODIFIED,C:\Users\nhat\Pictures\DecoyDocs\Project_Source\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,26.586
+11:11:38.721658,MODIFIED,C:\Users\nhat\Videos\DecoyDocs\Personal_Photos\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,4.112
+11:11:38.721658,MODIFIED,C:\Users\nhat\Videos\DecoyDocs\Financial_Reports\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,42.646
+11:11:38.721658,MODIFIED,C:\Users\nhat\Pictures\DecoyDocs\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,43.289
+11:11:38.768596,MODIFIED,C:\Users\nhat\Videos\DecoyDocs\HOW TO BACK FILES.txt,,4.7597,1410,STATUS_SUCCESS,0.653
+11:12:06.925919,RENAMED,C:\Users\nhat\Favorites\DecoyDocs\!00_Client_Database_đúng_099.json.mallab,C:\Users\nhat\Favorites\DecoyDocs\!00_Client_Database_đúng_099.json,7.9818,11682,STATUS_SUCCESS,0.628
+11:12:06.925919,RENAMED,C:\Users\nhat\Favorites\DecoyDocs\!00_Contract_Master_hoặc_320.docx.mallab,C:\Users\nhat\Favorites\DecoyDocs\!00_Contract_Master_hoặc_320.docx,7.9953,37076,STATUS_SUCCESS,1.165
+11:12:06.925919,RENAMED,C:\Users\nhat\Favorites\DecoyDocs\000_Accounting_với_220.db.mallab,C:\Users\nhat\Favorites\DecoyDocs\000_Accounting_với_220.db,7.9907,20588,STATUS_SUCCESS,1.004
+11:12:06.925919,RENAMED,C:\Users\nhat\Favorites\DecoyDocs\000_Client_Database_của_381.jpg.mallab,C:\Users\nhat\Favorites\DecoyDocs\000_Client_Database_của_381.jpg,7.9827,10570,STATUS_SUCCESS,1.457
+11:12:06.925919,RENAMED,C:\Users\nhat\Favorites\DecoyDocs\000_Payroll_2026_với_471.json.mallab,C:\Users\nhat\Favorites\DecoyDocs\000_Payroll_2026_với_471.json,7.9885,15131,STATUS_SUCCESS,0.986
+11:12:06.943781,RENAMED,C:\Users\nhat\Favorites\DecoyDocs\decoy_Accounting_cho_046.jpg.mallab,C:\Users\nhat\Favorites\DecoyDocs\decoy_Accounting_cho_046.jpg,7.9851,13037,STATUS_SUCCESS,1.547
+11:12:06.943781,RENAMED,C:\Users\nhat\Favorites\DecoyDocs\Financial_Reports\$_Payroll_2026_vẫn_068.jpg.mallab,C:\Users\nhat\Favorites\DecoyDocs\Financial_Reports\$_Payroll_2026_vẫn_068.jpg,7.9819,11066,STATUS_SUCCESS,1.103
+11:12:06.957700,RENAMED,C:\Users\nhat\Favorites\DecoyDocs\Financial_Reports\000_Backup_Admin_cách_656.docx.mallab,C:\Users\nhat\Favorites\DecoyDocs\Financial_Reports\000_Backup_Admin_cách_656.docx,7.9949,37375,STATUS_SUCCESS,1.428
+11:12:06.957700,RENAMED,C:\Users\nhat\Favorites\DecoyDocs\Project_Source\$_Backup_Admin_theo_530.json.mallab,C:\Users\nhat\Favorites\DecoyDocs\Project_Source\$_Backup_Admin_theo_530.json,7.9883,16985,STATUS_SUCCESS,1.189
+11:12:06.957700,RENAMED,C:\Users\nhat\Favorites\DecoyDocs\Project_Source\$_Backup_Admin_với_001.json.mallab,C:\Users\nhat\Favorites\DecoyDocs\Project_Source\$_Backup_Admin_với_001.json,7.9838,10995,STATUS_SUCCESS,1.443
+11:12:06.957700,RENAMED,C:\Users\nhat\Favorites\DecoyDocs\Project_Source\decoy_Accounting_là_197.json.mallab,C:\Users\nhat\Favorites\DecoyDocs\Project_Source\decoy_Accounting_là_197.json,7.9891,16715,STATUS_SUCCESS,0.827
+11:12:06.957700,RENAMED,C:\Users\nhat\Favorites\DecoyDocs\Project_Source\decoy_Backup_Admin_có_003.jpg.mallab,C:\Users\nhat\Favorites\DecoyDocs\Project_Source\decoy_Backup_Admin_có_003.jpg,7.9817,11694,STATUS_SUCCESS,0.648
+11:12:06.957700,RENAMED,C:\Users\nhat\Music\DecoyDocs\$_Financial_Report_vẫn_569.jpg.mallab,C:\Users\nhat\Music\DecoyDocs\$_Financial_Report_vẫn_569.jpg,7.9875,13690,STATUS_SUCCESS,0.811
+11:12:06.957700,RENAMED,C:\Users\nhat\Music\DecoyDocs\000_Payroll_2026_chưa_686.docx.mallab,C:\Users\nhat\Music\DecoyDocs\000_Payroll_2026_chưa_686.docx,7.9951,37358,STATUS_SUCCESS,1.092
+11:12:06.957700,RENAMED,C:\Users\nhat\Music\DecoyDocs\000_Payroll_2026_với_657.db.mallab,C:\Users\nhat\Music\DecoyDocs\000_Payroll_2026_với_657.db,7.9846,12396,STATUS_SUCCESS,0.742
+11:12:06.957700,RENAMED,C:\Users\nhat\Music\DecoyDocs\Backup_Data\!00_Payroll_2026_như_769.db.mallab,C:\Users\nhat\Music\DecoyDocs\Backup_Data\!00_Payroll_2026_như_769.db,7.9880,16492,STATUS_SUCCESS,0.850
+11:12:06.957700,RENAMED,C:\Users\nhat\Favorites\DecoyDocs\Project_Source\000_Confidential_của_383.db.mallab,C:\Users\nhat\Favorites\DecoyDocs\Project_Source\000_Confidential_của_383.db,7.9880,16492,STATUS_SUCCESS,10.788
+11:12:06.972903,RENAMED,C:\Users\nhat\Music\DecoyDocs\Backup_Data\aaa_Client_Database_như_631.db.mallab,C:\Users\nhat\Music\DecoyDocs\Backup_Data\aaa_Client_Database_như_631.db,7.9913,20588,STATUS_SUCCESS,1.033
+11:12:06.972903,RENAMED,C:\Users\nhat\Music\DecoyDocs\Backup_Data\decoy_Payroll_2026_có_487.jpg.mallab,C:\Users\nhat\Music\DecoyDocs\Backup_Data\decoy_Payroll_2026_có_487.jpg,7.9894,17599,STATUS_SUCCESS,0.772
+11:12:06.972903,RENAMED,C:\Users\nhat\Music\DecoyDocs\Financial_Reports\!00_Backup_Admin_là_465.jpg.mallab,C:\Users\nhat\Music\DecoyDocs\Financial_Reports\!00_Backup_Admin_là_465.jpg,7.9839,11743,STATUS_SUCCESS,0.819
+11:12:06.972903,RENAMED,C:\Users\nhat\Music\DecoyDocs\Financial_Reports\!00_Backup_Admin_từ_092.db.mallab,C:\Users\nhat\Music\DecoyDocs\Financial_Reports\!00_Backup_Admin_từ_092.db,7.9852,12396,STATUS_SUCCESS,0.891
+11:12:06.972903,RENAMED,C:\Users\nhat\Music\DecoyDocs\Financial_Reports\$_Backup_Admin_tôi_620.jpg.mallab,C:\Users\nhat\Music\DecoyDocs\Financial_Reports\$_Backup_Admin_tôi_620.jpg,7.9895,16239,STATUS_SUCCESS,0.893
+11:12:06.972903,RENAMED,C:\Users\nhat\Music\DecoyDocs\Financial_Reports\000_Contract_Master_đang_006.docx.mallab,C:\Users\nhat\Music\DecoyDocs\Financial_Reports\000_Contract_Master_đang_006.docx,7.9949,37282,STATUS_SUCCESS,1.144
+11:12:06.972903,RENAMED,C:\Users\nhat\Music\DecoyDocs\Financial_Reports\aaa_Backup_Admin_vậy_597.docx.mallab,C:\Users\nhat\Music\DecoyDocs\Financial_Reports\aaa_Backup_Admin_vậy_597.docx,7.9950,37109,STATUS_SUCCESS,1.763
+11:12:06.972903,RENAMED,C:\Users\nhat\Music\DecoyDocs\Financial_Reports\decoy_Payroll_2026_bạn_551.db.mallab,C:\Users\nhat\Music\DecoyDocs\Financial_Reports\decoy_Payroll_2026_bạn_551.db,7.9905,20588,STATUS_SUCCESS,0.961
+11:12:06.972903,RENAMED,C:\Users\nhat\Music\DecoyDocs\Backup_Data\aaa_Contract_Master_các_122.json.mallab,C:\Users\nhat\Music\DecoyDocs\Backup_Data\aaa_Contract_Master_các_122.json,7.9900,14978,STATUS_SUCCESS,36.521
+11:12:06.972903,RENAMED,C:\Users\nhat\Music\DecoyDocs\Financial_Reports\000_Financial_Report_lớn_385.json.mallab,C:\Users\nhat\Music\DecoyDocs\Financial_Reports\000_Financial_Report_lớn_385.json,7.9895,15676,STATUS_SUCCESS,32.099
+11:12:06.988576,RENAMED,C:\Users\nhat\Music\DecoyDocs\HR_Contracts\!00_Accounting_cách_128.db.mallab,C:\Users\nhat\Music\DecoyDocs\HR_Contracts\!00_Accounting_cách_128.db,7.9921,20588,STATUS_SUCCESS,0.789
+11:12:06.988576,RENAMED,C:\Users\nhat\Pictures\DecoyDocs\$_Financial_Report_đúng_733.docx.mallab,C:\Users\nhat\Pictures\DecoyDocs\$_Financial_Report_đúng_733.docx,7.9954,37314,STATUS_SUCCESS,1.368
+11:12:06.988576,RENAMED,C:\Users\nhat\Pictures\DecoyDocs\000_Confidential_chưa_305.jpg.mallab,C:\Users\nhat\Pictures\DecoyDocs\000_Confidential_chưa_305.jpg,7.9883,17109,STATUS_SUCCESS,1.027
+11:12:06.988576,RENAMED,C:\Users\nhat\Pictures\DecoyDocs\aaa_Client_Database_giữa_488.docx.mallab,C:\Users\nhat\Pictures\DecoyDocs\aaa_Client_Database_giữa_488.docx,7.9949,37387,STATUS_SUCCESS,4.898
+11:12:06.988576,RENAMED,C:\Users\nhat\Pictures\DecoyDocs\Backup_Data\!00_Client_Database_người_496.json.mallab,C:\Users\nhat\Pictures\DecoyDocs\Backup_Data\!00_Client_Database_người_496.json,7.9876,14117,STATUS_SUCCESS,1.178
+11:12:07.004193,RENAMED,C:\Users\nhat\Pictures\DecoyDocs\Backup_Data\!00_Payroll_2026_để_442.db.mallab,C:\Users\nhat\Pictures\DecoyDocs\Backup_Data\!00_Payroll_2026_để_442.db,7.9889,16492,STATUS_SUCCESS,0.690
+11:12:07.004193,RENAMED,C:\Users\nhat\Pictures\DecoyDocs\Config_Prod\!00_Client_Database_này_517.json.mallab,C:\Users\nhat\Pictures\DecoyDocs\Config_Prod\!00_Client_Database_này_517.json,7.9889,17030,STATUS_SUCCESS,0.693
+11:12:07.004193,RENAMED,C:\Users\nhat\Pictures\DecoyDocs\Config_Prod\decoy_Client_Database_như_544.jpg.mallab,C:\Users\nhat\Pictures\DecoyDocs\Config_Prod\decoy_Client_Database_như_544.jpg,7.9838,13181,STATUS_SUCCESS,0.574
+11:12:07.004193,RENAMED,C:\Users\nhat\Pictures\DecoyDocs\decoy_Accounting_của_337.docx.mallab,C:\Users\nhat\Pictures\DecoyDocs\decoy_Accounting_của_337.docx,7.9952,37027,STATUS_SUCCESS,1.034
+11:12:07.004193,RENAMED,C:\Users\nhat\Pictures\DecoyDocs\Financial_Reports\$_Client_Database_cho_411.json.mallab,C:\Users\nhat\Pictures\DecoyDocs\Financial_Reports\$_Client_Database_cho_411.json,7.9868,14122,STATUS_SUCCESS,0.636
+11:12:07.004193,RENAMED,C:\Users\nhat\Music\DecoyDocs\HR_Contracts\!00_Contract_Master_tôi_315.json.mallab,C:\Users\nhat\Music\DecoyDocs\HR_Contracts\!00_Contract_Master_tôi_315.json,7.9845,11675,STATUS_SUCCESS,1.047
+11:12:07.004193,RENAMED,C:\Users\nhat\Music\DecoyDocs\HR_Contracts\!00_Financial_Report_đã_543.json.mallab,C:\Users\nhat\Music\DecoyDocs\HR_Contracts\!00_Financial_Report_đã_543.json,7.9901,17738,STATUS_SUCCESS,1.082
+11:12:07.004193,RENAMED,C:\Users\nhat\Music\DecoyDocs\HR_Contracts\000_Financial_Report_khi_218.docx.mallab,C:\Users\nhat\Music\DecoyDocs\HR_Contracts\000_Financial_Report_khi_218.docx,7.9948,37142,STATUS_SUCCESS,1.470
+11:12:07.004193,RENAMED,C:\Users\nhat\Pictures\DecoyDocs\Backup_Data\decoy_Confidential_từ_456.jpg.mallab,C:\Users\nhat\Pictures\DecoyDocs\Backup_Data\decoy_Confidential_từ_456.jpg,7.9877,15073,STATUS_SUCCESS,14.236
+11:12:07.019872,RENAMED,C:\Users\nhat\Pictures\DecoyDocs\Financial_Reports\000_Contract_Master_nhưng_498.db.mallab,C:\Users\nhat\Pictures\DecoyDocs\Financial_Reports\000_Contract_Master_nhưng_498.db,7.9867,16492,STATUS_SUCCESS,1.859
+11:12:07.019872,RENAMED,C:\Users\nhat\Pictures\DecoyDocs\Financial_Reports\aaa_Payroll_2026_để_714.docx.mallab,C:\Users\nhat\Pictures\DecoyDocs\Financial_Reports\aaa_Payroll_2026_để_714.docx,7.9953,37185,STATUS_SUCCESS,1.094
+11:12:07.019872,RENAMED,C:\Users\nhat\Pictures\DecoyDocs\HR_Contracts\$_Backup_Admin_vài_546.db.mallab,C:\Users\nhat\Pictures\DecoyDocs\HR_Contracts\$_Backup_Admin_vài_546.db,7.9849,12396,STATUS_SUCCESS,0.664
+11:12:07.019872,RENAMED,C:\Users\nhat\Pictures\DecoyDocs\HR_Contracts\decoy_Backup_Admin_vẫn_424.docx.mallab,C:\Users\nhat\Pictures\DecoyDocs\HR_Contracts\decoy_Backup_Admin_vẫn_424.docx,7.9948,37302,STATUS_SUCCESS,1.201
+11:12:07.041733,RENAMED,C:\Users\nhat\Pictures\DecoyDocs\Personal_Photos\!00_Contract_Master_với_711.jpg.mallab,C:\Users\nhat\Pictures\DecoyDocs\Personal_Photos\!00_Contract_Master_với_711.jpg,7.9825,11749,STATUS_SUCCESS,0.609
+11:12:07.041733,RENAMED,C:\Users\nhat\Pictures\DecoyDocs\Personal_Photos\aaa_Contract_Master_vẫn_085.jpg.mallab,C:\Users\nhat\Pictures\DecoyDocs\Personal_Photos\aaa_Contract_Master_vẫn_085.jpg,7.9867,13452,STATUS_SUCCESS,0.635
+11:12:07.050753,RENAMED,C:\Users\nhat\Pictures\DecoyDocs\Project_Source\!00_Accounting_các_149.json.mallab,C:\Users\nhat\Pictures\DecoyDocs\Project_Source\!00_Accounting_các_149.json,7.9858,11171,STATUS_SUCCESS,0.667
+11:12:07.050753,RENAMED,C:\Users\nhat\Pictures\DecoyDocs\Project_Source\!00_Payroll_2026_tại_708.db.mallab,C:\Users\nhat\Pictures\DecoyDocs\Project_Source\!00_Payroll_2026_tại_708.db,7.9896,16492,STATUS_SUCCESS,0.963
+11:12:07.050753,RENAMED,C:\Users\nhat\Pictures\DecoyDocs\Project_Source\aaa_Client_Database_cũng_023.jpg.mallab,C:\Users\nhat\Pictures\DecoyDocs\Project_Source\aaa_Client_Database_cũng_023.jpg,7.9884,14683,STATUS_SUCCESS,0.729
+11:12:07.050753,RENAMED,C:\Users\nhat\Pictures\DecoyDocs\Project_Source\aaa_Backup_Admin_đi_087.json.mallab,C:\Users\nhat\Pictures\DecoyDocs\Project_Source\aaa_Backup_Admin_đi_087.json,7.9881,15513,STATUS_SUCCESS,2.675
+11:12:07.050753,RENAMED,C:\Users\nhat\Pictures\DecoyDocs\Project_Source\aaa_Contract_Master_hơn_464.docx.mallab,C:\Users\nhat\Pictures\DecoyDocs\Project_Source\aaa_Contract_Master_hơn_464.docx,7.9949,37335,STATUS_SUCCESS,1.352
+11:12:07.050753,RENAMED,C:\Users\nhat\Pictures\DecoyDocs\Project_Source\aaa_Financial_Report_rất_125.docx.mallab,C:\Users\nhat\Pictures\DecoyDocs\Project_Source\aaa_Financial_Report_rất_125.docx,7.9954,37368,STATUS_SUCCESS,1.743
+11:12:07.050753,RENAMED,C:\Users\nhat\Pictures\DecoyDocs\Project_Source\decoy_Contract_Master_vì_641.db.mallab,C:\Users\nhat\Pictures\DecoyDocs\Project_Source\decoy_Contract_Master_vì_641.db,7.9873,16492,STATUS_SUCCESS,0.764
+11:12:07.050753,RENAMED,C:\Users\nhat\Pictures\DecoyDocs\Project_Source\decoy_Backup_Admin_sau_205.db.mallab,C:\Users\nhat\Pictures\DecoyDocs\Project_Source\decoy_Backup_Admin_sau_205.db,7.9911,20588,STATUS_SUCCESS,3.404
+11:12:07.066487,RENAMED,C:\Users\nhat\Videos\DecoyDocs\!00_Backup_Admin_gần_687.docx.mallab,C:\Users\nhat\Videos\DecoyDocs\!00_Backup_Admin_gần_687.docx,7.9946,37309,STATUS_SUCCESS,1.370
+11:12:07.066487,RENAMED,C:\Users\nhat\Videos\DecoyDocs\!00_Payroll_2026_thì_321.json.mallab,C:\Users\nhat\Videos\DecoyDocs\!00_Payroll_2026_thì_321.json,7.9842,12021,STATUS_SUCCESS,0.611
+11:12:07.066487,RENAMED,C:\Users\nhat\Videos\DecoyDocs\$_Accounting_để_722.docx.mallab,C:\Users\nhat\Videos\DecoyDocs\$_Accounting_để_722.docx,7.9948,37226,STATUS_SUCCESS,1.076
+11:12:07.066487,RENAMED,C:\Users\nhat\Videos\DecoyDocs\$_Client_Database_đi_756.docx.mallab,C:\Users\nhat\Videos\DecoyDocs\$_Client_Database_đi_756.docx,7.9944,37201,STATUS_SUCCESS,1.164
+11:12:07.066487,RENAMED,C:\Users\nhat\Videos\DecoyDocs\$_Financial_Report_chưa_204.docx.mallab,C:\Users\nhat\Videos\DecoyDocs\$_Financial_Report_chưa_204.docx,7.9948,37151,STATUS_SUCCESS,1.112
+11:12:07.066487,RENAMED,C:\Users\nhat\Videos\DecoyDocs\000_Backup_Admin_mỗi_413.jpg.mallab,C:\Users\nhat\Videos\DecoyDocs\000_Backup_Admin_mỗi_413.jpg,7.9815,12089,STATUS_SUCCESS,0.982
+11:12:07.066487,RENAMED,C:\Users\nhat\Videos\DecoyDocs\000_Confidential_như_747.jpg.mallab,C:\Users\nhat\Videos\DecoyDocs\000_Confidential_như_747.jpg,7.9868,13819,STATUS_SUCCESS,1.059
+11:12:07.066487,RENAMED,C:\Users\nhat\Videos\DecoyDocs\Financial_Reports\!00_Contract_Master_sẽ_131.db.mallab,C:\Users\nhat\Videos\DecoyDocs\Financial_Reports\!00_Contract_Master_sẽ_131.db,7.9845,12396,STATUS_SUCCESS,10.456
+11:12:07.082510,RENAMED,C:\Users\nhat\Videos\DecoyDocs\Financial_Reports\$_Accounting_tôi_613.jpg.mallab,C:\Users\nhat\Videos\DecoyDocs\Financial_Reports\$_Accounting_tôi_613.jpg,7.9894,18955,STATUS_SUCCESS,1.629
+11:12:07.085096,RENAMED,C:\Users\nhat\Videos\DecoyDocs\Financial_Reports\decoy_Confidential_số_739.db.mallab,C:\Users\nhat\Videos\DecoyDocs\Financial_Reports\decoy_Confidential_số_739.db,7.9912,20588,STATUS_SUCCESS,1.842
+11:12:07.085096,MODIFIED,C:\Users\nhat\Videos\DecoyDocs\Personal_Photos\aaa_Contract_Master_giống_238.db,,7.9837,12396,STATUS_SUCCESS,0.614
+11:12:07.085096,RENAMED,C:\Users\nhat\Videos\DecoyDocs\Personal_Photos\aaa_Contract_Master_giống_238.db.mallab,C:\Users\nhat\Videos\DecoyDocs\Personal_Photos\aaa_Contract_Master_giống_238.db,7.9837,12396,STATUS_SUCCESS,1.791
+11:12:07.085096,RENAMED,C:\Users\nhat\Videos\DecoyDocs\Personal_Photos\decoy_Backup_Admin_tôi_576.docx.mallab,C:\Users\nhat\Videos\DecoyDocs\Personal_Photos\decoy_Backup_Admin_tôi_576.docx,7.9952,37162,STATUS_SUCCESS,1.780
+11:12:07.085096,RENAMED,C:\Users\nhat\Videos\DecoyDocs\Personal_Photos\decoy_Backup_Admin_tự_512.db.mallab,C:\Users\nhat\Videos\DecoyDocs\Personal_Photos\decoy_Backup_Admin_tự_512.db,7.9926,20588,STATUS_SUCCESS,1.387
+11:12:07.085096,RENAMED,C:\Users\nhat\Videos\DecoyDocs\Personal_Photos\decoy_Client_Database_đúng_795.jpg.mallab,C:\Users\nhat\Videos\DecoyDocs\Personal_Photos\decoy_Client_Database_đúng_795.jpg,7.9850,12303,STATUS_SUCCESS,1.325
+11:12:07.085096,RENAMED,C:\Users\nhat\Videos\DecoyDocs\Personal_Photos\!00_Financial_Report_từ_735.db.mallab,C:\Users\nhat\Videos\DecoyDocs\Personal_Photos\!00_Financial_Report_từ_735.db,7.9908,20588,STATUS_SUCCESS,9.633
+11:13:24.909136,MODIFIED,C:\Users\nhat\Documents\DecoyDocs\aaa_Client_Database_nếu_363.txt,,4.9624,469,STATUS_SUCCESS,0.515
+11:13:28.487992,MODIFIED,C:\Users\nhat\Documents\DecoyDocs\!00_Accounting_thì_493.pdf,,5.7700,2071,STATUS_SUCCESS,1.483
