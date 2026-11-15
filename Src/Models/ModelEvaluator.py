@@ -183,7 +183,7 @@ class ModelEvaluator:
         plt.close(fig)
         return out_path
 
-    # Vẽ đường cong ROC và Precision-Recall so sánh Model A và Model B
+    # Vẽ đường cong ROC và Precision-Recall (Test Set)
     def plot_roc_and_pr_curves(self, results: Dict[str, EvaluationResult]) -> Path:
         fig, (ax_roc, ax_pr) = plt.subplots(1, 2, figsize=(12, 5))
 
@@ -213,7 +213,7 @@ class ModelEvaluator:
         plt.close(fig)
         return out_path
 
-    # Vẽ biểu đồ Top-N đặc trưng quan trọng nhất của từng biến thể
+    # Vẽ biểu đồ Top-N đặc trưng quan trọng nhất
     def plot_feature_importances(self, results: Dict[str, EvaluationResult], top_n: int = 12) -> Path:
         variants = list(results.keys())
         fig, axes = plt.subplots(1, len(variants), figsize=(7 * len(variants), 6))
@@ -262,7 +262,7 @@ class ModelEvaluator:
         pd.DataFrame(rows).to_csv(csv_path, index=False, encoding="utf-8-sig")
         return csv_path
 
-    # Chạy đánh giá toàn bộ các mô hình đã lưu (.joblib) và sinh biểu đồ + báo cáo
+    # Chạy đánh giá mô hình đã lưu (.joblib) và sinh biểu đồ + báo cáo
     def evaluate_saved_models(
         self,
         models_dir: Optional[Path] = None,
@@ -272,10 +272,9 @@ class ModelEvaluator:
         active_splitter = splitter if splitter is not None else DataSplitter()
 
         results: Dict[str, EvaluationResult] = {}
-        for variant in ("model_a", "model_b"):
-            model_path = target_models_dir / f"rf_{variant}.joblib"
-            splits = active_splitter.split(variant=variant, save_splits=False)
-            results[variant] = self.evaluate_variant(model_path=model_path, splits=splits)
+        model_path = target_models_dir / "rf_model_a.joblib"
+        splits = active_splitter.split(variant="model_a", save_splits=False)
+        results["model_a"] = self.evaluate_variant(model_path=model_path, splits=splits)
 
         self.plot_confusion_matrices(results)
         self.plot_roc_and_pr_curves(results)
@@ -284,3 +283,12 @@ class ModelEvaluator:
 
         print(f"[+] Đã xuất biểu đồ và báo cáo tại: {self.reports_dir}")
         return results
+
+    # Hàm tiện ích trả về trực tiếp kết quả đánh giá Model A
+    def evaluate_model(
+        self,
+        models_dir: Optional[Path] = None,
+        splitter: Optional[DataSplitter] = None,
+    ) -> EvaluationResult:
+        results = self.evaluate_saved_models(models_dir=models_dir, splitter=splitter)
+        return results["model_a"]

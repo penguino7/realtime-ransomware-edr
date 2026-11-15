@@ -1,3 +1,2 @@
 ﻿variant,model_name,num_features,threshold,accuracy,precision,recall,f1,roc_auc,pr_auc,fpr,tn,fp,fn,tp
 model_a,random_forest,33,0.6641,1.0,1.0,1.0,1.0,1.0,1.0,0.0,528,0,0,133
-model_b,random_forest,26,0.7755,1.0,1.0,1.0,1.0,1.0,1.0,0.0,528,0,0,133
