@@ -36,17 +36,6 @@ class DataSplitter:
     METADATA_COLS: List[str] = ["sample_id", "pid", "process_name", "tick_index", "long_total_files"]
     LABEL_COL: str = "label"
 
-    # 7 đặc trưng phụ thuộc thời gian / tốc độ cần loại bỏ đối với Model B (Clock-Free)
-    TIME_DEPENDENT_FEATURES: Set[str] = {
-        "short_duration_sec",
-        "short_write_ops_per_sec",
-        "short_read_ops_per_sec",
-        "short_write_bytes_per_sec",
-        "med_duration_sec",
-        "med_write_ops_per_sec",
-        "long_duration_sec",
-    }
-
     # Khởi tạo bộ chia dữ liệu với đường dẫn dataset và tỷ lệ tách
     def __init__(
         self,
@@ -86,23 +75,10 @@ class DataSplitter:
 
         return df
 
-    # Lấy danh sách tên cột đặc trưng cho Model A (30 cột) hoặc Model B (23 cột)
+    # Lấy danh sách 33 cột đặc trưng huấn luyện (loại bỏ metadata và cột nhãn label)
     def get_feature_names(self, df: pd.DataFrame, variant: str = "model_a") -> List[str]:
         excluded = set(self.METADATA_COLS) | {self.LABEL_COL}
-        all_features = [col for col in df.columns if col not in excluded]
-
-        variant_clean = variant.strip().lower()
-        if variant_clean in ("model_a", "a", "full"):
-            return all_features
-        elif variant_clean in ("model_b", "b", "clock_free", "time_invariant"):
-            clock_free_features = [
-                col for col in all_features if col not in self.TIME_DEPENDENT_FEATURES
-            ]
-            return clock_free_features
-        else:
-            raise ValueError(
-                f"Biến thể '{variant}' không hợp lệ! Chỉ chấp nhận: 'model_a' hoặc 'model_b'."
-            )
+        return [col for col in df.columns if col not in excluded]
 
     # Tách lớp Benign theo từng phiên (GroupShuffleSplit theo sample_id)
     def _split_benign(
@@ -137,44 +113,25 @@ class DataSplitter:
 
         return b_train, b_val, b_test
 
-    # Tách lớp Ransomware theo phiên (>=3 phiên) hoặc theo chuỗi thời gian tick_index
+    # Tách lớp Ransomware theo chuỗi thời gian tick_index cho từng phiên/dòng mã độc
     def _split_ransomware(
         self, rw_df: pd.DataFrame
     ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-        num_rw_sessions = rw_df["sample_id"].nunique()
-
-        if num_rw_sessions >= 3:
-            # Khi đã có đủ nhiều phiên ransomware khác nhau (WannaCry, LockBit, Babuk...)
-            gss_test = GroupShuffleSplit(
-                n_splits=1, test_size=self.test_size, random_state=self.random_state
-            )
-            train_val_idx, test_idx = next(
-                gss_test.split(rw_df, groups=rw_df["sample_id"])
-            )
-            rw_train_val = rw_df.iloc[train_val_idx].copy()
-            rw_test = rw_df.iloc[test_idx].copy()
-
-            val_relative_size = self.val_size / (1.0 - self.test_size)
-            gss_val = GroupShuffleSplit(
-                n_splits=1, test_size=val_relative_size, random_state=self.random_state
-            )
-            train_idx, val_idx = next(
-                gss_val.split(rw_train_val, groups=rw_train_val["sample_id"])
-            )
-            rw_train = rw_train_val.iloc[train_idx].copy()
-            rw_val = rw_train_val.iloc[val_idx].copy()
-        else:
-            # Trường hợp thực nghiệm ban đầu (1 phiên mã độc quy mô lớn như LockBit 3.0)
-            # Sắp xếp nghiêm ngặt theo tick_index để mô phỏng diễn biến tấn công theo thời gian thực
-            rw_sorted = rw_df.sort_values("tick_index").reset_index(drop=True)
-            n_total = len(rw_sorted)
+        rw_train_list, rw_val_list, rw_test_list = [], [], []
+        for _, grp in rw_df.groupby("sample_id"):
+            grp_sorted = grp.sort_values("tick_index").reset_index(drop=True)
+            n_total = len(grp_sorted)
             n_test = max(1, int(n_total * self.test_size))
             n_val = max(1, int(n_total * self.val_size))
             n_train = n_total - n_test - n_val
 
-            rw_train = rw_sorted.iloc[:n_train].copy()
-            rw_val = rw_sorted.iloc[n_train:n_train + n_val].copy()
-            rw_test = rw_sorted.iloc[n_train + n_val:].copy()
+            rw_train_list.append(grp_sorted.iloc[:n_train])
+            rw_val_list.append(grp_sorted.iloc[n_train:n_train + n_val])
+            rw_test_list.append(grp_sorted.iloc[n_train + n_val:])
+
+        rw_train = pd.concat(rw_train_list, ignore_index=True)
+        rw_val = pd.concat(rw_val_list, ignore_index=True)
+        rw_test = pd.concat(rw_test_list, ignore_index=True)
 
         return rw_train, rw_val, rw_test
 
@@ -184,14 +141,9 @@ class DataSplitter:
         splits: DatasetSplits,
         output_dir: Optional[Path] = None
     ) -> Path:
-        variant_dir = (
-            "Model_A"
-            if splits.variant.strip().lower() in ("model_a", "a", "full")
-            else "Model_B"
-        )
         target_dir = Path(
             output_dir if output_dir is not None
-            else self.dataset_path.parent / "Splits" / variant_dir
+            else self.dataset_path.parent / "Splits"
         )
         target_dir.mkdir(parents=True, exist_ok=True)
 
@@ -229,7 +181,7 @@ class DataSplitter:
         pd.DataFrame(session_rows).to_csv(
             target_dir / "split_sessions.csv", index=False
         )
-        print(f"[+] Đã xuất dữ liệu chia [{variant_dir}] tại: {target_dir}")
+        print(f"[+] Đã xuất dữ liệu chia tại: {target_dir}")
         return target_dir
 
     # Chạy toàn bộ quy trình chia Train/Val/Test và đóng gói thành DatasetSplits
