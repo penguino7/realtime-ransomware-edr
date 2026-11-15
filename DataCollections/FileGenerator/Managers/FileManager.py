@@ -3,6 +3,7 @@ import sys
 import json
 import random
 import shutil
+import unicodedata
 from pathlib import Path
 from typing import List, Dict, Optional, Any
 from faker import Faker
@@ -57,7 +58,7 @@ class FileEnvironmentManager:
 
     REGISTRY_FILENAME = "decoy_registry.json"
 
-    def __init__(self, base_dirs: Optional[List[Path]] = None, locale: str = "vi_VN") -> None:
+    def __init__(self, base_dirs: Optional[List[Path]] = None, locale: str = "en_US") -> None:
         try:
             self.faker = Faker(locale)
         except Exception:
@@ -176,7 +177,11 @@ class FileEnvironmentManager:
 
             prefix = random.choice(canary_prefixes)
             topic = random.choice(business_topics)
-            clean_word = "".join(c for c in self.faker.word() if c.isalnum())
+            raw_word = self.faker.word().replace('đ', 'd').replace('Đ', 'D')
+            clean_word = "".join(
+                c for c in unicodedata.normalize('NFKD', raw_word)
+                if not unicodedata.combining(c) and c.isascii() and c.isalnum()
+            )
             filename = f"{prefix}{topic}_{clean_word}_{i:03d}{ext}"
             file_path = target_dir / filename
 
