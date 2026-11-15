@@ -146,9 +146,9 @@ class FeatureVector:
     short_write_ops_per_sec: float
     short_read_ops_per_sec: float
     short_write_bytes_per_sec: float
-    short_write_ops_per_file: float     # [MỚI] Tần suất ghi trên mỗi file trong cửa sổ ngắn (Clock-Free)
-    short_write_bytes_per_file: float   # [MỚI] Dung lượng byte ghi trên mỗi file trong cửa sổ ngắn (Clock-Free)
-    short_read_to_write_ratio: float    # [MỚI] Tỷ lệ Đọc/Ghi trong cửa sổ ngắn (Clock-Free)
+    short_write_ops_per_file: float     # Tần suất ghi trên mỗi file trong cửa sổ ngắn
+    short_write_bytes_per_file: float   # Dung lượng byte ghi trên mỗi file trong cửa sổ ngắn
+    short_read_to_write_ratio: float    # Tỷ lệ Đọc/Ghi trong cửa sổ ngắn
     short_mean_entropy: float
     short_max_entropy: float
     short_entropy_diff: float
@@ -234,8 +234,7 @@ class FeatureVector:
             "label": self.label,
         }
 
-    # Trích xuất danh sách đúng 33 giá trị đặc trưng số học theo thứ tự chuẩn
-    # (Model A - Time-Aware / Full Model) để phục vụ suy luận mô hình AI.
+    # Trích xuất danh sách đúng 33 giá trị đặc trưng số học theo thứ tự chuẩn để phục vụ suy luận mô hình AI
     def to_feature_list(self) -> List[float]:
         return [
             # Short Window (16)
@@ -267,42 +266,6 @@ class FeatureVector:
             float(self.med_dir_traversal_count),
             # Long Window (8 features - không gồm long_total_files)
             self.long_duration_sec,
-            self.long_mean_entropy,
-            self.long_entropy_diff,
-            self.long_high_entropy_ratio,
-            self.long_rename_ratio,
-            self.long_delete_ratio,
-            self.long_new_ext_files_ratio,
-            self.long_inplace_rewrite_ratio,
-        ]
-
-    # Trích xuất danh sách 26 đặc trưng độc lập thời gian (Model B - Clock-Free / Anti-Sleep-Evasion).
-    # Loại bỏ 7 đặc trưng phụ thuộc thời gian (short/med/long duration, 3 ops_per_sec, write_bytes_per_sec)
-    # và không gồm long_total_files.
-    def to_time_invariant_feature_list(self) -> List[float]:
-        return [
-            # Short Window (12 features không phụ thuộc thời gian)
-            self.short_write_ops_per_file,
-            self.short_write_bytes_per_file,
-            self.short_read_to_write_ratio,
-            self.short_mean_entropy,
-            self.short_max_entropy,
-            self.short_entropy_diff,
-            self.short_high_entropy_ratio,
-            float(self.short_rename_count),
-            float(self.short_delete_count),
-            self.short_ext_diversity,
-            self.short_new_ext_files_ratio,
-            self.short_inplace_rewrite_ratio,
-            # Medium Window (7 features không phụ thuộc thời gian)
-            self.med_read_to_write_ratio,
-            self.med_mean_entropy,
-            self.med_high_entropy_ratio,
-            float(self.med_rename_count),
-            float(self.med_delete_count),
-            self.med_ext_diversity,
-            float(self.med_dir_traversal_count),
-            # Long Window (7 features không phụ thuộc thời gian)
             self.long_mean_entropy,
             self.long_entropy_diff,
             self.long_high_entropy_ratio,
