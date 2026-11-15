@@ -149,7 +149,7 @@ class FeatureExtractor:
         read_ops_per_sec = round(read_ops / eff_duration, 4)
         write_bytes_per_sec = round(write_bytes / eff_duration, 4)
 
-        # Các đặc trưng độc lập thời gian (Clock-Free / Per-File & Tỷ lệ hành vi)
+        # Đặc trưng tần suất, dung lượng theo file và tỷ lệ hành vi đọc/ghi
         eff_files = max(total_files, 1)
         short_write_ops_per_file = round(write_ops / eff_files, 4)
         short_write_bytes_per_file = round(write_bytes / eff_files, 4)
