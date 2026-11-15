@@ -171,7 +171,7 @@ class ModelTrainer:
         clf.fit(X_train, y_train)
         return clf
 
-    # Huấn luyện và tinh chỉnh Random Forest cho 1 biến thể (Model A hoặc Model B)
+    # Huấn luyện và tinh chỉnh Random Forest cho Model A (33 đặc trưng)
     def train_random_forest(self, splits: DatasetSplits) -> TrainedModelBundle:
         candidates = self._generate_rf_param_grid()
         best_rank: Optional[Tuple[float, float, float, int]] = None
@@ -235,12 +235,13 @@ class ModelTrainer:
             raise FileNotFoundError(f"Không tìm thấy tệp mô hình tại: {path}")
         return joblib.load(path)
 
-    # Chạy huấn luyện đầy đủ cho cả hai biến thể Model A (30 features) và Model B (23 features)
-    def train_both_variants(self) -> Dict[str, Tuple[TrainedModelBundle, DatasetSplits]]:
-        results: Dict[str, Tuple[TrainedModelBundle, DatasetSplits]] = {}
-        for variant in ("model_a", "model_b"):
-            splits = self.splitter.split(variant=variant)
-            bundle = self.train_random_forest(splits=splits)
-            results[variant] = (bundle, splits)
+    # Chạy huấn luyện mô hình Model A (33 đặc trưng)
+    def train(self) -> Tuple[TrainedModelBundle, DatasetSplits]:
+        splits = self.splitter.split(variant="model_a")
+        bundle = self.train_random_forest(splits=splits)
+        return bundle, splits
 
-        return results
+    # Hàm tương thích ngược với quy trình trước đây
+    def train_both_variants(self) -> Dict[str, Tuple[TrainedModelBundle, DatasetSplits]]:
+        bundle, splits = self.train()
+        return {"model_a": (bundle, splits)}
