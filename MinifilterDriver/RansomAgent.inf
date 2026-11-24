@@ -1,0 +1,76 @@
+
+
+; Khối 1: Khai báo phiên bản và định danh kỹ thuật của Driver
+[Version]
+Signature   = "$Windows NT$"
+Class       = "ActivityMonitor"
+ClassGuid   = {b86dff51-a31e-4bac-b3cf-e8cfe75c017f}
+Provider    = %ProviderString%
+DriverVer   = 11/24/2026,1.0.0.0
+CatalogFile = RansomAgent.cat
+PnpLockdown = 1
+
+; Khối 2: Xác định thư mục đích trên ổ cứng (DIRID 12: %windir%\system32\drivers)
+[DestinationDirs]
+DefaultDestDir          = 12
+RansomAgent.DriverFiles = 12
+
+; Khối 3: Quy trình cài đặt cho hệ điều hành Windows 64-bit (x64)
+[DefaultInstall.NTamd64]
+OptionDesc          = %ServiceDesc%
+CopyFiles           = RansomAgent.DriverFiles
+
+[DefaultInstall.NTamd64.Services]
+AddService          = %ServiceName%,,RansomAgent.Service
+
+; Khối 4: Quy trình gỡ cài đặt và dọn dẹp dịch vụ
+[DefaultUninstall.NTamd64]
+DelFiles   = RansomAgent.DriverFiles        
+
+[DefaultUninstall.NTamd64.Services]
+DelService = %ServiceName%,0x200    ; 0x200 = Dừng dịch vụ trước khi xóa
+
+; Khối 5: Cấu hình tham số dịch vụ hệ thống (Service Control Manager)
+[RansomAgent.Service]
+DisplayName      = %ServiceName%
+Description      = %ServiceDesc%
+ServiceBinary    = %12%\%DriverName%.sys        ; C:\Windows\system32\drivers\RansomAgent.sys
+Dependencies     = "FltMgr"                     ; Phụ thuộc vào Filter Manager
+ServiceType      = 2                            ; SERVICE_FILE_SYSTEM_DRIVER
+StartType        = 3                            ; SERVICE_DEMAND_START (Khởi động thủ công theo lệnh)
+ErrorControl     = 1                            ; SERVICE_ERROR_NORMAL
+LoadOrderGroup   = "FSFilter Activity Monitor"
+AddReg           = RansomAgent.AddRegistry
+
+; Khối 6: Đăng ký cấu hình Minifilter và Altitude 320600 vào Registry
+[RansomAgent.AddRegistry]
+HKR,,"DebugFlags",0x00010001,0x00000001
+HKR,,"SupportedFeatures",0x00010001,0x3
+HKR,"Instances","DefaultInstance",0x00000000,%DefaultInstance%
+HKR,"Instances\"%Instance1.Name%,"Altitude",0x00000000,%Instance1.Altitude%
+HKR,"Instances\"%Instance1.Name%,"Flags",0x00010001,%Instance1.Flags%
+
+; Khối 7: Danh sách file thực thi cần sao chép
+[RansomAgent.DriverFiles]
+%DriverName%.sys
+
+; Khối 8: Khai báo nguồn file cài đặt
+[SourceDisksFiles]
+RansomAgent.sys = 1,,
+
+[SourceDisksNames]
+1 = %DiskId1%,,,
+
+; Khối 9: Bảng định nghĩa các hằng số chuỗi ký tự
+[Strings]
+ProviderString          = "Ransomware EDR "
+ServiceDesc             = "RansomAgent Realtime Ransomware Detection Minifilter"
+ServiceName             = "RansomAgent"
+DriverName              = "RansomAgent"
+DiskId1                 = "RansomAgent Device Installation Disk"
+
+; Cấu hình Instance và Altitude 320600
+DefaultInstance         = "RansomAgent - Top Instance"
+Instance1.Name          = "RansomAgent - Top Instance"
+Instance1.Altitude      = "320600"
+Instance1.Flags         = 0x0              ; 0x0 = Tự động bám vào mọi phân vùng ổ đĩa khi mount
