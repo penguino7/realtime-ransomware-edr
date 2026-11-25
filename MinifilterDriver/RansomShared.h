@@ -19,6 +19,7 @@
 #define OP_WRITE 2  // Thao tác ghi dữ liệu vào file
 #define OP_RENAME 3 // Thao tác đổi tên hoặc đổi đuôi file
 #define OP_DELETE 4 // Thao tác xóa file
+#define OP_READ 5   // Thao tác đọc dữ liệu từ file
 
 // 3. Định nghĩa các lệnh từ User Agent gửi xuống Driver
 #define CMD_BLOCK_GID 1    // Khóa toàn bộ I/O của cây tiến trình (GID)
@@ -31,8 +32,8 @@ typedef struct _IRP_RECORD
 {
     ULONG ProcessId;                   // PID của tiến trình thực hiện thao tác (4 bytes)
     ULONG GroupId;                     // Định danh nhóm GID của cây tiến trình (4 bytes)
-    UCHAR OperationType;               // Loại thao tác: OP_CREATE, OP_WRITE, OP_RENAME, OP_DELETE (1 byte)
-    float ShannonEntropy;              // Độ hỗn loạn tính trên 64KB RAM khi ghi file: 0.0 -> 8.0 (4 bytes)
+    UCHAR OperationType;               // Loại thao tác: OP_CREATE, OP_WRITE, OP_RENAME, OP_DELETE, OP_READ (1 byte)
+    float ShannonEntropy;              // Độ hỗn loạn tính trên 64KB RAM khi đọc/ghi file: 0.0 -> 8.0 (4 bytes)
     LARGE_INTEGER FileSize;            // Kích thước của file tính theo bytes (8 bytes)
     LARGE_INTEGER Timestamp;           // Mốc thời gian hệ thống chuẩn Windows 100-nanosecond (8 bytes)
     WCHAR FilePath[MAX_PATH_CHARS];    // Đường dẫn file gốc bị tác động (520 bytes)
